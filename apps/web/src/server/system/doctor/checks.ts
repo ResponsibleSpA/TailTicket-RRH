@@ -11,6 +11,7 @@ import { loadConfigNamespace } from "../../config/config";
 import { db } from "../../db";
 import { detectDbTimezone } from "../../db/time";
 import { attachmentsDir, fsStoragePath } from "../../domain/file/storage";
+import { writeModeConfigured } from "../write-mode";
 import { installConfig } from "../../env";
 import { loadSystemEmail, localDelivery, smtpRoutesFor, type SmtpRoute } from "../../mail/mailer";
 import { schemaStatus } from "../schema-compat";
@@ -244,6 +245,15 @@ export function checkGrants(): Promise<DoctorCheck> {
     );
     const hint = `Concedi solo i privilegi necessari (come amministratore del DB, sostituendo <utente> e <host>):\n${recommendedGrant(schema)}`;
     if (a.dangerous.length) {
+      // stack integrato (TAILTICKET_MODE non impostata): installer e upgrader di osTicket usano lo stesso utente e
+      // gli servono questi privilegi; il blocco vale per il collegamento a un osTicket in produzione
+      if (!writeModeConfigured()) {
+        return {
+          level: "info",
+          detail: `Privilegi DDL o amministrativi (${a.dangerous.join(", ")}): previsti nello stack integrato, dove installer e aggiornamenti di osTicket usano lo stesso utente.`,
+          hint: `Collegandoti a un osTicket in produzione usa un utente dedicato con soli privilegi sui dati:\n${recommendedGrant(schema)}`,
+        };
+      }
       return {
         level: "block",
         detail: `Privilegi DDL o amministrativi non consentiti: ${a.dangerous.join(", ")}.`,

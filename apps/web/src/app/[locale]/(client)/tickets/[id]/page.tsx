@@ -1,8 +1,12 @@
+import { ArrowLeft, Pencil } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import { WriteGate } from "@/components/common/WriteGate";
 import PortalThread from "@/components/portal/PortalThread";
 import ReplyForm from "@/components/portal/ReplyForm";
+import { InfoItem, InfoList, Panel, StatusBadge } from "@/components/portal/PortalUi";
+import { BTN_SECONDARY, FOCUS, TEXT_LINK } from "@/components/portal/styles";
 import Alert from "@/components/ui/alert/Alert";
 import { Link } from "@/i18n/navigation";
 import { FormType } from "@/lib/osticket/object-types";
@@ -15,6 +19,7 @@ import { clientCanAccess } from "@/server/domain/client/tickets";
 import { threadUploadRules } from "@/server/domain/file/upload";
 import { loadFormDef } from "@/server/domain/forms/load";
 import { formatDbDate } from "@/server/format/datetime";
+import { cn } from "@/utils";
 
 import { requireClient } from "../../guard";
 
@@ -53,7 +58,8 @@ export default async function ClientTicketPage({
     return (
       <div className="space-y-4">
         <Alert variant="error" title={t("notFound")} message="" />
-        <Link href="/tickets" className="text-brand-600 hover:underline dark:text-brand-400">
+        <Link href="/tickets" className={cn("inline-flex items-center gap-1.5 text-theme-sm", TEXT_LINK)}>
+          <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
           {t("back")}
         </Link>
       </div>
@@ -77,77 +83,89 @@ export default async function ClientTicketPage({
         </div>
       )}
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{view.subject}</h1>
-          <p className="text-theme-sm text-gray-500 dark:text-gray-400">#{view.number}</p>
-        </div>
-        {view.canEdit && (
-          <WriteGate>
-            <Link
-              href={`/tickets/${view.id}/edit`}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-            >
-              {t("edit")}
-            </Link>
-          </WriteGate>
+      <div className="space-y-3">
+        {!client.guest && (
+          <Link href="/tickets" className={cn("inline-flex items-center gap-1.5 rounded text-theme-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white", FOCUS)}>
+            <ArrowLeft aria-hidden="true" className="size-4 rtl:rotate-180" />
+            {t("back")}
+          </Link>
         )}
+        <PageHeader
+          title={view.subject}
+          subtitle={
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="tabular-nums">#{view.number}</span>
+              <StatusBadge state={view.state}>{view.statusName}</StatusBadge>
+            </span>
+          }
+          actions={
+            view.canEdit && (
+              <WriteGate>
+                <Link href={`/tickets/${view.id}/edit`} className={BTN_SECONDARY}>
+                  <Pencil aria-hidden="true" className="size-4" />
+                  {t("edit")}
+                </Link>
+              </WriteGate>
+            )
+          }
+        />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <dl className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 text-theme-sm dark:border-gray-800 dark:bg-white/3">
-          <h2 className="mb-2 font-medium text-gray-800 dark:text-white/90">{t("basic")}</h2>
-          <div className="flex justify-between gap-3"><dt className="text-gray-500 dark:text-gray-400">{t("status")}</dt><dd className="text-gray-800 dark:text-white/90">{view.statusName}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-gray-500 dark:text-gray-400">{t("dept")}</dt><dd className="text-gray-800 dark:text-white/90">{view.dept}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-gray-500 dark:text-gray-400">{t("createDate")}</dt><dd className="text-gray-800 dark:text-white/90">{formatDbDate(view.created, tz, locale, "full")}</dd></div>
-        </dl>
-        <dl className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 text-theme-sm dark:border-gray-800 dark:bg-white/3">
-          <h2 className="mb-2 font-medium text-gray-800 dark:text-white/90">{t("user")}</h2>
-          <div className="flex justify-between gap-3">
-            <dt className="text-gray-500 dark:text-gray-400">{t("name")}</dt>
-            <dd className="text-gray-800 dark:text-white/90">{view.ownerName}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-gray-500 dark:text-gray-400">{t("email")}</dt>
-            <dd className="text-gray-800 dark:text-white/90">{view.ownerEmail}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-gray-500 dark:text-gray-400">{t("phone")}</dt>
-            <dd className="text-gray-800 dark:text-white/90">{view.ownerPhone || "—"}</dd>
-          </div>
-        </dl>
+      <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+        {/* dettagli: sopra il thread su mobile, a lato da desktop */}
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:order-last">
+          <Panel title={t("basic")} className="sm:p-5">
+            <InfoList>
+              <InfoItem label={t("status")}>{view.statusName}</InfoItem>
+              <InfoItem label={t("dept")}>{view.dept}</InfoItem>
+              <InfoItem label={t("createDate")}>
+                <span className="tabular-nums">{formatDbDate(view.created, tz, locale, "full")}</span>
+              </InfoItem>
+            </InfoList>
+          </Panel>
+          <Panel title={t("user")} className="sm:p-5">
+            <InfoList>
+              <InfoItem label={t("name")}>{view.ownerName}</InfoItem>
+              <InfoItem label={t("email")}>{view.ownerEmail}</InfoItem>
+              {/* valore vuoto o di soli spazi: "—" come nelle altre righe */}
+              <InfoItem label={t("phone")}>{view.ownerPhone.trim()}</InfoItem>
+            </InfoList>
+          </Panel>
+          {view.answers.length > 0 && (
+            <Panel className="sm:p-5">
+              <InfoList>
+                {view.answers.map((a, i) => (
+                  <InfoItem key={i} label={a.label}>
+                    {a.value}
+                  </InfoItem>
+                ))}
+              </InfoList>
+            </Panel>
+          )}
+        </aside>
+
+        <div className="min-w-0 space-y-6 lg:col-span-2">
+          <PortalThread
+            entries={view.entries}
+            events={view.events}
+            tz={tz}
+            locale={locale}
+            hideStaffName={cfg.bool("hide_staff_name")}
+            labels={{ posted: t("postedLabel"), staff: t("staff"), edited: t("editedLabel"), events: eventLabels }}
+          />
+
+          {view.parentId ? (
+            <Alert variant="warning" title={t("merged")} message="" showLink linkHref={`/tickets/${view.parentId}`} linkText={t("parent")} />
+          ) : view.closedNotReopenable ? (
+            <Alert variant="warning" title={t("closedNotReopenable")} message="" />
+          ) : null}
+          {/* key: un messaggio inviato aggiunge una voce al thread e il form si rimonta vuoto; l'esito ?posted è
+              mostrato nel form stesso, dove porta il redirect a #reply */}
+          {view.canReply && (
+            <ReplyForm key={view.entries.length} posted={!!sp.posted} ticketId={view.id} reopen={view.reopenOnReply} attachments={!!message?.config.attachments} maxFileSize={rules?.size ?? 0} />
+          )}
+        </div>
       </div>
-
-      {view.answers.length > 0 && (
-        <dl className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 text-theme-sm dark:border-gray-800 dark:bg-white/3">
-          {view.answers.map((a, i) => (
-            <div key={i} className="flex justify-between gap-3">
-              <dt className="text-gray-500 dark:text-gray-400">{a.label}</dt>
-              <dd className="text-gray-800 dark:text-white/90">{a.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-
-      <PortalThread
-        entries={view.entries}
-        events={view.events}
-        tz={tz}
-        locale={locale}
-        hideStaffName={cfg.bool("hide_staff_name")}
-        labels={{ posted: t("postedLabel"), staff: t("staff"), edited: t("editedLabel"), events: eventLabels }}
-      />
-
-      {view.parentId ? (
-        <Alert variant="warning" title={t("merged")} message="" showLink linkHref={`/tickets/${view.parentId}`} linkText={t("parent")} />
-      ) : view.closedNotReopenable ? (
-        <Alert variant="warning" title={t("closedNotReopenable")} message="" />
-      ) : null}
-      {/* key: un messaggio inviato aggiunge una voce al thread e il form si rimonta vuoto; l'esito ?posted è
-          mostrato nel form stesso, dove porta il redirect a #reply */}
-      {view.canReply && (
-        <ReplyForm key={view.entries.length} posted={!!sp.posted} ticketId={view.id} reopen={view.reopenOnReply} attachments={!!message?.config.attachments} maxFileSize={rules?.size ?? 0} />
-      )}
     </div>
   );
 }

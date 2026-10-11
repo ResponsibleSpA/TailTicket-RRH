@@ -1,6 +1,8 @@
+import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Forbidden, PageHeader } from "@/components/common/DataTable";
+import { ghostButtonClass } from "@/components/common/menu-classes";
 import { ReadOnlyNotice, WriteGate } from "@/components/common/WriteGate";
 import NewTicketForm from "@/components/tickets/create/NewTicketForm";
 import type { NewTicketOptions } from "@/components/tickets/create/types";
@@ -49,7 +51,8 @@ export default async function NewTicketPage({ params, searchParams }: { params: 
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <Link href="/agent/tickets" className="text-sm text-brand-600 hover:underline dark:text-brand-400">
+          <Link href="/agent/tickets" className={ghostButtonClass}>
+            <ArrowLeft aria-hidden className="size-4 rtl:rotate-180" />
             {t("back")}
           </Link>
         }

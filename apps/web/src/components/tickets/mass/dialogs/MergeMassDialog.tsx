@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { massMergeAction, massMergeCandidatesAction } from "@/app/[locale]/(staff)/agent/(panel)/tickets/actions-mass";
 import { Check, Field, Select } from "@/components/tickets/edit/inputs";
+import Badge from "@/components/ui/badge/Badge";
 
 import MassDialog from "../MassDialog";
 import type { MassData, MassDialogProps } from "../types";
@@ -44,9 +45,13 @@ export default function MergeMassDialog({ ids, title, data, onClose, onSuccess }
           {list.map((x, i) => (
             <li key={x.id} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-theme-sm dark:border-gray-800">
               <input type="hidden" name="numbers" value={x.number} />
-              <span className="font-medium text-gray-800 dark:text-white/90">#{x.number}</span>
+              <span className="font-medium text-gray-800 tabular-nums dark:text-white/90">#{x.number}</span>
               <span className="flex-1 truncate text-gray-600 dark:text-gray-400">{x.subject}</span>
-              {i === 0 && <span className="rounded bg-brand-50 px-2 py-0.5 text-theme-xs text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">{t("parent")}</span>}
+              {i === 0 && (
+              <Badge size="sm" color="primary">
+                {t("parent")}
+              </Badge>
+            )}
               <button
                 type="button"
                 disabled={i === 0}

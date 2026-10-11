@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useRef } from "react";
 
-import Callout from "@/components/common/Callout";
 import ComponentCard from "@/components/common/ComponentCard";
 import { ReadOnlyNote, useReadOnlyHint } from "@/components/common/WriteGate";
 import Label from "@/components/form/Label";
@@ -16,6 +15,8 @@ import { cn } from "@/utils";
 import { useUndoReload } from "./useUndoReload";
 
 import AccessEditor from "./AccessEditor";
+import FormActions from "./FormActions";
+import Outcome from "./Outcome";
 import UndoChange from "./UndoChange";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
 
@@ -211,22 +212,20 @@ export default function AdminForm({
     <div className="space-y-6">
       <div ref={banner} tabIndex={-1} className="scroll-mt-24 outline-none empty:hidden">
         {state.status === "saved" && (
-          <Callout tone="success" role="status">
-            {undo.isUndone(state.nonce) ? undoneTxt : (savedMessage ?? t("saved"))}
+          <Outcome tone="success" role="status" title={undo.isUndone(state.nonce) ? undoneTxt : (savedMessage ?? t("saved"))}>
             {state.change && !undo.isUndone(state.nonce) && <UndoChange key={state.nonce} change={state.change} inline onUndone={() => undo.reload(state.nonce)} />}
-          </Callout>
+          </Outcome>
         )}
         {state.status === "error" && (
-          <Callout tone="error" role="alert">
-            <p>{t("fixErrors")}</p>
+          <Outcome tone="error" role="alert" title={t("fixErrors")}>
             {other.length > 0 && (
-              <ul className="mt-2 list-disc ps-5">
+              <ul className="list-disc ps-4">
                 {other.map(([k, v]) => (
                   <li key={k}>{errText(v)}</li>
                 ))}
               </ul>
             )}
-          </Callout>
+          </Outcome>
         )}
       </div>
       {/* dopo un salvataggio riuscito il form si rimonta con i valori aggiornati dal server */}
@@ -241,11 +240,11 @@ export default function AdminForm({
             </div>
           </ComponentCard>
         ))}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={pending || !!readOnly} title={readOnly}>
+        <FormActions>
+          <Button type="submit" size="sm" disabled={pending || !!readOnly} title={readOnly}>
             {pending ? t("saving") : (submitLabel ?? t("save"))}
           </Button>
-        </div>
+        </FormActions>
       </form>
     </div>
   );

@@ -10,6 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { idOrNotFound } from "@/lib/route-id";
 import { db } from "@/server/db";
 import { groupTemplates, loadGroup, TEMPLATE_GROUPS, TEMPLATE_NAMES } from "@/server/domain/adminsys/template";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../../_sys/server";
 import { requireAdmin } from "../../guard";
@@ -58,7 +59,7 @@ export default async function TemplateSetPage({ params, searchParams }: { params
                   key: code,
                   cells: {
                     name: (
-                      <Link href={`/admin/templates/${tplId}/${code.replace(/\./g, "-")}`} className="font-medium text-brand-500 hover:text-brand-600">
+                      <Link href={`/admin/templates/${tplId}/${code.replace(/\./g, "-")}`} className={ROW_LINK}>
                         {t(`names.${code.replace(/\./g, "_")}`)}
                         {!m && (
                           <Badge size="sm" color="warning">

@@ -8,6 +8,7 @@ import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listPages } from "@/server/domain/adminsys/page";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -53,7 +54,7 @@ export default async function PagesPage({ params, searchParams }: { params: Prom
             cells: {
               sel: <input type="checkbox" name="ids[]" value={p.id} className="h-4 w-4 accent-brand-500" aria-label={p.name} />,
               name: (
-                <Link href={`/admin/pages/${p.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/pages/${p.id}`} className={ROW_LINK}>
                   {p.name}
                   {p.isDefault && <span className="ms-2 text-theme-xs text-gray-500">({c("default")})</span>}
                 </Link>

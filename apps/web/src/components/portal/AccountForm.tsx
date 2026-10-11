@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef } from "react";
 
+import { KeyRound, MailCheck, SlidersHorizontal, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import DynamicForm from "@/components/forms/dynamic/DynamicForm";
@@ -14,6 +15,10 @@ import type { DynamicFormView } from "@/lib/forms/dynamic-field";
 
 import { profileAction, registerAction, type ProfileState, type RegisterState } from "@/app/[locale]/(client)/actions";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
+import { cn } from "@/utils";
+
+import { Panel } from "./PortalUi";
+import { BTN_PRIMARY, BTN_SECONDARY, CARD } from "./styles";
 
 interface Props {
   mode: "register" | "profile";
@@ -78,12 +83,15 @@ function AccountFormInner({ mode, userForm, values, timezone, lang, languages, s
 
   if ("done" in state && state.done) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-        <h2 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{doneContent?.title || t("registered")}</h2>
+      <section className={cn(CARD, "flex flex-col items-center px-6 py-12 text-center")}>
+        <span className="flex size-12 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400">
+          <MailCheck aria-hidden="true" className="size-6" />
+        </span>
+        <h2 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white/90">{doneContent?.title || t("registered")}</h2>
         {doneContent ? (
-          <div className="mt-3 text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: doneContent.html }} />
+          <div className="mt-2 max-w-xl text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: doneContent.html }} />
         ) : (
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">{t("registeredText")}</p>
+          <p className="mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">{t("registeredText")}</p>
         )}
       </section>
     );
@@ -113,14 +121,12 @@ function AccountFormInner({ mode, userForm, values, timezone, lang, languages, s
       )}
 
       {userForm && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-          <h2 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">{userForm.title || t("contact")}</h2>
+        <Panel icon={UserRound} title={userForm.title || t("contact")} description={userForm.instructions || undefined}>
           <DynamicForm form={userForm} values={vals} errors={dynErrors} hidden={hidden} />
-        </section>
+        </Panel>
       )}
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-        <h2 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">{t("preferences")}</h2>
+      <Panel icon={SlidersHorizontal} title={t("preferences")}>
         <div className="grid gap-5 sm:grid-cols-2">
           <FieldShell htmlFor="timezone" label={t("timezone")} errors={fieldErr("timezone")}>
             <select ref={tzRef} id="timezone" name="timezone" defaultValue={state.values?.timezone ?? timezone} className={selectCls}>
@@ -145,11 +151,10 @@ function AccountFormInner({ mode, userForm, values, timezone, lang, languages, s
             </FieldShell>
           )}
         </div>
-      </section>
+      </Panel>
 
       {showPassword && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-          <h2 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">{t("credentials")}</h2>
+        <Panel icon={KeyRound} title={t("credentials")}>
           <div className="grid gap-5 sm:grid-cols-3">
             {requireCurrent && (
               <FieldShell htmlFor="cpasswd" label={t("currentPassword")} errors={fieldErr("cpasswd")}>
@@ -163,14 +168,14 @@ function AccountFormInner({ mode, userForm, values, timezone, lang, languages, s
               <input id="passwd2" name="passwd2" type="password" maxLength={128} autoComplete="new-password" className={inputCls} />
             </FieldShell>
           </div>
-        </section>
+        </Panel>
       )}
 
-      <div className="flex flex-wrap justify-end gap-3">
-        <Link href="/" className="h-11 rounded-lg border border-gray-300 px-5 text-sm leading-11 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Link href="/" className={BTN_SECONDARY}>
           {t("cancel")}
         </Link>
-        <button type="submit" disabled={pending} className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+        <button type="submit" disabled={pending} className={BTN_PRIMARY}>
           {pending ? t("saving") : mode === "register" ? t("register") : t("update")}
         </button>
       </div>

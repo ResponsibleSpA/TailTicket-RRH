@@ -8,6 +8,7 @@ import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listApiKeys } from "@/server/domain/adminsys/apikey";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -53,7 +54,7 @@ export default async function ApiKeysPage({ params, searchParams }: { params: Pr
             cells: {
               sel: <input type="checkbox" name="ids[]" value={k.id} className="h-4 w-4 accent-brand-500" aria-label={k.apikey} />,
               key: (
-                <Link href={`/admin/apikeys/${k.id}`} className="font-mono text-theme-xs font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/apikeys/${k.id}`} className={`${ROW_LINK} font-mono text-theme-xs`}>
                   {k.apikey}
                 </Link>
               ),

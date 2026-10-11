@@ -1,25 +1,28 @@
+import { AlarmClock, CircleCheck, Inbox, UserRound } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import BarBreakdown from "@/components/charts/BarBreakdown";
 import ComponentCard from "@/components/common/ComponentCard";
 import DataTable from "@/components/common/DataTable";
 import EventsChart from "@/components/dashboard/EventsChart";
+import KpiCard, { type KpiDelta } from "@/components/dashboard/KpiCard";
 import StatsFilter from "@/components/dashboard/StatsFilter";
 import StatsTabs from "@/components/dashboard/StatsTabs";
-import { Link } from "@/i18n/navigation";
 import { agentQueueNav } from "@/server/domain/queue/context";
 import {
   PERIOD_CHOICES,
   parseGroup,
   parsePeriod,
   plotData,
+  previousRange,
   reportRange,
+  seriesTotal,
   tabularData,
   TABULAR_GROUPS,
   type TabularGroup,
   type TabularRow,
 } from "@/server/domain/stats/report";
 import { agentTimeZone } from "@/server/format/datetime";
-import { cn } from "@/utils";
 
 import { requireAgent } from "../guard";
 
@@ -46,21 +49,34 @@ export default async function AgentDashboardPage({
   const range = reportRange(sp.start, period, tz);
 
   // Tutte e tre le schede: servono i conteggi delle righe; la tabella mostra quella attiva
-  const [{ top, counts, all }, plot, tables] = await Promise.all([
+  const [{ top, counts, all }, plot, prevPlot, tables] = await Promise.all([
     agentQueueNav(agent),
     plotData(range, agent),
+    plotData(previousRange(range), agent),
     Promise.all(TABULAR_GROUPS.map((g) => tabularData(g, agent, range))),
   ]);
   const rowsOf = Object.fromEntries(TABULAR_GROUPS.map((g, i) => [g, tables[i]])) as Record<TabularGroup, TabularRow[]>;
   const table = rowsOf[group];
   const kpi = (id: number) => (typeof counts.get(id) === "number" ? (counts.get(id) as number) : 0);
-  const cards = [
-    { label: t("kpi.open"), value: kpi(1), href: "/agent/tickets?queue=1" },
-    { label: t("kpi.overdue"), value: kpi(4), href: "/agent/tickets?queue=4", tone: "text-error-500" },
-    { label: t("kpi.mine"), value: kpi(5), href: "/agent/tickets?queue=5" },
-    { label: t("kpi.closedToday"), value: kpi(9), href: "/agent/tickets?queue=9" },
-  ].filter((c, i) => all.has([1, 4, 5, 9][i]));
+  const daily = (name: string) => plot.series.find((x) => x.name === name)?.data ?? [];
+  const periodDays = plot.days.length;
+  const delta = (name: string, good: KpiDelta["good"]): KpiDelta => ({
+    current: seriesTotal(plot, name),
+    previous: seriesTotal(prevPlot, name),
+    good,
+    labels: {
+      up: (pct) => t("delta.up", { pct }),
+      down: (pct) => t("delta.down", { pct }),
+      same: t("delta.same"),
+      new: t("delta.new"),
+      hint: t("delta.vsPrevious", { days: periodDays }),
+    },
+  });
+  // Ticket per reparto nel periodo: solo i reparti con movimenti, i più attivi in alto
+  const deptRows = rowsOf.dept.filter((r) => r.opened + r.closed > 0).sort((a, b) => b.opened + b.closed - (a.opened + a.closed)).slice(0, 8);
   void top;
+  const created = delta("created", "neutral");
+  const closed = delta("closed", "up");
 
   // Stessi filtri per schede ed export (l'export rifà la stessa tabularData con questi parametri)
   const filters: Record<string, string> = { start: sp.start ? range.startDay : "", period };
@@ -75,32 +91,70 @@ export default async function AgentDashboardPage({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("welcome", { name: agent.name.full })}</h2>
-
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {cards.map((c) => (
-          <Link key={c.href} href={c.href} className="rounded-2xl border border-gray-200 bg-white p-5 hover:border-brand-300 dark:border-gray-800 dark:bg-white/3">
-            <p className="text-theme-sm text-gray-500 dark:text-gray-400">{c.label}</p>
-            <p className={cn("mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90", c.tone)}>{c.value}</p>
-          </Link>
-        ))}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white/90">{t("welcome", { name: agent.name.first || agent.name.full })}</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
+        </div>
+        <StatsFilter start={range.startDay} period={period} periods={PERIOD_CHOICES} group={group} rangeText={rangeText} />
       </div>
 
-      <ComponentCard title={t("activity")} desc={t("activityDesc")}>
-        <StatsFilter start={range.startDay} period={period} periods={PERIOD_CHOICES} group={group} rangeText={rangeText} />
-        {plot.series.length ? (
-          <EventsChart
-            days={plot.days}
-            series={plot.series.map((s) => ({
-              ...s,
-              key: s.name,
-              name: t.has(`eventNames.${s.name}`) ? t(`eventNames.${s.name}`) : s.name,
-            }))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {all.has(1) && (
+          <KpiCard
+            label={t("kpi.open")}
+            value={kpi(1)}
+            icon={Inbox}
+            href="/agent/tickets?queue=1"
+            locale={locale}
+            foot={t("kpi.openFoot", { n: created.current })}
+            spark={{ data: daily("created"), tone: "primary" }}
           />
-        ) : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t("noData")}</p>
         )}
-      </ComponentCard>
+        <KpiCard label={t("kpi.closed")} value={closed.current} icon={CircleCheck} locale={locale} delta={closed} spark={{ data: daily("closed"), tone: "success" }} />
+        {all.has(4) && (
+          <KpiCard
+            label={t("kpi.overdue")}
+            value={kpi(4)}
+            icon={AlarmClock}
+            href="/agent/tickets?queue=4"
+            locale={locale}
+            danger={kpi(4) > 0}
+            foot={kpi(4) > 0 ? t("kpi.overdueFoot") : t("kpi.overdueNone")}
+          />
+        )}
+        {all.has(5) && <KpiCard label={t("kpi.mine")} value={kpi(5)} icon={UserRound} href="/agent/tickets?queue=5" locale={locale} foot={t("kpi.mineFoot")} />}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <ComponentCard title={t("activity")} desc={t("activityDesc")} className="xl:col-span-2">
+          {plot.series.length ? (
+            <EventsChart
+              days={plot.days}
+              series={plot.series.map((s) => ({
+                ...s,
+                key: s.name,
+                name: t.has(`eventNames.${s.name}`) ? t(`eventNames.${s.name}`) : s.name,
+              }))}
+            />
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("noData")}</p>
+          )}
+        </ComponentCard>
+        <ComponentCard title={t("byDept")} desc={t("byDeptDesc")}>
+          {deptRows.length ? (
+            <BarBreakdown
+              categories={deptRows.map((r) => r.label)}
+              series={[
+                { name: t("cols.opened"), tone: "primary", data: deptRows.map((r) => r.opened) },
+                { name: t("cols.closed"), tone: "success", data: deptRows.map((r) => r.closed) },
+              ]}
+            />
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("noData")}</p>
+          )}
+        </ComponentCard>
+      </div>
 
       <StatsTabs
         active={group}

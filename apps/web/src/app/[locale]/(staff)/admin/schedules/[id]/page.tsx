@@ -15,6 +15,7 @@ import { db } from "@/server/db";
 import { scheduleOptions, timezoneOptions } from "@/server/domain/admin/lookups";
 import { describeEntry, displaySortOrder, FREQUENCIES, isFullDayEntry, type EntryDesc } from "@/server/domain/admin/schedule-entry-form";
 import { phpJsonDecode } from "@/server/format/php-json";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../../_sys/server";
 import { requireAdmin } from "../../guard";
@@ -212,7 +213,7 @@ export default async function SchedulePage({ params, searchParams }: { params: P
               cells: {
                 sel: <input type="checkbox" name="ids[]" value={e.id} className="h-4 w-4 accent-brand-500" aria-label={e.name} />,
                 name: (
-                  <Link href={`/admin/schedules/${scheduleId}?entry=${e.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                  <Link href={`/admin/schedules/${scheduleId}?entry=${e.id}`} className={ROW_LINK}>
                     {e.name}
                   </Link>
                 ),

@@ -8,6 +8,7 @@
     "transfer": "Transfer",
     "changeStatus": "Change status",
     "more": "More",
+    "toolbar": "Ticket actions",
     "releaseMenu": "Release (unassign) ticket",
     "release": "Release",
     "markAnswered": "Mark as answered",

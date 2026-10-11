@@ -16,11 +16,17 @@ import { menuButtonClass } from "./menu-classes";
 export default function MenuButton({
   label,
   width = "w-56",
+  icon,
+  className = menuButtonClass,
   children,
 }: {
   label: string;
   /** larghezza del menu (classe Tailwind) */
   width?: "w-56" | "w-60" | "w-64";
+  /** icona prima dell'etichetta */
+  icon?: ReactNode;
+  /** aspetto del pulsante (menu-classes: bordo, testo o gruppo); predefinito il pulsante con bordo */
+  className?: string;
   children: (close: () => void) => ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -43,10 +49,11 @@ export default function MenuButton({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((v) => !v)}
-        className={cn("dropdown-toggle", menuButtonClass)}
+        className={cn("dropdown-toggle", className)}
       >
+        {icon}
         {label}
-        <ChevronDown aria-hidden="true" className={cn("size-4 transition-transform", open && "rotate-180")} />
+        <ChevronDown aria-hidden="true" className={cn("size-4 text-gray-400 transition-transform", open && "rotate-180")} />
       </button>
       <Dropdown id={menuId} role="menu" triggerRef={triggerRef} isOpen={open} onClose={close} className={cn(width, "p-2")}>
         {children(choose)}

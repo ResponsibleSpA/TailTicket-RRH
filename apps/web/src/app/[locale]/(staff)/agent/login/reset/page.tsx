@@ -9,7 +9,7 @@ import { db } from "@/server/db";
 import { loadTheme } from "@/server/theme/theme";
 
 export async function generateMetadata() {
-  return { title: (await getTranslations("auth"))("agentLoginTitle") };
+  return { title: (await getTranslations("peopleAuth"))("resetTitle") };
 }
 
 export const dynamic = "force-dynamic";

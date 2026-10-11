@@ -28,7 +28,10 @@
       "ticketsText": "Check the status of your requests and reply.",
       "statusTitle": "Check ticket status",
       "statusText": "Sign in with your account or with your email and ticket number.",
-      "featured": "Featured Knowledge Base Articles"
+      "featured": "Featured Knowledge Base Articles",
+      "kbTitle": "Knowledge base",
+      "kbText": "Find answers to the most common questions right away.",
+      "actions": "What would you like to do?"
     },
     "login": {
       "title": "Sign in",
@@ -150,7 +153,8 @@
       "userid": "Email or username",
       "login": "Sign in",
       "send": "Send email",
-      "disabled": "Password reset is not available"
+      "disabled": "Password reset is not available",
+      "backToLogin": "Back to sign in"
     },
     "tickets": {
       "title": "My tickets",
@@ -169,7 +173,11 @@
         "dept": "Department"
       },
       "empty": "No tickets",
-      "pages": "Pages"
+      "pages": "Pages",
+      "subtitle": "Your support requests and their status.",
+      "new": "New ticket",
+      "filter": "Ticket status",
+      "emptyText": "No tickets match the selected filters."
     },
     "ticket": {
       "title": "Ticket",
@@ -235,7 +243,16 @@
       },
       "signIn": "Sign in",
       "topicLoadError": "The help topic fields could not be loaded.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "steps": {
+        "contact": "Your details",
+        "contactClient": "The ticket will be opened in your name: replies will be sent to this address.",
+        "contactGuest": "How we can reach you with updates on your request.",
+        "topic": "Topic",
+        "topicText": "Pick the topic closest to your request: it helps us route it to the right person.",
+        "details": "Request details",
+        "detailsText": "Describe the issue with all useful information; you can attach files or screenshots."
+      }
     },
     "kb": {
       "title": "Knowledge base",
@@ -250,7 +267,10 @@
       "attachments": "Attachments",
       "topics": "Help topics",
       "categories": "Categories",
-      "search": "Search our knowledge base"
+      "search": "Search our knowledge base",
+      "subtitle": "Guides and answers to frequently asked questions, organized by category.",
+      "faqCount": "{count, plural, one {# article} other {# articles}}",
+      "breadcrumb": "Breadcrumb"
     }
   }
 }

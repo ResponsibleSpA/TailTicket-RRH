@@ -172,6 +172,9 @@
     "unlink": "Unlink",
     "mass": {
       "selectAll": "Select all",
+      "selected": "{count} selected",
+      "toolbar": "Actions on selected tickets",
+      "more": "More",
       "selectFirst": "Select at least one ticket.",
       "doneAll": "{count, plural, one {# ticket processed} other {# tickets processed}}.",
       "donePartial": "{count} of {total} tickets processed.",

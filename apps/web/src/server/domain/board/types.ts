@@ -67,8 +67,8 @@ export interface BoardColumn {
   /** per le colonne di stato */
   statusId?: number;
   state?: StatusState;
-  /** colore (priorità) */
-  color?: string | null;
+  /** urgenza della priorità (colonne e swimlane per priorità; 99 = senza priorità) */
+  urgency?: number;
   /** iniziali (assegnatario) */
   initials?: string;
   /** assegnatario: agente o team */

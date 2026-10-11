@@ -1,8 +1,10 @@
 import { ReactNode } from "react";
 
+import { cn } from "@/utils";
+
 interface ButtonProps {
   children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
+  size?: "xs" | "sm" | "md"; // Button size (xs: compatto, alto come i campi da 36px)
   variant?: "primary" | "outline"; // Button variant
   startIcon?: ReactNode; // Icon before the text
   endIcon?: ReactNode; // Icon after the text
@@ -27,7 +29,8 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Size Classes
   const sizeClasses = {
-    sm: "px-4 py-3 text-sm",
+    xs: "h-9 px-3 text-sm",
+    sm: "h-10 px-4 text-sm",
     md: "px-5 py-3.5 text-sm",
   };
 
@@ -41,11 +44,8 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition ${className} ${
-        sizeClasses[size]
-      } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
-      }`}
+      // className per ultimo (twMerge): chi usa il pulsante può cambiarne colore o dimensioni
+      className={cn("inline-flex items-center justify-center gap-2 rounded-lg font-medium transition", sizeClasses[size], variantClasses[variant], disabled && "cursor-not-allowed opacity-50", className)}
       onClick={onClick}
       disabled={disabled}
       type={type}

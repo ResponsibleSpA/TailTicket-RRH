@@ -8,6 +8,7 @@ import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listTemplateGroups } from "@/server/domain/adminsys/template";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -54,7 +55,7 @@ export default async function TemplatesPage({ params, searchParams }: { params: 
             cells: {
               sel: <input type="checkbox" name="ids[]" value={g.tpl_id} className="h-4 w-4 accent-brand-500" aria-label={g.name} />,
               name: (
-                <Link href={`/admin/templates/${g.tpl_id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/templates/${g.tpl_id}`} className={ROW_LINK}>
                   {g.name}
                   {g.isDefault && <span className="ms-2 text-theme-xs text-gray-500">({c("default")})</span>}
                 </Link>

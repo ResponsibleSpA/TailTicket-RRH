@@ -115,7 +115,7 @@ export default function ThemeEditor({ initial, helpdeskTitle, hasStaffLogo, hasC
 
       <div className="space-y-6">
         <div className="sticky top-24 space-y-6">
-          <PreviewCard />
+          <PreviewCard settings={settings} appName={settings.app_name || helpdeskTitle} />
           <SaveControls
             state={state}
             dirty={dirty}

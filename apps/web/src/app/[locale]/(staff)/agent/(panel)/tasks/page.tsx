@@ -4,10 +4,10 @@ import DataTable, { PageHeader, SearchBox } from "@/components/common/DataTable"
 import LinkPager from "@/components/common/LinkPager";
 import PeopleCards from "@/components/people/PeopleCards";
 import PeopleDoneNotice from "@/components/people/PeopleDoneNotice";
+import { FilterTabs, NameLink, QuietLink } from "@/components/people/PeopleLinks";
 import NewTaskButton from "@/components/people/tasks/NewTaskButton";
 import TaskMassActions, { TaskSelect } from "@/components/people/tasks/TaskMassActions";
 import Badge from "@/components/ui/badge/Badge";
-import { Link } from "@/i18n/navigation";
 import { TaskModel } from "@/lib/osticket/flags";
 import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
@@ -19,7 +19,6 @@ import { countTaskQueues, listTasks, type TaskQueueName, type TaskRow } from "@/
 import { selectableDepts } from "@/server/domain/ticket/assignees";
 import { checkStaffPerm, loadTicket } from "@/server/domain/ticket/ticket";
 import { agentTimeZone, formatDbDate } from "@/server/format/datetime";
-import { cn } from "@/utils";
 
 import { requireAgent } from "../../guard";
 
@@ -32,9 +31,7 @@ export async function generateMetadata() {
 /** Numero del ticket del task come link (stile dei link delle liste). */
 function ticketLink(k: TaskRow) {
   return k.ticket_id ? (
-    <Link href={`/agent/tickets/${k.ticket_id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-      #{k.ticket_number}
-    </Link>
+    <QuietLink href={`/agent/tickets/${k.ticket_id}`}>#{k.ticket_number}</QuietLink>
   ) : (
     "—"
   );
@@ -134,22 +131,17 @@ export default async function TasksPage({
       />
       <PeopleDoneNotice done={sp.done} n={sp.n} />
       <TaskMassActions can={can} agents={agents} teams={teams} depts={depts} />
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
-        {QUEUES.map((q) => (
-          <Link
-            key={q}
-            href={`/agent/tasks?queue=${q}${ticketParam}`}
-            className={cn(
-              "rounded-lg px-3 py-2 text-sm font-medium",
-              q === queue && !sp.q && queueChosen
-                ? "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"
-                : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5",
-            )}
-          >
-            {t(`queues.${q}`)}
-            <span className="ms-1.5 rounded-full bg-gray-100 px-1.5 text-theme-xs text-gray-600 tabular-nums dark:bg-white/5 dark:text-gray-400">{counts[q]}</span>
-          </Link>
-        ))}
+      <div className="border-b border-gray-200 pb-3 dark:border-gray-800">
+        <FilterTabs
+          label={t("title")}
+          items={QUEUES.map((q) => ({
+            key: q,
+            href: `/agent/tasks?queue=${q}${ticketParam}`,
+            label: t(`queues.${q}`),
+            count: counts[q],
+            active: q === queue && !sp.q && queueChosen,
+          }))}
+        />
       </div>
       <PeopleCards
         empty={t("empty")}
@@ -157,9 +149,9 @@ export default async function TasksPage({
           key: k.id,
           select: <TaskSelect id={k.id} />,
           title: (
-            <Link href={`/agent/tasks/${k.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-              #{k.number} · {k.title}
-            </Link>
+            <NameLink href={`/agent/tasks/${k.id}`}>
+              <span className="font-normal text-gray-500 tabular-nums dark:text-gray-400">#{k.number}</span> {k.title}
+            </NameLink>
           ),
           badge:
             (k.flags & TaskModel.ISOPEN) === 0 ? (
@@ -192,15 +184,13 @@ export default async function TasksPage({
             cells: {
               sel: <TaskSelect id={k.id} />,
               number: (
-                <Link href={`/agent/tasks/${k.id}`} className="font-medium text-brand-600 hover:underline dark:text-brand-400">
-                  {k.number}
-                </Link>
+                <QuietLink href={`/agent/tasks/${k.id}`}>{k.number}</QuietLink>
               ),
               ticket: ticketLink(k),
               created: formatDbDate(k.created, tz, locale),
               title: (
                 <span className="inline-flex items-center gap-2">
-                  {k.title}
+                  <NameLink href={`/agent/tasks/${k.id}`}>{k.title}</NameLink>
                   {(k.flags & TaskModel.ISOPEN) === 0 && (
                     <Badge size="sm" color="light">
                       {t("completed")}

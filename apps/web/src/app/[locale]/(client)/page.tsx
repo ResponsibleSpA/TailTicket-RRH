@@ -1,11 +1,14 @@
+import { ArrowRight, BookOpen, ChevronRight, Inbox, LifeBuoy, type LucideIcon, Search, SquarePen, Ticket } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { RICH_CLASS } from "@/components/portal/rich";
+import { BTN_SECONDARY, CARD, FIELD, FOCUS } from "@/components/portal/styles";
 import { Link } from "@/i18n/navigation";
 import { withBase } from "@/lib/base-path";
 import { coreConfig } from "@/server/config/config";
 import { contentPage, featuredCategories, kbEnabled } from "@/server/domain/client/kb";
 import { safeHtml } from "@/server/format/sanitize";
+import { cn } from "@/utils";
 
 import { portalVisitor } from "./guard";
 
@@ -14,9 +17,31 @@ export async function generateMetadata() {
   return { title: t("title") };
 }
 
+/** Scorciatoia della home: icona, titolo, descrizione e freccia; `main` evidenzia l'azione principale. */
+function ActionCard({ href, icon: Icon, title, text, main }: { href: string; icon: LucideIcon; title: string; text: string; main?: boolean }) {
+  return (
+    <Link href={href} className={cn(CARD, "group flex items-start gap-4 p-5 transition-colors hover:border-gray-300 dark:hover:border-gray-700", FOCUS)}>
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl",
+          main ? "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400" : "bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400",
+        )}
+      >
+        <Icon aria-hidden="true" className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-semibold text-gray-900 group-hover:text-brand-600 dark:text-white/90 dark:group-hover:text-brand-400">{title}</span>
+        <span className="mt-1 block text-theme-sm text-gray-500 dark:text-gray-400">{text}</span>
+      </span>
+      <ArrowRight aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-gray-400 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-500 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+    </Link>
+  );
+}
+
 /**
- * Home del portale clienti (index.php): ricerca nella knowledge base, pagina "landing" configurata
- * (landing_page_id) o messaggio di benvenuto, scorciatoie e articoli in evidenza.
+ * Home del portale clienti (index.php): pagina "landing" configurata (landing_page_id) o messaggio di
+ * benvenuto con la ricerca nella knowledge base, scorciatoie (apri ticket, i miei ticket o verifica dello
+ * stato, knowledge base) e articoli in evidenza.
  */
 export default async function PortalHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -28,61 +53,72 @@ export default async function PortalHome({ params }: { params: Promise<{ locale:
   const featured = kb ? await featuredCategories() : [];
   const canOpen = cfg.str("client_registration") !== "disabled" || !cfg.bool("clients_only");
 
+  const actions: { key: string; href: string; icon: LucideIcon; title: string; text: string; main?: boolean }[] = [];
+  if (canOpen) actions.push({ key: "open", href: "/open", icon: SquarePen, title: t("openTitle"), text: t("openText"), main: true });
+  if (client) actions.push({ key: "tickets", href: client.guest ? `/tickets/${client.guest.ticketId}` : "/tickets", icon: Inbox, title: t("ticketsTitle"), text: t("ticketsText") });
+  else actions.push({ key: "status", href: "/login#access", icon: Ticket, title: t("statusTitle"), text: t("statusText") });
+  if (kb) actions.push({ key: "kb", href: "/kb", icon: BookOpen, title: t("kbTitle"), text: t("kbText") });
+
   return (
     <div className="space-y-8">
-      {kb && (
-        <form action={withBase("/kb")} method="get" className="flex flex-col gap-3 sm:flex-row" role="search">
-          <input
-            name="q"
-            placeholder={t("kbSearch")}
-            aria-label={t("kbSearch")}
-            className="h-11 flex-1 rounded-lg border border-gray-300 bg-white px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-          />
-          <button type="submit" className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600">
-            {t("search")}
-          </button>
-        </form>
-      )}
+      {/* benvenuto: il testo resta quello configurato in osTicket (pagina landing) */}
+      <section className={cn(CARD, "relative overflow-hidden")}>
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand-500/50 to-transparent" />
+        <div className="px-6 py-8 sm:px-10 sm:py-12">
+          <p className="mb-4 inline-flex items-center gap-2 text-theme-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <LifeBuoy aria-hidden="true" className="size-4 text-brand-500" />
+            {t("title")}
+          </p>
+          <div className="max-w-3xl">
+            {landing ? (
+              <div
+                className={cn(RICH_CLASS, "text-base sm:[&_p]:text-base [&_h1]:text-2xl [&_h1]:tracking-tight sm:[&_h1]:text-3xl [&_p:last-child]:mb-0 [&_p]:leading-relaxed")}
+                dangerouslySetInnerHTML={{ __html: safeHtml(landing.body) }}
+              />
+            ) : (
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl dark:text-white/90">{t("welcome")}</h1>
+            )}
+          </div>
+          {kb && (
+            <form action={withBase("/kb")} method="get" className="mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row" role="search">
+              <div className="relative flex-1">
+                <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <input type="search" name="q" placeholder={t("kbSearch")} aria-label={t("kbSearch")} className={cn(FIELD, "w-full ps-10")} />
+              </div>
+              <button type="submit" className={BTN_SECONDARY}>
+                {t("search")}
+              </button>
+            </form>
+          )}
+        </div>
+      </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 lg:col-span-2 dark:border-gray-800 dark:bg-white/3">
-          {landing ? (
-            <div className={RICH_CLASS} dangerouslySetInnerHTML={{ __html: safeHtml(landing.body) }} />
-          ) : (
-            <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("welcome")}</h1>
-          )}
-        </section>
-        <aside className="space-y-3">
-          {canOpen && (
-            <Link href="/open" className="block rounded-2xl border border-brand-200 bg-brand-25 p-5 hover:bg-brand-50 dark:border-brand-800 dark:bg-brand-500/10">
-              <span className="block text-base font-semibold text-brand-700 dark:text-brand-300">{t("openTitle")}</span>
-              <span className="mt-1 block text-theme-sm text-gray-600 dark:text-gray-400">{t("openText")}</span>
-            </Link>
-          )}
-          <Link
-            href={client ? (client.guest ? `/tickets/${client.guest.ticketId}` : "/tickets") : "/login#access"}
-            className="block rounded-2xl border border-gray-200 bg-white p-5 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:hover:bg-white/5"
-          >
-            <span className="block text-base font-semibold text-gray-800 dark:text-white/90">{client ? t("ticketsTitle") : t("statusTitle")}</span>
-            <span className="mt-1 block text-theme-sm text-gray-600 dark:text-gray-400">{client ? t("ticketsText") : t("statusText")}</span>
-          </Link>
-        </aside>
-      </div>
+      <section aria-label={t("actions")} className={cn("grid gap-4", actions.length >= 3 ? "md:grid-cols-3" : "sm:grid-cols-2")}>
+        {actions.map(({ key, ...a }) => (
+          <ActionCard key={key} {...a} />
+        ))}
+      </section>
 
       {featured.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">{t("featured")}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white/90">{t("featured")}</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {featured.map((c) => (
-              <div key={c.id} className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3">
-                <h3 className="font-medium text-gray-800 dark:text-white/90">{c.name}</h3>
-                <ul className="mt-3 space-y-3">
+              <div key={c.id} className={cn(CARD, "p-5")}>
+                <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white/90">
+                  <BookOpen aria-hidden="true" className="size-4 text-gray-400" />
+                  {c.name}
+                </h3>
+                <ul className="mt-3 divide-y divide-gray-100 dark:divide-gray-800">
                   {c.faqs.map((f) => (
                     <li key={f.id}>
-                      <Link href={`/kb/faq/${f.id}`} className="text-theme-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
-                        {f.question}
+                      <Link href={`/kb/faq/${f.id}`} className={cn("group flex items-start gap-3 py-3", FOCUS)}>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-theme-sm font-medium text-gray-800 group-hover:text-brand-600 dark:text-white/90 dark:group-hover:text-brand-400">{f.question}</span>
+                          {f.teaser && <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">{f.teaser}</span>}
+                        </span>
+                        <ChevronRight aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-gray-400 rtl:rotate-180" />
                       </Link>
-                      {f.teaser && <p className="text-theme-xs text-gray-500 dark:text-gray-400">{f.teaser}</p>}
                     </li>
                   ))}
                 </ul>

@@ -1,8 +1,10 @@
-import { Folder, Paperclip } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
+import { FaqLinkList, KbBreadcrumb, KbEmpty, SubcategoryChip } from "@/components/portal/KbParts";
 import KbSidebar from "@/components/portal/KbSidebar";
-import { Link, redirect } from "@/i18n/navigation";
+import { Panel } from "@/components/portal/PortalUi";
+import { redirect } from "@/i18n/navigation";
 import { parseId } from "@/lib/route-id";
 import { publicCategory } from "@/server/domain/client/kb";
 import { safeHtml } from "@/server/format/sanitize";
@@ -28,50 +30,26 @@ export default async function KbCategoryPage({ params }: { params: Promise<{ loc
   const c = cat!;
   const t = await getTranslations("portal.kb");
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="space-y-5 lg:col-span-2">
-        <nav className="text-theme-sm text-gray-500 dark:text-gray-400">
-          <Link href="/kb" className="hover:underline">
-            {t("all")}
-          </Link>
-          {c.parent && (
-            <>
-              {" › "}
-              <Link href={`/kb/category/${c.parent.id}`} className="hover:underline">
-                {c.parent.name}
-              </Link>
-            </>
-          )}
-        </nav>
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{c.name}</h1>
+    <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+      <div className="min-w-0 space-y-5 lg:col-span-2">
+        <KbBreadcrumb items={[{ href: "/kb", label: t("all") }, ...(c.parent ? [{ href: `/kb/category/${c.parent.id}`, label: c.parent.name }] : []), { label: c.name }]} />
+        <PageHeader title={c.name} />
         {c.description && <div className="text-theme-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: safeHtml(c.description) }} />}
         {c.subcategories.length > 0 && (
-          <ul className="space-y-1">
+          <ul className="flex flex-wrap gap-2">
             {c.subcategories.map((s) => (
               <li key={s.id}>
-                <Link href={`/kb/category/${s.id}`} className="inline-flex items-center gap-1.5 text-brand-600 hover:underline dark:text-brand-400">
-                  <Folder className="size-4" /> {s.name} ({s.count})
-                </Link>
+                <SubcategoryChip id={s.id} name={s.name} count={s.count} />
               </li>
             ))}
           </ul>
         )}
         {c.faqs.length ? (
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3">
-            <h2 className="mb-3 font-medium text-gray-800 dark:text-white/90">{t("faqs")}</h2>
-            <ol className="list-decimal space-y-2 ps-6">
-              {c.faqs.map((f) => (
-                <li key={f.id}>
-                  <Link href={`/kb/faq/${f.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-                    {f.question}
-                  </Link>
-                  {f.attachments ? <Paperclip className="ms-1 inline size-3.5 align-[-2px] text-gray-400" /> : null}
-                </li>
-              ))}
-            </ol>
-          </section>
+          <Panel title={t("faqs")} className="pb-2 sm:pb-3">
+            <FaqLinkList faqs={c.faqs} className="-mt-2" />
+          </Panel>
         ) : (
-          !c.subcategories.length && <p className="text-gray-500 dark:text-gray-400">{t("emptyCategory")}</p>
+          !c.subcategories.length && <KbEmpty text={t("emptyCategory")} />
         )}
       </div>
       <KbSidebar topics={c.topics} />

@@ -4,11 +4,9 @@ import { getTranslations } from "next-intl/server";
 
 import { Hidden, Section, TextAreaField, TextField } from "@/components/adminsys/fields";
 import Repeater from "@/components/adminsys/Repeater";
-import Callout from "@/components/common/Callout";
 import { DynamicFormField } from "@/lib/osticket/flags";
 import { db } from "@/server/db";
 import { FIELD_TYPES, REQUIREMENT_MODES, type formDetail } from "@/server/domain/adminsys/form";
-import { CDATA_FORM_TYPES } from "@/server/domain/forms/cdata";
 
 type Detail = NonNullable<Awaited<ReturnType<typeof formDetail>>>;
 
@@ -32,12 +30,10 @@ export async function FormFields({ detail }: { detail: Detail | null }) {
   const lists = await db().selectFrom("list").select(["id", "name"]).orderBy("name").execute();
   const typeOptions = [...FIELD_TYPES.map((v) => ({ value: v, label: t(`fieldTypes.${v}`) })), ...lists.map((l) => ({ value: `list-${l.id}`, label: `${t("listPrefix")}: ${l.name}` }))];
   const form = detail?.form;
-  const cdata = !!form && CDATA_FORM_TYPES.includes(form.type);
   const vis = (k: string) => t(k);
   return (
     <>
       <Hidden name="do" value={form ? "update" : "add"} />
-      {cdata && <Callout tone="warning">{t("ddlNote")}</Callout>}
       <Section title={t("sections.form")}>
         <TextField name="title" label={t("formTitle")} value={form?.title} required wide />
         <TextAreaField name="instructions" label={t("instructions")} value={form?.instructions} rows={3} />

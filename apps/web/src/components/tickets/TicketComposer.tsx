@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock, MessageSquareReply, Send, StickyNote } from "lucide-react";
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 
 import RichTextEditor, { type RichTextEditorHandle } from "@/components/editor/RichTextEditor";
@@ -10,10 +11,15 @@ import { cn } from "@/utils";
 import { cannedTextAction, lockAction, postNoteAction, postReplyAction, releaseLockAction, type LockState, type PostState } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
 
+import { ComposerAlert, ComposerField, ComposerFooter, composerSelectCls as selectCls, SubmitButton, TabButton } from "./ComposerParts";
+
 export interface ComposerLabels {
   reply: string;
   note: string;
   send: string;
+  sendReply: string;
+  sendNote: string;
+  noteHint: string;
   sending: string;
   replyTo: string;
   replyAll: string;
@@ -71,9 +77,6 @@ interface Props {
 
 /** Stato del form con il numero di invii riusciti (chiave degli allegati: si svuotano solo dopo un invio). */
 type ComposerState = PostState & { sent?: number };
-
-const selectCls =
-  "h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
 /** Risposta / nota interna con gestione del lock come ticket-view.inc.php + osticket.js. */
 export default function TicketComposer(props: Props) {
@@ -140,8 +143,7 @@ export default function TicketComposer(props: Props) {
   };
 
   const statusSelect = (
-    <label className="flex flex-col gap-1 text-theme-sm text-gray-600 dark:text-gray-400">
-      {labels.statusAfter}
+    <ComposerField label={labels.statusAfter}>
       <select name="statusId" defaultValue="" className={selectCls}>
         <option value="">{labels.statusUnchanged}</option>
         {props.statuses
@@ -152,38 +154,34 @@ export default function TicketComposer(props: Props) {
             </option>
           ))}
       </select>
-    </label>
+    </ComposerField>
   );
 
   const errorText = state.error ? (labels.errors[state.error] ?? state.error) : null;
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3">
-      <div role="tablist" className="flex border-b border-gray-200 dark:border-gray-800">
+      <div role="tablist" className="flex border-b border-gray-200 px-1 dark:border-gray-800">
         {props.canReply && (
-          <TabButton id={`composer-${ticketId}-reply`} active={tab === "reply"} onClick={() => setTab("reply")}>
+          <TabButton id={`composer-${ticketId}-reply`} active={tab === "reply"} onClick={() => setTab("reply")} icon={MessageSquareReply}>
             {labels.reply}
           </TabButton>
         )}
-        <TabButton id={`composer-${ticketId}-note`} active={tab === "note"} onClick={() => setTab("note")}>
+        <TabButton id={`composer-${ticketId}-note`} active={tab === "note"} onClick={() => setTab("note")} icon={StickyNote}>
           {labels.note}
         </TabButton>
       </div>
 
-      {lock.lockedBy && (
-        <p className="mx-5 mt-4 rounded-lg bg-warning-50 px-4 py-2 text-theme-sm text-warning-700 dark:bg-warning-500/15 dark:text-warning-400">
-          {labels.lockedBy.replace("{name}", lock.lockedBy)}
-        </p>
-      )}
+      {lock.lockedBy && <ComposerAlert tone="warning">{labels.lockedBy.replace("{name}", lock.lockedBy)}</ComposerAlert>}
       {errorText && (
-        <p role="alert" className="mx-5 mt-4 rounded-lg bg-error-50 px-4 py-2 text-theme-sm text-error-700 dark:bg-error-500/15 dark:text-error-400">
+        <ComposerAlert tone="error" role="alert">
           {errorText}
-        </p>
+        </ComposerAlert>
       )}
       {state.ok && !state.closed && (
-        <p role="status" className="mx-5 mt-4 rounded-lg bg-success-50 px-4 py-2 text-theme-sm text-success-700 dark:bg-success-500/15 dark:text-success-400">
+        <ComposerAlert tone="success" role="status">
           {labels.posted}
-        </p>
+        </ComposerAlert>
       )}
 
       <form
@@ -192,22 +190,20 @@ export default function TicketComposer(props: Props) {
         id={`composer-${ticketId}-reply-panel`}
         role="tabpanel"
         aria-labelledby={`composer-${ticketId}-reply`}
-        className={cn("space-y-4 p-5", tab !== "reply" && "hidden")}
+        className={cn("space-y-4 p-4 sm:p-5", tab !== "reply" && "hidden")}
       >
         <input type="hidden" name="ticketId" value={ticketId} />
         <input type="hidden" name="lockCode" value={lock.code ?? ""} />
-        <div className="flex flex-wrap gap-4">
-          <label className="flex flex-col gap-1 text-theme-sm text-gray-600 dark:text-gray-400">
-            {labels.replyTo}
+        <div className="flex flex-wrap gap-3 sm:gap-4">
+          <ComposerField label={labels.replyTo}>
             <select name="replyTo" defaultValue="all" className={selectCls}>
               <option value="all">{labels.replyAll}</option>
               <option value="user">{labels.replyUser}</option>
               <option value="none">{labels.replyNone}</option>
             </select>
-          </label>
+          </ComposerField>
           {props.canned.length > 0 && (
-            <label className="flex flex-col gap-1 text-theme-sm text-gray-600 dark:text-gray-400">
-              {labels.canned}
+            <ComposerField label={labels.canned}>
               <select defaultValue="" onChange={(e) => void insertCanned(e.target.value)} className={selectCls}>
                 <option value="">{labels.cannedPick}</option>
                 {props.canned.map((c) => (
@@ -216,17 +212,19 @@ export default function TicketComposer(props: Props) {
                   </option>
                 ))}
               </select>
-            </label>
+            </ComposerField>
           )}
         </div>
         {props.collaborators.length > 0 && (
-          <fieldset className="text-theme-sm text-gray-600 dark:text-gray-400">
-            <legend className="mb-1">{labels.collaborators}</legend>
-            <div className="flex flex-wrap gap-3">
+          <fieldset className="text-theme-sm text-gray-700 dark:text-gray-400">
+            <legend className="mb-1.5 font-medium">{labels.collaborators}</legend>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {props.collaborators.map((c) => (
-                <label key={c.userId} className="flex items-center gap-2">
-                  <input type="checkbox" name="ccs" value={c.userId} defaultChecked={c.active} className="size-4 accent-brand-500" />
-                  {c.name} <span className="text-gray-400">&lt;{c.email}&gt;</span>
+                <label key={c.userId} className="flex min-w-0 items-center gap-2">
+                  <input type="checkbox" name="ccs" value={c.userId} defaultChecked={c.active} className="size-4 shrink-0 accent-brand-500" />
+                  <span className="truncate">
+                    {c.name} <span className="text-gray-400">&lt;{c.email}&gt;</span>
+                  </span>
                 </label>
               ))}
             </div>
@@ -234,24 +232,16 @@ export default function TicketComposer(props: Props) {
         )}
         <RichTextEditor ref={replyEditor} name="response" placeholder={labels.replyPlaceholder} onActivity={lockMode === 2 ? acquire : undefined} labels={labels.editor} />
         {props.uploadUrl && <AttachmentInput key={`r${replyState.sent ?? 0}`} name="files" uploadUrl={props.uploadUrl} maxSize={props.maxFileSize} />}
-        <div className="flex flex-wrap items-end gap-4">
-          <label className="flex flex-col gap-1 text-theme-sm text-gray-600 dark:text-gray-400">
-            {labels.signature}
+        <ComposerFooter submit={<SubmitButton pending={replyPending} label={labels.sendReply} pendingLabel={labels.sending} icon={Send} />}>
+          <ComposerField label={labels.signature}>
             <select name="signature" defaultValue={props.defaultSignature} className={selectCls}>
               <option value="none">{labels.sigNone}</option>
               {props.hasMySignature && <option value="mine">{labels.sigMine}</option>}
               {props.deptSignature && <option value="dept">{labels.sigDept}</option>}
             </select>
-          </label>
+          </ComposerField>
           {statusSelect}
-          <button
-            type="submit"
-            disabled={replyPending}
-            className="ms-auto h-10 rounded-lg bg-brand-500 px-5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60"
-          >
-            {replyPending ? labels.sending : labels.send}
-          </button>
-        </div>
+        </ComposerFooter>
       </form>
 
       <form
@@ -260,48 +250,25 @@ export default function TicketComposer(props: Props) {
         id={`composer-${ticketId}-note-panel`}
         role="tabpanel"
         aria-labelledby={`composer-${ticketId}-note`}
-        className={cn("space-y-4 p-5", tab !== "note" && "hidden")}
+        className={cn("space-y-4 p-4 sm:p-5", tab !== "note" && "hidden")}
       >
         <input type="hidden" name="ticketId" value={ticketId} />
         <input type="hidden" name="lockCode" value={lock.code ?? ""} />
+        {/* la nota non arriva all'utente: lo si dice prima di scriverla */}
+        <p className="flex items-center gap-2 text-theme-xs text-warning-700 dark:text-warning-400">
+          <Lock aria-hidden className="size-3.5 shrink-0" />
+          {labels.noteHint}
+        </p>
         <input
           name="title"
           placeholder={labels.noteTitle}
           aria-label={labels.noteTitle}
-          className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:text-white/90"
+          className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
         />
         <RichTextEditor ref={noteEditor} name="note" placeholder={labels.notePlaceholder} onActivity={lockMode === 2 ? acquire : undefined} labels={labels.editor} />
         {props.uploadUrl && <AttachmentInput key={`n${noteState.sent ?? 0}`} name="files" uploadUrl={props.uploadUrl} maxSize={props.maxFileSize} />}
-        <div className="flex flex-wrap items-end gap-4">
-          {statusSelect}
-          <button
-            type="submit"
-            disabled={notePending}
-            className="ms-auto h-10 rounded-lg bg-warning-500 px-5 text-sm font-medium text-white shadow-theme-xs hover:bg-warning-600 disabled:opacity-60"
-          >
-            {notePending ? labels.sending : labels.send}
-          </button>
-        </div>
+        <ComposerFooter submit={<SubmitButton pending={notePending} label={labels.sendNote} pendingLabel={labels.sending} icon={StickyNote} />}>{statusSelect}</ComposerFooter>
       </form>
     </div>
-  );
-}
-
-function TabButton({ id, active, onClick, children }: { id: string; active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      id={id}
-      role="tab"
-      aria-selected={active}
-      aria-controls={`${id}-panel`}
-      onClick={onClick}
-      className={cn(
-        "px-5 py-3 text-sm font-medium",
-        active ? "border-b-2 border-brand-500 text-brand-600 dark:text-brand-400" : "text-gray-500 hover:text-gray-700 dark:text-gray-400",
-      )}
-    >
-      {children}
-    </button>
   );
 }

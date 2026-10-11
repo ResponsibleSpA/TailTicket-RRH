@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { sql, type RawBuilder } from "kysely";
 
 import { db, table, type DbOrTx } from "../../db";
-import { toDb } from "../../db/time";
+import { fromDb, toDb } from "../../db/time";
 import { GlobalPerm, type Agent } from "../staff/staff";
 
 /**
@@ -47,6 +47,20 @@ export function reportRange(startDate: string | undefined, end: PeriodEnd, userT
 /** Normalizza i parametri della dashboard (?start=&period=&group=) come la pagina. */
 export function parsePeriod(period: string | null | undefined): PeriodEnd {
   return (PERIOD_CHOICES as readonly string[]).includes(period ?? "") ? (period as PeriodEnd) : "now";
+}
+
+/** Periodo precedente della stessa durata, che finisce dove inizia `r` (variazioni dei KPI della dashboard). */
+export function previousRange(r: ReportRange): ReportRange {
+  const start = fromDb(r.start);
+  const stop = fromDb(r.stop);
+  if (!start || !stop) return r;
+  const prevStart = start.minus(stop.diff(start));
+  return { ...r, start: toDb(prevStart), stop: r.start, startDay: prevStart.setZone(r.zone).toISODate() ?? "", lastDay: start.setZone(r.zone).minus({ days: 1 }).toISODate() ?? "" };
+}
+
+/** Totale di una serie del grafico (es. "created", "closed"); 0 se nel periodo non ci sono eventi di quel tipo. */
+export function seriesTotal(plot: PlotData, name: string): number {
+  return plot.series.find((s) => s.name === name)?.data.reduce((a, b) => a + b, 0) ?? 0;
 }
 
 export const TABULAR_GROUPS = ["dept", "topic", "staff"] as const;

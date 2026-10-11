@@ -11,6 +11,7 @@ import { Dept } from "@/lib/osticket/flags";
 import { coreConfig } from "@/server/config/config";
 import { db, table } from "@/server/db";
 import { deptOptions } from "@/server/domain/admin/lookups";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { requireAdmin } from "../guard";
 import { massDeptAction } from "./actions";
@@ -70,7 +71,7 @@ export default async function DepartmentsPage({ params, searchParams }: { params
               cells: {
                 sel: <input type="checkbox" name="ids[]" value={d.id} className="h-4 w-4 accent-brand-500" aria-label={d.name} />,
                 name: (
-                  <Link href={`/admin/departments/${d.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                  <Link href={`/admin/departments/${d.id}`} className={ROW_LINK}>
                     {d.name}
                     {d.id === defaultId && <span className="ms-2 text-theme-xs text-gray-500">({u("default")})</span>}
                   </Link>

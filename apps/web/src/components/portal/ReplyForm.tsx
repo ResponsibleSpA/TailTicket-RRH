@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import RichTextEditor from "@/components/editor/RichTextEditor";
@@ -11,7 +12,9 @@ import Alert from "@/components/ui/alert/Alert";
 
 import { replyAction, type ReplyState } from "@/app/[locale]/(client)/actions";
 
+import { BTN_PRIMARY, CARD } from "./styles";
 import { useEditorLabels } from "./useEditorLabels";
+import { cn } from "@/utils";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
 
 type ReplyFormProps = {
@@ -42,14 +45,16 @@ function ReplyFormInner({ ticketId, reopen, attachments, maxFileSize, posted }: 
   const [state, action, pending] = useActionState<ReplyState, FormData>(replyAction, {});
   const submit = submitKeepingValues(action);
   return (
-    <form id="reply" onSubmit={submit} className="scroll-mt-24 space-y-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-      <h2 className="text-base font-medium text-gray-800 dark:text-white/90">{t("replyTitle")}</h2>
+    <form id="reply" onSubmit={submit} className={cn(CARD, "scroll-mt-24 space-y-4 p-5 sm:p-6")}>
+      <div>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white/90">{t("replyTitle")}</h2>
+        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{t("replyHint")}</p>
+      </div>
       {posted && !state.error && (
         <div>
           <Alert variant="success" title={t("posted")} message="" />
         </div>
       )}
-      <p className="text-theme-sm text-gray-500 dark:text-gray-400">{t("replyHint")}</p>
       {state.error && (
         <div>
           <Alert variant="error" title={te.has(state.error) ? te(state.error) : state.error} message="" />
@@ -60,7 +65,8 @@ function ReplyFormInner({ ticketId, reopen, attachments, maxFileSize, posted }: 
       {attachments && maxFileSize > 0 && <AttachmentInput name="files" uploadUrl="/api/portal/upload" maxSize={maxFileSize} />}
       {reopen && <Alert variant="warning" title={t("reopenOnReply")} message="" />}
       <div className="flex justify-end">
-        <button type="submit" disabled={pending} className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+        <button type="submit" disabled={pending} className={BTN_PRIMARY}>
+          <Send aria-hidden="true" className="size-4" />
           {pending ? t("posting") : t("post")}
         </button>
       </div>

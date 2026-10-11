@@ -1,6 +1,9 @@
+import { CircleCheck } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import AccountForm from "@/components/portal/AccountForm";
+import { CARD } from "@/components/portal/styles";
 import Alert from "@/components/ui/alert/Alert";
 import { redirect } from "@/i18n/navigation";
 import { UserAccountStatus } from "@/lib/osticket/flags";
@@ -9,6 +12,7 @@ import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
 import { configuredLanguages, profileFormValues, renderedContent } from "@/server/domain/client/ui";
 import { baseForms } from "@/server/domain/ticket/create-ui";
+import { cn } from "@/utils";
 
 import { requireClient } from "../guard";
 
@@ -36,15 +40,17 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
   const thanks = sp.confirmed ? await renderedContent(cfg, "registration-thanks") : null;
   const langs = configuredLanguages(cfg).map((code) => ({ code, label: code }));
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("profileTitle")}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("profileSubtitle")}</p>
-      </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader title={t("profileTitle")} subtitle={t("profileSubtitle")} />
       {thanks && (
-        <section className="rounded-2xl border border-success-200 bg-success-25 p-6 dark:border-success-800 dark:bg-success-500/10">
-          <h2 className="font-semibold text-gray-800 dark:text-white/90">{thanks.title}</h2>
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: thanks.html }} />
+        <section className={cn(CARD, "flex gap-4 p-5 sm:p-6")}>
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400">
+            <CircleCheck aria-hidden="true" className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white/90">{thanks.title}</h2>
+            <div className="mt-1 text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: thanks.html }} />
+          </div>
         </section>
       )}
       {(forced || sp.pwchange) && <Alert variant="warning" title={t("pwchangeRequired")} message="" />}

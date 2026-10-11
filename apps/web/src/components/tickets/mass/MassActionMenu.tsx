@@ -1,12 +1,12 @@
 "use client";
 
+import { ArrowRightLeft, CircleDot, Download, Ellipsis, Trash2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import MenuButton from "@/components/common/MenuButton";
-import { menuButtonClass, menuItemClass } from "@/components/common/menu-classes";
+import { buttonGroupClass, dangerGhostButtonClass, ghostButtonClass, groupButtonClass, menuItemClass } from "@/components/common/menu-classes";
 import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
 import { useWriteMode } from "@/context/WriteModeContext";
-import { cn } from "@/utils";
 
 import type { MassData, MassKind } from "./types";
 
@@ -16,7 +16,14 @@ interface MassActionMenuProps {
   onOpen: (kind: MassKind) => void;
 }
 
-/** Pulsanti e menu delle azioni di massa ammesse dai permessi dell'agente (in sola lettura solo l'export). */
+/** icone del gruppo principale: nascoste su mobile, dove il gruppo occupa tutta la riga */
+const groupIcon = "hidden size-4 text-gray-400 sm:block";
+
+/**
+ * Pulsanti e menu delle azioni di massa ammesse dai permessi dell'agente (in sola lettura solo l'export),
+ * in ordine di importanza: gruppo unito stato/assegna/trasferisci, "Altro" (unisci, collega), elimina in
+ * rosso tenue senza bordo, export della coda in fondo a destra (non dipende dalla selezione).
+ */
 export default function MassActionMenu({ data, onOpen }: MassActionMenuProps) {
   const t = useTranslations("ticketEdit.mass");
   const writable = useWriteMode().canWrite("operational");
@@ -36,31 +43,58 @@ export default function MassActionMenu({ data, onOpen }: MassActionMenuProps) {
       {label}
     </DropdownItem>
   );
-  const button = (k: Exclude<MassKind, object>, label: string, className = menuButtonClass) => (
-    <button type="button" className={className} onClick={() => onOpen(k)}>
-      {label}
-    </button>
-  );
+  const grouped = (can.status && data.statuses.length > 0) || can.assign || can.transfer;
 
   return (
     <>
-      {can.status && data.statuses.length > 0 && <MenuButton label={t("status")}>{(c) => data.statuses.map((s) => item(s.name, { status: s.id }, c))}</MenuButton>}
-      {can.assign && (
-        <MenuButton label={t("assign")}>
+      {grouped && (
+        <div role="group" aria-label={t("toolbar")} className={`${buttonGroupClass} w-full sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none`}>
+          {can.status && data.statuses.length > 0 && (
+            <MenuButton label={t("status")} icon={<CircleDot aria-hidden className={groupIcon} />} className={groupButtonClass}>
+              {(c) => data.statuses.map((s) => item(s.name, { status: s.id }, c))}
+            </MenuButton>
+          )}
+          {can.assign && (
+            <MenuButton label={t("assign")} icon={<UserPlus aria-hidden className={groupIcon} />} className={groupButtonClass}>
+              {(c) => (
+                <>
+                  {item(t("claim"), "claim", c)}
+                  {item(t("toAgent"), "assignAgents", c)}
+                  {item(t("toTeam"), "assignTeams", c)}
+                </>
+              )}
+            </MenuButton>
+          )}
+          {can.transfer && (
+            <button type="button" className={groupButtonClass} onClick={() => onOpen("transfer")}>
+              <ArrowRightLeft aria-hidden className={groupIcon} />
+              {t("transfer")}
+            </button>
+          )}
+        </div>
+      )}
+      {(can.merge || can.link) && (
+        <MenuButton label={t("more")} icon={<Ellipsis aria-hidden className="size-4" />} className={ghostButtonClass}>
           {(c) => (
             <>
-              {item(t("claim"), "claim", c)}
-              {item(t("toAgent"), "assignAgents", c)}
-              {item(t("toTeam"), "assignTeams", c)}
+              {can.merge && item(t("merge"), "merge", c)}
+              {can.link && item(t("link"), "link", c)}
             </>
           )}
         </MenuButton>
       )}
-      {can.merge && button("merge", t("merge"))}
-      {can.link && button("link", t("link"))}
-      {can.transfer && button("transfer", t("transfer"))}
-      {can.delete && button("delete", t("delete"), cn(menuButtonClass, "text-error-600 dark:text-error-400"))}
-      {can.export && button("export", t("export"))}
+      {can.delete && (
+        <button type="button" className={dangerGhostButtonClass} onClick={() => onOpen("delete")}>
+          <Trash2 aria-hidden className="size-4" />
+          {t("delete")}
+        </button>
+      )}
+      {can.export && (
+        <button type="button" className={`${ghostButtonClass} ms-auto`} onClick={() => onOpen("export")}>
+          <Download aria-hidden className="size-4" />
+          {t("export")}
+        </button>
+      )}
     </>
   );
 }

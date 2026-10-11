@@ -9,8 +9,11 @@ import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import WriteModeBanner from "@/components/shell/WriteModeBanner";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Menu, X } from "lucide-react";
+import { LogIn, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/utils";
+
+import { Avatar } from "./PortalUi";
+import { FOCUS } from "./styles";
 
 export interface PortalNavItem {
   key: "home" | "kb" | "open" | "tickets" | "status" | "profile";
@@ -68,6 +71,7 @@ export default function PortalHeader({ items, user, showLogin, logoutAction }: P
   const linkClass = (href: string, mobile = false) =>
     cn(
       "rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors",
+      FOCUS,
       active(href, mobile)
         ? "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"
         : "text-gray-600 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white",
@@ -93,19 +97,31 @@ export default function PortalHeader({ items, user, showLogin, logoutAction }: P
           <ThemeToggleButton />
           {user ? (
             <div className="hidden items-center gap-3 sm:flex">
-              <span className="text-theme-sm text-gray-600 dark:text-gray-300">
-                {user.name}
-                {user.guest && <span className="ms-1 text-theme-xs text-gray-400">({t("guest")})</span>}
+              <span className="flex items-center gap-2 text-theme-sm font-medium text-gray-700 dark:text-gray-300">
+                <Avatar name={user.name} className="size-8" />
+                <span className="max-w-40 truncate">{user.name}</span>
+                {user.guest && <span className="text-theme-xs font-normal text-gray-400">({t("guest")})</span>}
               </span>
               <form action={logoutAction}>
-                <button type="submit" className="rounded-lg border border-gray-300 px-3 py-2 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+                <button
+                  type="submit"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5",
+                    FOCUS,
+                  )}
+                >
+                  <LogOut aria-hidden="true" className="size-4" />
                   {t("logout")}
                 </button>
               </form>
             </div>
           ) : (
             showLogin && (
-              <Link href="/login" className="hidden rounded-lg bg-brand-500 px-4 py-2 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 sm:inline-block">
+              <Link
+                href="/login"
+                className={cn("hidden items-center gap-1.5 rounded-lg bg-brand-500 px-4 py-2 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 sm:inline-flex", FOCUS)}
+              >
+                <LogIn aria-hidden="true" className="size-4" />
                 {t("login")}
               </Link>
             )
@@ -113,7 +129,7 @@ export default function PortalHeader({ items, user, showLogin, logoutAction }: P
           <button
             type="button"
             ref={toggleRef}
-            className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 text-gray-500 lg:hidden dark:border-gray-800 dark:text-gray-400"
+            className={cn("flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 text-gray-500 lg:hidden dark:border-gray-800 dark:text-gray-400", FOCUS)}
             onClick={() => {
               setHash(window.location.hash);
               setOpen((v) => !v);
@@ -136,11 +152,22 @@ export default function PortalHeader({ items, user, showLogin, logoutAction }: P
             </Link>
           ))}
           {user ? (
-            <form action={logoutAction}>
-              <button type="submit" className="w-full rounded-lg px-3 py-2 text-start text-theme-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
-                {t("logout")}
-              </button>
-            </form>
+            <div className="mt-2 border-t border-gray-100 pt-2 dark:border-gray-800">
+              <p className="flex items-center gap-2 px-3 py-2 text-theme-sm font-medium text-gray-800 dark:text-white/90">
+                <Avatar name={user.name} className="size-8" />
+                <span className="min-w-0 truncate">{user.name}</span>
+                {user.guest && <span className="text-theme-xs font-normal text-gray-400">({t("guest")})</span>}
+              </p>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className={cn("flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-theme-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5", FOCUS)}
+                >
+                  <LogOut aria-hidden="true" className="size-4" />
+                  {t("logout")}
+                </button>
+              </form>
+            </div>
           ) : (
             showLogin && (
               <Link href="/login" className={linkClass("/login", true)} aria-current={active("/login", true) ? "page" : undefined} onClick={() => setOpen(false)}>

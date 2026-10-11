@@ -1,8 +1,9 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { BTN_REMOVE, BTN_SECONDARY } from "@/components/admin/styles";
 import { cn } from "@/utils";
 
 import { controlClass, type Opt } from "./fields";
@@ -128,11 +129,11 @@ export default function Repeater({
                   <button
                     type="button"
                     onClick={() => setExtra((x) => x.filter((y) => y.key !== row.key))}
-                    className="rounded p-1.5 text-error-600 hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-500/10"
+                    className={BTN_REMOVE}
                     aria-label={removeLabel}
                     title={removeLabel}
                   >
-                    <X className="size-4" />
+                    <Trash2 aria-hidden className="size-4" />
                   </button>
                 </td>
               </tr>
@@ -146,9 +147,10 @@ export default function Repeater({
           setExtra((x) => [...x, { key: seq, values: { ...newDefaults } }]);
           setSeq((s) => s + 1);
         }}
-        className="rounded-lg px-3 py-2 text-sm font-medium text-brand-600 ring-1 ring-brand-300 ring-inset hover:bg-brand-50 dark:text-brand-400 dark:ring-brand-500/40 dark:hover:bg-brand-500/10"
+        className={BTN_SECONDARY}
       >
-        + {addLabel}
+        <Plus aria-hidden className="size-4" />
+        {addLabel}
       </button>
     </div>
   );

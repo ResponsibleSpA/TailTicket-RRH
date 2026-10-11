@@ -13,6 +13,9 @@ import type { DynamicFormView } from "@/lib/forms/dynamic-field";
 import { editTicketAction, type EditState } from "@/app/[locale]/(client)/actions";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
 
+import { Panel } from "./PortalUi";
+import { BTN_PRIMARY, BTN_SECONDARY } from "./styles";
+
 type EditTicketFormProps = {
   ticketId: number;
   forms: DynamicFormView[];
@@ -39,15 +42,15 @@ function EditTicketFormInner({ ticketId, forms, values }: EditTicketFormProps) {
       {state.error && state.error !== "invalid" && <Alert variant="error" title={te.has(state.error) ? te(state.error) : state.error} message="" />}
       <input type="hidden" name="ticketId" value={ticketId} />
       {forms.map((f) => (
-        <section key={f.id} className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-          <DynamicForm form={f} values={state.values ?? values} errors={state.fieldErrors} showTitle />
-        </section>
+        <Panel key={f.id} title={f.title || undefined}>
+          <DynamicForm form={f} values={state.values ?? values} errors={state.fieldErrors} />
+        </Panel>
       ))}
-      <div className="flex justify-end gap-3">
-        <Link href={`/tickets/${ticketId}`} className="h-11 rounded-lg border border-gray-300 px-5 text-sm leading-11 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Link href={`/tickets/${ticketId}`} className={BTN_SECONDARY}>
           {t("cancel")}
         </Link>
-        <button type="submit" disabled={pending} className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+        <button type="submit" disabled={pending} className={BTN_PRIMARY}>
           {t("save")}
         </button>
       </div>

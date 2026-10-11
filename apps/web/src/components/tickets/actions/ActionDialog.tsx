@@ -5,9 +5,10 @@ import { useActionState, useEffect, useRef, type ReactNode } from "react";
 
 import type { TicketActionState } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions-assign";
 import RichTextEditor from "@/components/editor/RichTextEditor";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
+
+import { dialogClass, DialogFooter, DialogNotice, DialogTitle, PrimaryButton, SecondaryButton } from "../dialog-ui";
 
 type TicketAction = (prev: TicketActionState, form: FormData) => Promise<TicketActionState>;
 
@@ -30,8 +31,6 @@ interface ActionDialogProps {
   children?: ReactNode;
 }
 
-const box = "rounded-lg px-4 py-3 text-theme-sm";
-
 /** Messaggio d'errore tradotto di un'azione (chiave errors.<codice>, altrimenti generico). */
 function useActionError() {
   const t = useTranslations("ticketActions");
@@ -44,11 +43,11 @@ export function ErrorBox({ state }: { state: TicketActionState }) {
   const error = errorOf(state);
   if (!error) return null;
   return (
-    <div role="alert" className={`${box} bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400`}>
+    <DialogNotice tone="error" role="alert">
       {error}
       {/* dettaglio del dominio (testo PHP in inglese) solo per gli errori generici */}
       {state.detail && state.error === "status_failed" && <span className="block text-theme-xs opacity-80">{state.detail}</span>}
-    </div>
+    </DialogNotice>
   );
 }
 
@@ -86,27 +85,27 @@ export default function ActionDialog({
   const submit = submitKeepingValues(formAction);
 
   return (
-    <Modal isOpen onClose={warned ? () => onSuccess(state) : onClose} className="m-4 max-w-[600px] p-6 lg:p-8">
+    <Modal isOpen onClose={warned ? () => onSuccess(state) : onClose} className={dialogClass()}>
       <div className="space-y-5">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
+        <DialogTitle>{title}</DialogTitle>
         {warned ? (
           <>
-            <div role="status" className={`${box} bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-orange-400`}>
+            <DialogNotice tone="warning" role="status">
               {t("childrenFailed", { tickets: state.warn ?? "" })}
-            </div>
-            <div className="flex justify-end">
-              <Button size="sm" onClick={() => onSuccess(state)}>
+            </DialogNotice>
+            <DialogFooter>
+              <PrimaryButton type="button" onClick={() => onSuccess(state)}>
                 {t("close")}
-              </Button>
-            </div>
+              </PrimaryButton>
+            </DialogFooter>
           </>
         ) : (
           <>
             {aside}
             <form onSubmit={submit} className="space-y-5">
               <input type="hidden" name="ticketId" value={ticketId} />
-              {notice && <div className={`${box} bg-blue-light-50 text-blue-light-700 dark:bg-blue-light-500/15 dark:text-blue-light-400`}>{notice}</div>}
-              {warning && <div className={`${box} bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-orange-400`}>{warning}</div>}
+              {notice && <DialogNotice tone="info">{notice}</DialogNotice>}
+              {warning && <DialogNotice tone="warning">{warning}</DialogNotice>}
               <ErrorBox state={state} />
               {children}
               {commentsPlaceholder !== undefined && (
@@ -126,14 +125,10 @@ export default function ActionDialog({
                   }}
                 />
               )}
-              <div className="flex items-center justify-end gap-3">
-                <Button size="sm" variant="outline" onClick={onClose}>
-                  {t("cancel")}
-                </Button>
-                <Button size="sm" type="submit" disabled={pending}>
-                  {pending ? t("working") : submitLabel}
-                </Button>
-              </div>
+              <DialogFooter>
+                <SecondaryButton onClick={onClose}>{t("cancel")}</SecondaryButton>
+                <PrimaryButton disabled={pending}>{pending ? t("working") : submitLabel}</PrimaryButton>
+              </DialogFooter>
             </form>
           </>
         )}

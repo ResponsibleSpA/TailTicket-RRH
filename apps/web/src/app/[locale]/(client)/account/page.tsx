@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import AccountForm from "@/components/portal/AccountForm";
 import { redirect } from "@/i18n/navigation";
 import { coreConfig } from "@/server/config/config";
@@ -25,11 +26,8 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
   const t = await getTranslations("portal.account");
   const { user } = await baseForms(db(), cfg, "client");
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("registerTitle")}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("registerSubtitle")}</p>
-      </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader title={t("registerTitle")} subtitle={t("registerSubtitle")} />
       <AccountForm
         mode="register"
         userForm={user}

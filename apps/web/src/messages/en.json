@@ -114,7 +114,13 @@
       "open": "Open tickets",
       "overdue": "Overdue",
       "mine": "My tickets",
-      "closedToday": "Closed today"
+      "closedToday": "Closed today",
+      "created": "New in period",
+      "closed": "Closed in period",
+      "mineFoot": "assigned to you",
+      "overdueFoot": "past due date",
+      "overdueNone": "nothing overdue",
+      "openFoot": "{n} new in period"
     },
     "activity": "Ticket activity",
     "activityDesc": "Events per day in the selected period",
@@ -166,7 +172,17 @@
       "logout": "Logouts",
       "message": "Messages",
       "note": "Notes"
-    }
+    },
+    "subtitle": "Overview of your departments' tickets",
+    "delta": {
+      "up": "+{pct}%",
+      "down": "−{pct}%",
+      "same": "unchanged",
+      "new": "new",
+      "vsPrevious": "vs previous {days, plural, one {# day} other {# days}}"
+    },
+    "byDept": "By department",
+    "byDeptDesc": "Tickets opened and closed in the period"
   },
   "notFound": {
     "error": "ERROR",
@@ -273,6 +289,8 @@
       "generic": "Ticket action completed."
     },
     "empty": "No tickets in this queue",
+    "emptyHint": "New tickets will show up here. Try another queue or the search.",
+    "queuesNav": "Ticket queues",
     "pageOf": "Page {page} of {pages}",
     "prev": "Previous",
     "next": "Next",
@@ -286,14 +304,13 @@
     "answered": "Answered",
     "locked": "Being edited by another agent",
     "openLegacy": "Open in classic panel",
-    "created": "Ticket created successfully.",
+    "created": "Created",
     "closeNotice": "Close",
     "details": "Details",
     "department": "Department",
     "helpTopic": "Help topic",
     "sla": "SLA plan",
     "source": "Source",
-    "created": "Created",
     "dueDate": "Due date",
     "lastMessage": "Last message",
     "lastResponse": "Last response",
@@ -515,6 +532,9 @@
     "replyPlaceholder": "Write your reply to the user…",
     "notePlaceholder": "Write a note visible to agents only…",
     "posted": "Posted successfully.",
+    "noteHint": "Visible to agents only, never sent to the user.",
+    "sendReply": "Send reply",
+    "sendNote": "Add note",
     "lockedBy": "This ticket is being edited by {name}: replies and notes are blocked until the lock expires.",
     "errors": {
       "read_only": "Operation not available: TailTicket is read-only.",

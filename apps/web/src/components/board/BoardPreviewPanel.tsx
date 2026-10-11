@@ -16,6 +16,7 @@ import { cn } from "@/utils";
 
 import AssigneeAvatar from "./AssigneeAvatar";
 import { blockReason } from "./CardMenu";
+import DueBadge from "./DueBadge";
 import PriorityPill from "./PriorityPill";
 
 type Loaded = { id: number; preview: BoardPreview | null; error: boolean };
@@ -91,7 +92,7 @@ export default function BoardPreviewPanel({
       <dt className="shrink-0 text-theme-sm text-gray-500 dark:text-gray-400">
         {label}
       </dt>
-      <dd className="min-w-0 text-end text-theme-sm text-gray-800 dark:text-white/90">
+      <dd className="min-w-0 text-end text-theme-sm text-gray-900 tabular-nums dark:text-white/90">
         {value}
       </dd>
     </div>
@@ -114,10 +115,10 @@ export default function BoardPreviewPanel({
       >
         <header className="flex items-start gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
           <div className="min-w-0 flex-1">
-            <p className="font-mono flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
+            <p className="flex items-center gap-1.5 text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">
               #{card.number}
               {card.lockedBy && (
-                <span className="font-sans inline-flex items-center gap-1 text-warning-600 dark:text-warning-400">
+                <span className="inline-flex items-center gap-1 text-warning-600 dark:text-warning-400">
                   <Lock className="size-3.5" aria-hidden />
                   {tc("locked", { name: card.lockedBy })}
                 </span>
@@ -125,7 +126,7 @@ export default function BoardPreviewPanel({
             </p>
             <h2
               id="board-preview-title"
-              className="mt-1 text-lg font-semibold break-words text-gray-800 dark:text-white/90"
+              className="mt-1 text-lg leading-snug font-semibold break-words text-gray-900 dark:text-white/90"
             >
               {card.subject || "—"}
             </h2>
@@ -143,18 +144,7 @@ export default function BoardPreviewPanel({
 
         <div className="custom-scrollbar flex-1 overflow-y-auto px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
-            {(card.overdue || card.dueSoon) && (
-              <span
-                className={`text-theme-xs ${cn(
-                  "rounded-full px-2 py-0.5 font-medium",
-                  card.overdue
-                    ? "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400"
-                    : "bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-warning-400",
-                )}`}
-              >
-                {card.overdue ? tc("overdue") : tc("dueSoon")}
-              </span>
-            )}
+            <DueBadge card={card} />
             <PriorityPill priority={card.priority} />
           </div>
 
@@ -269,7 +259,7 @@ export default function BoardPreviewPanel({
         <footer className="border-t border-gray-100 px-5 py-4 dark:border-gray-800">
           <Link
             href={`/agent/tickets/${card.id}`}
-            className="flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
+            className="flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden"
           >
             {t("open")}
           </Link>

@@ -9,7 +9,7 @@ import PeopleDoneNotice from "@/components/people/PeopleDoneNotice";
 import { RowSelect } from "@/components/people/directory/DirectoryButtons";
 import OrgActions, { OrgMembersBar } from "@/components/people/directory/OrgActions";
 import PersonTickets, { type TicketStateFilter } from "@/components/people/PersonTickets";
-import { Link } from "@/i18n/navigation";
+import { ActionLink, NameLink } from "@/components/people/PeopleLinks";
 import { UserModel } from "@/lib/osticket/flags";
 import { idOrNotFound } from "@/lib/route-id";
 import { coreConfig } from "@/server/config/config";
@@ -61,9 +61,9 @@ export default async function OrgPage({ params, searchParams }: { params: Promis
         title={org.name}
         subtitle={org.domain}
         actions={
-          <Link href={`/agent/tickets?org=${org.id}`} className="rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600">
+          <ActionLink href={`/agent/tickets?org=${org.id}`} primary>
             {t("orgTickets")}
-          </Link>
+          </ActionLink>
         }
       />
       <PeopleDoneNotice done={done} name={org.name} />
@@ -107,9 +107,7 @@ export default async function OrgPage({ params, searchParams }: { params: Promis
               cells: {
                 sel: <RowSelect id={u.id} group="member" />,
                 name: canSeeUsers ? (
-                  <Link href={`/agent/users/${u.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-                    {u.name}
-                  </Link>
+                  <NameLink href={`/agent/users/${u.id}`}>{u.name}</NameLink>
                 ) : (
                   u.name
                 ),

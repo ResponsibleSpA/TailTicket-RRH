@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
 import { listEmails } from "@/server/domain/adminsys/email";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -49,7 +50,7 @@ export default async function EmailsPage({ params, searchParams }: { params: Pro
             cells: {
               sel: <input type="checkbox" name="ids[]" value={r.email_id} disabled={r.email_id === def} className="h-4 w-4 accent-brand-500" aria-label={r.email} />,
               email: (
-                <Link href={`/admin/emails/${r.email_id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/emails/${r.email_id}`} className={ROW_LINK}>
                   {r.name ? `${r.name} <${r.email}>` : r.email}
                   {r.email_id === def && <span className="ms-2 text-theme-xs text-gray-500">({c("default")})</span>}
                 </Link>

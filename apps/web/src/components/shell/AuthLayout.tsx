@@ -21,6 +21,10 @@ export default function AuthLayout({
   return (
     <div className="relative z-1 bg-white p-6 sm:p-0 dark:bg-gray-900">
       <div className="relative flex min-h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
+        {/* sotto lg il pannello del marchio è nascosto: logo sopra il form */}
+        <div className="flex justify-center pt-2 sm:pt-10 lg:hidden">
+          <BrandLogo height={40} />
+        </div>
         {children}
         <div
           className="hidden min-h-screen w-full items-center bg-gray-900 bg-cover bg-center lg:grid lg:w-1/2 dark:bg-white/5"

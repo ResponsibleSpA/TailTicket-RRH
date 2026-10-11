@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import { loadTheme } from "@/server/theme/theme";
 
 import { requireAdmin } from "../guard";
@@ -18,10 +19,7 @@ export default async function AdminThemePage({ params }: { params: Promise<{ loc
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("desc")}</p>
-      </div>
+      <PageHeader title={t("title")} subtitle={t("desc")} />
       <ThemeEditor
         initial={settings}
         helpdeskTitle={displayName}

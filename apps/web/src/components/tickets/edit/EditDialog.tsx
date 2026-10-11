@@ -4,13 +4,12 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useRef, type ReactNode } from "react";
 
 import type { EditActionState } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions-edit";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
 
-type EditAction = (prev: EditActionState, form: FormData) => Promise<EditActionState>;
+import { dialogClass, DialogFooter, DialogNotice, dialogScrollClass, DialogTitle, PrimaryButton, SecondaryButton } from "../dialog-ui";
 
-const box = "rounded-lg px-4 py-3 text-theme-sm";
+type EditAction = (prev: EditActionState, form: FormData) => Promise<EditActionState>;
 
 /** Messaggio d'errore tradotto (ticketEdit.errors.<codice>) con gli eventuali errori dei campi. */
 export function EditErrorBox({ state }: { state: EditActionState }) {
@@ -19,7 +18,7 @@ export function EditErrorBox({ state }: { state: EditActionState }) {
   const msg = (code: string) => (t.has(`errors.${code}`) ? t(`errors.${code}`) : t("errors.generic"));
   const fieldMsg = (code: string) => (t.has(`fieldErrors.${code}`) ? t(`fieldErrors.${code}`) : code);
   return (
-    <div role="alert" className={`${box} bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400`}>
+    <DialogNotice tone="error" role="alert">
       {msg(state.error)}
       {state.fields && (
         <ul className="mt-1 list-disc ps-5 text-theme-xs">
@@ -30,7 +29,7 @@ export function EditErrorBox({ state }: { state: EditActionState }) {
           ))}
         </ul>
       )}
-    </div>
+    </DialogNotice>
   );
 }
 
@@ -73,29 +72,21 @@ export default function EditDialog({ ticketId, title, action, submitLabel, onClo
   const submit = submitKeepingValues(formAction);
 
   return (
-    <Modal isOpen onClose={onClose} className={`m-4 ${wide ? "max-w-[840px]" : "max-w-[600px]"} p-6 lg:p-8`}>
-      <form onSubmit={submit} className="custom-scrollbar max-h-[80vh] space-y-5 overflow-y-auto pe-1">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
+    <Modal isOpen onClose={onClose} className={dialogClass(wide ? "xl" : "md")}>
+      <form onSubmit={submit} className={dialogScrollClass}>
+        <DialogTitle>{title}</DialogTitle>
         <input type="hidden" name="ticketId" value={ticketId} />
-        {warning && <div className={`${box} bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-orange-400`}>{warning}</div>}
+        {warning && <DialogNotice tone="warning">{warning}</DialogNotice>}
         <div ref={errorBox} className="empty:hidden">
           <EditErrorBox state={state} />
         </div>
         {children}
-        <div className="flex items-center justify-end gap-3">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {t("cancel")}
-          </Button>
-          <button
-            type="submit"
-            disabled={pending}
-            className={`inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white shadow-theme-xs disabled:opacity-50 ${
-              danger ? "bg-error-500 hover:bg-error-600" : "bg-brand-500 hover:bg-brand-600"
-            }`}
-          >
+        <DialogFooter>
+          <SecondaryButton onClick={onClose}>{t("cancel")}</SecondaryButton>
+          <PrimaryButton disabled={pending} danger={danger}>
             {pending ? t("working") : submitLabel}
-          </button>
-        </div>
+          </PrimaryButton>
+        </DialogFooter>
       </form>
     </Modal>
   );

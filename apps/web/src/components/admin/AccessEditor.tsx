@@ -1,10 +1,13 @@
 "use client";
 
+import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import type { FormField } from "@/lib/admin/form-schema";
 import { cn } from "@/utils";
+
+import { BTN_REMOVE, BTN_SECONDARY } from "./styles";
 
 type AccessField = Extract<FormField, { kind: "access" }>;
 
@@ -26,11 +29,11 @@ export default function AccessEditor({ field }: { field: AccessField }) {
     <div className="space-y-3">
       {rows.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">{t("noneSelected")}</p>}
       {rows.length > 0 && (
-        <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
+        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
           {rows.map((r, i) => (
-            <li key={r.id} className="flex flex-wrap items-center gap-3 px-3 py-2">
+            <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
               <input type="hidden" name={idsName} value={r.id} />
-              <span className="min-w-40 flex-1 text-sm text-gray-800 dark:text-white/90">{label(r.id)}</span>
+              <span className="min-w-40 flex-1 text-sm font-medium text-gray-800 dark:text-white/90">{label(r.id)}</span>
               {field.role && field.roles && (
                 <select
                   name={`${field.role}[${r.id}]`}
@@ -60,12 +63,9 @@ export default function AccessEditor({ field }: { field: AccessField }) {
                   {t("alerts")}
                 </label>
               )}
-              <button
-                type="button"
-                onClick={() => setRows(rows.filter((_, j) => j !== i))}
-                className="text-sm font-medium text-error-500 hover:text-error-600"
-              >
-                {t("remove")}
+              <button type="button" onClick={() => setRows(rows.filter((_, j) => j !== i))} title={t("remove")} className={BTN_REMOVE}>
+                <Trash2 aria-hidden className="size-4" />
+                <span className="sr-only">{t("remove")}</span>
               </button>
             </li>
           ))}
@@ -88,8 +88,9 @@ export default function AccessEditor({ field }: { field: AccessField }) {
               setRows([...rows, { id: pick, role: field.roles?.[0]?.value, alerts: true }]);
               setPick("");
             }}
-            className="h-9 rounded-lg bg-brand-500 px-3 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+            className={cn(BTN_SECONDARY, "h-9 py-0")}
           >
+            <Plus aria-hidden className="size-4" />
             {t("add")}
           </button>
         </div>

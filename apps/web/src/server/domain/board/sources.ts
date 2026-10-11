@@ -4,7 +4,6 @@ import { db, type DbOrTx } from "../../db";
 import { agentQueueNav } from "../queue/context";
 import type { TicketQueue } from "../queue/queues";
 import type { Agent } from "../staff/staff";
-import { safeColor } from "./grouping";
 import type { BoardSourceOption } from "./types";
 
 /** Scelte della barra della board: sorgenti (code e ricerche) e priorità dei filtri rapidi. */
@@ -39,11 +38,11 @@ export async function boardSources(agent: Agent): Promise<BoardSourceOption[]> {
 }
 
 /** Priorità per i filtri rapidi (ordinate per urgenza). */
-export async function boardPriorities(executor: DbOrTx = db()): Promise<Array<{ id: number; name: string; color: string | null }>> {
+export async function boardPriorities(executor: DbOrTx = db()): Promise<Array<{ id: number; name: string; urgency: number }>> {
   const rows = await executor
     .selectFrom("ticket_priority")
-    .select(["priority_id", "priority_desc", "priority_color"])
+    .select(["priority_id", "priority_desc", "priority_urgency"])
     .orderBy("priority_urgency")
     .execute();
-  return rows.map((r) => ({ id: r.priority_id, name: r.priority_desc, color: safeColor(r.priority_color) }));
+  return rows.map((r) => ({ id: r.priority_id, name: r.priority_desc, urgency: Number(r.priority_urgency) }));
 }

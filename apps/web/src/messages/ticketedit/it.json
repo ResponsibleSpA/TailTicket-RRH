@@ -172,6 +172,9 @@
     "unlink": "Scollega",
     "mass": {
       "selectAll": "Seleziona tutti",
+      "selected": "{count, plural, one {# selezionato} other {# selezionati}}",
+      "toolbar": "Azioni sui ticket selezionati",
+      "more": "Altro",
       "selectFirst": "Seleziona almeno un ticket.",
       "doneAll": "{count, plural, one {# ticket elaborato} other {# ticket elaborati}}.",
       "donePartial": "{count} di {total} ticket elaborati.",

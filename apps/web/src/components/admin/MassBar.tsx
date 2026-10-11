@@ -10,9 +10,10 @@ import { useCheckedCount } from "@/lib/checked-ids";
 
 const IDS = 'input[name="ids[]"]';
 
-const BTN = "rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset disabled:cursor-not-allowed disabled:opacity-50";
-const NEUTRAL = `${BTN} text-gray-700 ring-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5 disabled:hover:bg-transparent`;
-const DANGER = `${BTN} text-error-600 ring-error-300 hover:bg-error-50 dark:text-error-400 dark:ring-error-500/40 dark:hover:bg-error-500/10 disabled:hover:bg-transparent`;
+const BTN =
+  "rounded-lg bg-white px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/3";
+const NEUTRAL = `${BTN} text-gray-700 ring-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5 disabled:hover:bg-white dark:disabled:hover:bg-white/3`;
+const DANGER = `${BTN} text-error-600 ring-error-300 hover:bg-error-50 dark:text-error-400 dark:ring-error-500/40 dark:hover:bg-error-500/10 disabled:hover:bg-white dark:disabled:hover:bg-white/3`;
 
 /**
  * Pulsanti delle azioni di massa (mass_process di scp/*.php) dentro il <form> della lista: ogni
@@ -43,7 +44,7 @@ export default function MassBar({ actions }: { actions: { value: string; label: 
         <SelectAll label={t("selectAll")} />
         {t("selectAll")}
       </label>
-      <span className="me-2 text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
+      <span className="me-2 text-sm text-gray-500 tabular-nums dark:text-gray-400" aria-live="polite">
         {t("selectedCount", { n: count })}
       </span>
       {actions.map((a) => (

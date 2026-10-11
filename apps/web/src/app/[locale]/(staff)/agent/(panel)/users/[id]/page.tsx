@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 
 import ComponentCard from "@/components/common/ComponentCard";
 import { Forbidden, PageHeader } from "@/components/common/DataTable";
+import InfoRow from "@/components/common/InfoRow";
 import { WriteGate } from "@/components/common/WriteGate";
 import AccountStatusBadge from "@/components/people/AccountStatusBadge";
 import PeopleDoneNotice from "@/components/people/PeopleDoneNotice";
+import { ActionLink } from "@/components/people/PeopleLinks";
 import UserActions from "@/components/people/directory/UserActions";
 import PersonTickets, { type TicketStateFilter } from "@/components/people/PersonTickets";
 import { Link } from "@/i18n/navigation";
@@ -50,17 +52,12 @@ export default async function UserPage({ params, searchParams }: { params: Promi
             {/* tickets.php?a=open&uid=: nuovo ticket con l'utente già selezionato */}
             {agent.hasPermInAnyRole(TicketPerm.CREATE) && (
               <WriteGate>
-                <Link
-                  href={`/agent/tickets/new?uid=${user.id}`}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-                >
-                  {t("newTicketForUser")}
-                </Link>
+                <ActionLink href={`/agent/tickets/new?uid=${user.id}`}>{t("newTicketForUser")}</ActionLink>
               </WriteGate>
             )}
-            <Link href={`/agent/tickets?user=${user.id}`} className="rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600">
-              {t("viewTickets", { n: user.tickets })}
-            </Link>
+            <ActionLink href={`/agent/tickets?user=${user.id}`} primary>
+              <span className="tabular-nums">{t("viewTickets", { n: user.tickets })}</span>
+            </ActionLink>
           </div>
         }
       />
@@ -86,9 +83,9 @@ export default async function UserPage({ params, searchParams }: { params: Promi
       />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ComponentCard title={t("profile")}>
-          <dl className="space-y-2 text-sm">
-            <Row label={t("emails")} value={user.emails.join(", ")} />
-            <Row
+          <dl>
+            <InfoRow label={t("emails")} value={user.emails.join(", ")} />
+            <InfoRow
               label={t("organization")}
               value={
                 user.org_id ? (
@@ -100,15 +97,15 @@ export default async function UserPage({ params, searchParams }: { params: Promi
                 )
               }
             />
-            <Row label={t("account")} value={<AccountStatusBadge status={user.account_status} />} />
-            {user.username && <Row label={t("username")} value={user.username} />}
-            <Row label={t("created")} value={formatDbDate(user.created, tz, locale)} />
-            <Row label={t("updated")} value={formatDbDate(user.updated, tz, locale)} />
+            <InfoRow label={t("account")} value={<AccountStatusBadge status={user.account_status} />} />
+            {user.username && <InfoRow label={t("username")} value={user.username} />}
+            <InfoRow label={t("created")} value={formatDbDate(user.created, tz, locale)} />
+            <InfoRow label={t("updated")} value={formatDbDate(user.updated, tz, locale)} />
           </dl>
         </ComponentCard>
         <ComponentCard title={t("fields")}>
-          <dl className="space-y-2 text-sm">
-            {user.fields.length ? user.fields.map((f) => <Row key={f.label} label={f.label} value={f.value} />) : <p className="text-gray-500">—</p>}
+          <dl>
+            {user.fields.length ? user.fields.map((f) => <InfoRow key={f.label} label={f.label} value={f.value} />) : <p className="text-sm text-gray-500 dark:text-gray-400">—</p>}
           </dl>
         </ComponentCard>
       </div>
@@ -121,15 +118,6 @@ export default async function UserPage({ params, searchParams }: { params: Promi
         tz={tz}
         locale={locale}
       />
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex justify-between gap-4">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd className="text-end text-gray-800 dark:text-white/90">{value || "—"}</dd>
     </div>
   );
 }

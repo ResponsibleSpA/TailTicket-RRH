@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import PhpLink from "@/components/adminsys/PhpLink";
 import SysNotice from "@/components/adminsys/SysNotice";
 import MassBar from "@/components/admin/MassBar";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import Badge from "@/components/ui/badge/Badge";
 import { PluginInstance } from "@/lib/osticket/flags";
@@ -31,9 +31,9 @@ export default async function PluginsPage({ params, searchParams }: { params: Pr
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <SysNotice sp={sp} />
-      <Callout tone="info">
+      <Outcome tone="info">
         {t("phpNote")} <PhpLink path="/scp/plugins.php" label={t("openPhp")} />
-      </Callout>
+      </Outcome>
       <form action={massPluginAction} className="space-y-4">
         <MassBar
           actions={[

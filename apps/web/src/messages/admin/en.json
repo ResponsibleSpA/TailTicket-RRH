@@ -472,54 +472,103 @@
   },
   "admHome": {
     "title": "Administration",
-    "system": "System",
-    "status": "Help desk",
-    "online": "Online",
-    "offline": "Offline",
-    "version": "Version",
-    "schema": "Schema signature",
-    "database": "Database",
-    "runtime": "Runtime",
-    "agentsSummary": "Agents",
-    "agentsLine": "{active} active of {total}, {admins, plural, one {# administrator} other {# administrators}}",
-    "users": "Users",
+    "subtitle": "Help desk configuration",
     "counts": {
       "openTickets": "Open tickets",
       "departments": "Departments",
-      "topics": "Help topics",
-      "agents": "Agents",
-      "teams": "Teams",
-      "roles": "Roles",
-      "slas": "SLA plans",
-      "schedules": "Schedules",
       "activeAgents": "Active agents",
-      "admins": "Administrators",
       "users": "Users"
     },
-    "sections": {
-      "settings": "Settings",
-      "manage": "Manage",
-      "staff": "Agents"
+    "kpi": {
+      "openFoot": "across all departments",
+      "agentsFoot": "of {total} · {admins, plural, one {# administrator} other {# administrators}}",
+      "deptsFoot": "{topics, plural, one {# topic} other {# topics}} · {teams, plural, one {# team} other {# teams}}",
+      "usersFoot": "registered clients"
     },
-    "links": {
-      "company": "Company",
-      "system": "System",
-      "tickets": "Tickets",
-      "tasks": "Tasks",
-      "agentsSettings": "Agents",
-      "usersSettings": "Users",
-      "kb": "Knowledgebase",
-      "theme": "New interface theme",
-      "topics": "Help topics",
-      "sla": "SLA plans",
-      "schedules": "Schedules",
-      "agents": "Agents",
-      "teams": "Teams",
-      "roles": "Roles",
-      "departments": "Departments"
+    "health": {
+      "title": "System status",
+      "details": "System information",
+      "helpdesk": "Help desk",
+      "helpdeskSub": "status set in osTicket",
+      "online": "Online",
+      "offline": "Offline",
+      "version": "Version",
+      "schema": "Database schema",
+      "schemaVerified": "Verified",
+      "schemaUnverified": "Not verified",
+      "mode": "Write mode",
+      "modes": {
+        "full": "Full",
+        "operational": "Operational",
+        "readonly": "Read-only"
+      },
+      "modeSub": {
+        "full": "tickets and administration",
+        "operational": "administration read-only",
+        "readonly": "no changes"
+      },
+      "modeReduced": "reduced, configured: {mode}",
+      "checks": "Checks",
+      "checksLoading": "Checking…",
+      "checksPassed": "{n} passed",
+      "checksBlocked": "{n, plural, one {# blocker} other {# blockers}}",
+      "checksLine": "{ok} ok · {warn, plural, one {# warning} other {# warnings}} · {block, plural, one {# blocker} other {# blockers}}",
+      "checksFailed": "Not completed"
     },
-    "schemaVerified": "verified by TailTicket",
-    "schemaUnverified": "not verified: TailTicket is read-only"
+    "hub": {
+      "settings": {
+        "title": "Settings",
+        "desc": "General help desk behaviour and the look of the new interface"
+      },
+      "staff": {
+        "title": "Agents and departments",
+        "desc": "Who works the tickets, with which permissions and in which departments"
+      },
+      "manage": {
+        "title": "Ticket management",
+        "desc": "Topics, rules, response times and help desk tools"
+      },
+      "emails": {
+        "title": "Email",
+        "desc": "Mailboxes, sending, message templates and blocked addresses"
+      },
+      "monitor": {
+        "title": "Monitoring",
+        "desc": "Installation health, undoable changes and the event log"
+      }
+    },
+    "desc": {
+      "company": "Organisation name, address and contacts",
+      "systemSettings": "Help desk status, language, time zone and formats",
+      "ticketsSettings": "Numbering, priorities, statuses and attachments",
+      "tasksSettings": "Task numbering and options",
+      "agentsSettings": "Agent sign-in, sessions and alerts",
+      "usersSettings": "Client registration and portal access",
+      "kbSettings": "Knowledge base and canned responses",
+      "theme": "Primary colour, light/dark mode, font and logos",
+      "agentsList": "Accounts, primary department, roles and permissions",
+      "teams": "Groups of agents tickets can be assigned to",
+      "roles": "Permission sets assigned per department",
+      "departments": "Structure, managers, SLAs and members",
+      "topics": "Topics clients pick when opening a ticket",
+      "filters": "Automatic rules for incoming tickets",
+      "sla": "Response times and due dates",
+      "schedules": "Business hours and holidays for due dates",
+      "queues": "Custom queues of the agent panel",
+      "forms": "Extra fields for tickets and contacts",
+      "lists": "Value lists used by forms",
+      "pages": "Portal and landing pages",
+      "apikeys": "Access for external integrations",
+      "plugins": "Extensions installed in osTicket",
+      "emailAccounts": "Incoming and outgoing mailboxes",
+      "emailSettings": "Default addresses, fetching and sending",
+      "templates": "Auto-reply and alert texts",
+      "banlist": "Senders whose tickets are rejected",
+      "diagnostic": "Test send to check outgoing mail",
+      "system": "Versions, database and connection checks",
+      "changes": "Recent admin saves you can undo",
+      "logs": "Logged events, warnings and errors"
+    }
   },
   "admSettings": {
     "saved": "Settings saved.",
@@ -750,6 +799,7 @@
     "restoreOff": "Undo not available: it requires full mode (TAILTICKET_MODE) with a verified database schema.",
     "restoreOnly": "The admin panel is read-only because of a problem reported by the doctor: undoing changes is still available.",
     "empty": "No changes recorded",
+    "emptyDesc": "Every admin save will show up here, with who made it and the rows it touched: you can undo it from here.",
     "when": "When",
     "who": "Who",
     "op": "Page",
@@ -794,5 +844,11 @@
       "busy": "Undo already in progress.",
       "failed": "Undo failed: reload the page and try again."
     }
+  },
+  "admTheme": {
+    "previewDesc": "Changes show up here and across the page right away, before you save them.",
+    "kpi": "Open tickets",
+    "unsaved": "Unsaved changes",
+    "upToDate": "No changes: this is the active theme"
   }
 }

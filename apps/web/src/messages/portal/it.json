@@ -28,7 +28,10 @@
       "ticketsText": "Consulta lo stato delle tue richieste e rispondi.",
       "statusTitle": "Verifica lo stato di un ticket",
       "statusText": "Accedi con il tuo account o con email e numero del ticket.",
-      "featured": "Articoli in evidenza"
+      "featured": "Articoli in evidenza",
+      "kbTitle": "Knowledge base",
+      "kbText": "Trova subito le risposte alle domande più frequenti.",
+      "actions": "Cosa vuoi fare?"
     },
     "login": {
       "title": "Accedi",
@@ -150,7 +153,8 @@
       "userid": "Email o nome utente",
       "login": "Accedi",
       "send": "Invia email",
-      "disabled": "Il reset della password non è disponibile"
+      "disabled": "Il reset della password non è disponibile",
+      "backToLogin": "Torna all'accesso"
     },
     "tickets": {
       "title": "I miei ticket",
@@ -169,7 +173,11 @@
         "dept": "Reparto"
       },
       "empty": "Nessun ticket",
-      "pages": "Pagine"
+      "pages": "Pagine",
+      "subtitle": "Le tue richieste di assistenza e il loro stato.",
+      "new": "Nuovo ticket",
+      "filter": "Stato dei ticket",
+      "emptyText": "Nessun ticket corrisponde ai filtri scelti."
     },
     "ticket": {
       "title": "Ticket",
@@ -235,7 +243,16 @@
       },
       "signIn": "Accedi",
       "topicLoadError": "Impossibile caricare i campi dell'help topic.",
-      "retry": "Riprova"
+      "retry": "Riprova",
+      "steps": {
+        "contact": "I tuoi dati",
+        "contactClient": "Il ticket sarà aperto a tuo nome: le risposte arriveranno a questo indirizzo.",
+        "contactGuest": "Come possiamo contattarti per aggiornarti sulla richiesta.",
+        "topic": "Argomento",
+        "topicText": "Scegli l'argomento più vicino alla tua richiesta: ci aiuta a indirizzarla alla persona giusta.",
+        "details": "Dettagli della richiesta",
+        "detailsText": "Descrivi il problema con tutte le informazioni utili; puoi allegare file o screenshot."
+      }
     },
     "kb": {
       "title": "Knowledge base",
@@ -250,7 +267,10 @@
       "attachments": "Allegati",
       "topics": "Help topic",
       "categories": "Categorie",
-      "search": "Cerca nella knowledge base"
+      "search": "Cerca nella knowledge base",
+      "subtitle": "Guide e risposte alle domande più frequenti, organizzate per categoria.",
+      "faqCount": "{count, plural, one {# articolo} other {# articoli}}",
+      "breadcrumb": "Percorso"
     }
   }
 }

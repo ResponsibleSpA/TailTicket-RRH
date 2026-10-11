@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import ComponentCard from "@/components/common/ComponentCard";
+import { PageHeader } from "@/components/common/DataTable";
 import InfoRow from "@/components/common/InfoRow";
 import AttachmentList from "@/components/kb/AttachmentList";
 import HtmlContent from "@/components/kb/HtmlContent";
@@ -35,14 +36,14 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         label={tk("breadcrumb")}
         items={[{ label: tk("allCategories"), href: "/agent/kb" }, ...faq.path.map((c) => ({ label: c.name, href: `/agent/kb/category/${c.id}` }))]}
       />
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold break-words text-gray-800 dark:text-white/90">{faq.question}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+      <PageHeader
+        title={<span className="break-words">{faq.question}</span>}
+        subtitle={
           <time dateTime={isoOf(faq.updated)} title={formatDbDate(faq.updated, tz, locale)}>
             {tk("lastUpdated", { date: formatDbDate(faq.updated, tz, locale, "human") })}
           </time>
-        </p>
-      </div>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">

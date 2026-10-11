@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import BackLink from "@/components/adminsys/BackLink";
 import SysForm from "@/components/adminsys/SysForm";
 import SysNotice from "@/components/adminsys/SysNotice";
-import Callout from "@/components/common/Callout";
+import { Notices } from "@/components/admin/Outcome";
 import { PageHeader } from "@/components/common/DataTable";
 import { redirect } from "@/i18n/navigation";
 import { Filter } from "@/lib/osticket/flags";
@@ -37,9 +37,14 @@ export default async function EditFilterPage({ params, searchParams }: { params:
     <div className="space-y-6">
       <PageHeader title={info.filter.name} subtitle={t("edit")} actions={<BackLink href="/admin/filters" label={c("back")} />} />
       <SysNotice sp={sp} />
-      {flags & Filter.DELETED_OBJECT ? <Callout tone="warning">{t("flags.deleted")}</Callout> : null}
-      {flags & Filter.INACTIVE_DEPT ? <Callout tone="warning">{t("flags.dept")}</Callout> : null}
-      {flags & Filter.INACTIVE_HT ? <Callout tone="warning">{t("flags.topic")}</Callout> : null}
+      {/* avvisi sul filtro (oggetti eliminati o disattivati): un solo riquadro */}
+      <Notices
+        items={[
+          ...(flags & Filter.DELETED_OBJECT ? [{ key: "deleted", tone: "warning" as const, content: t("flags.deleted") }] : []),
+          ...(flags & Filter.INACTIVE_DEPT ? [{ key: "dept", tone: "warning" as const, content: t("flags.dept") }] : []),
+          ...(flags & Filter.INACTIVE_HT ? [{ key: "topic", tone: "warning" as const, content: t("flags.topic") }] : []),
+        ]}
+      />
       <SysForm action={saveFilterAction.bind(null, filterId)} labels={await filterLabels()}>
         <FilterFields info={info} />
       </SysForm>

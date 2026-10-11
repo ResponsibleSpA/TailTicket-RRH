@@ -5,8 +5,11 @@ import { Link } from "@/i18n/navigation";
 
 export default function BackLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 hover:text-brand-600">
-      <ArrowLeft className="size-4 rtl:rotate-180" /> {label}
+    <Link
+      href={href}
+      className="group inline-flex shrink-0 items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-medium text-gray-500 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-gray-400 dark:hover:text-white/90"
+    >
+      <ArrowLeft aria-hidden className="size-4 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5" /> {label}
     </Link>
   );
 }

@@ -48,19 +48,19 @@ export default function BoardCellView({
       data-board-cell={cellKey}
       aria-label={column.title}
       className={cn(
-        "relative flex min-h-28 flex-col gap-2 rounded-xl bg-gray-100/70 p-2 transition-[background-color,opacity,outline-color] dark:bg-white/2",
+        "relative flex min-h-28 flex-col gap-2 rounded-xl bg-gray-100/60 p-2 transition-[background-color,opacity,outline-color] dark:bg-white/2",
         "outline-2 outline-offset-0 outline-transparent",
         dropState === "allowed" &&
-          "outline-brand-300 outline-dashed dark:outline-brand-700",
+          "outline-gray-300 outline-dashed dark:outline-gray-700",
         dropState === "over" &&
-          "bg-brand-50 outline-brand-500 outline-solid dark:bg-brand-500/10",
+          "bg-brand-50/70 outline-brand-500/60 outline-solid dark:bg-brand-500/8",
         dropState === "blocked" && "opacity-50",
       )}
     >
       {children}
 
       {shown === 0 && (
-        <p className="flex flex-1 items-center justify-center py-6 text-center text-theme-xs text-gray-400 dark:text-gray-500">
+        <p className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-gray-200 py-6 text-center text-theme-xs text-gray-400 dark:border-gray-800 dark:text-gray-500">
           {dropState === "over" ? t("dropHere") : t("empty")}
         </p>
       )}
@@ -70,7 +70,7 @@ export default function BoardCellView({
           type="button"
           onClick={onLoadMore}
           disabled={loading}
-          className="rounded-lg px-3 py-2 text-theme-xs font-medium text-brand-600 hover:bg-white focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden disabled:opacity-60 dark:text-brand-400 dark:hover:bg-white/5"
+          className="rounded-lg px-3 py-2 text-theme-xs font-medium text-gray-600 tabular-nums hover:bg-white hover:text-gray-900 focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden disabled:opacity-60 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white/90"
         >
           {loading ? t("loadingMore") : t("loadMore", { remaining })}
         </button>

@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ChevronDown, Search, X } from "lucide-react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
+import { PriorityDot } from "@/components/common/PriorityBadge";
 import { BOARD_GROUPS, BOARD_LANES, DEFAULT_BOARD_PARAMS, hasActiveFilters, type BoardGroupBy, type BoardLaneBy, type BoardParams } from "@/server/domain/board/params";
 import type { BoardSourceOption } from "@/server/domain/board/types";
 import { cn } from "@/utils";
@@ -11,7 +12,7 @@ import { cn } from "@/utils";
 export interface PriorityChoice {
   id: number;
   name: string;
-  color: string | null;
+  urgency: number;
 }
 
 function ToolbarSelect({ label, value, onChange, children, className }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode; className?: string }) {
@@ -34,7 +35,8 @@ function ToolbarSelect({ label, value, onChange, children, className }: { label:
   );
 }
 
-function Chip({ pressed, onClick, children }: { pressed: boolean; onClick: () => void; children: React.ReactNode }) {
+/** Filtro rapido: il segno di spunta rende lo stato attivo leggibile anche senza il colore. */
+function Chip({ pressed, onClick, children, check = true }: { pressed: boolean; onClick: () => void; children: React.ReactNode; check?: boolean }) {
   return (
     <button
       type="button"
@@ -42,11 +44,13 @@ function Chip({ pressed, onClick, children }: { pressed: boolean; onClick: () =>
       onClick={onClick}
       className={`text-theme-sm ${cn(
         "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 font-medium ring-1 transition focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden",
+        // attivo tenue col primario, come i badge (docs/brand/ui.md); inattivo neutro
         pressed
-          ? "bg-brand-500 text-white ring-brand-500 hover:bg-brand-600"
-          : "bg-white text-gray-700 ring-gray-300 hover:bg-gray-50 dark:bg-white/3 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5",
+          ? "bg-brand-50 text-brand-700 ring-brand-500/40 hover:bg-brand-100/70 dark:bg-brand-500/15 dark:text-brand-300 dark:ring-brand-400/40 dark:hover:bg-brand-500/20"
+          : "bg-white text-gray-700 ring-gray-200 hover:bg-gray-50 hover:text-gray-900 dark:bg-white/3 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5",
       )}`}
     >
+      {pressed && check && <Check className="-ms-0.5 size-3.5" aria-hidden />}
       {children}
     </button>
   );
@@ -196,17 +200,13 @@ export default function BoardToolbar({
             pressed={params.prio.includes(p.id)}
             onClick={() => togglePrio(p.id)}
           >
-            <span
-              aria-hidden
-              className="size-2 rounded-full bg-gray-400 ring-1 ring-black/10 dark:ring-white/20"
-              style={p.color ? { backgroundColor: p.color } : undefined}
-            />
+            <PriorityDot urgency={p.urgency} />
             <span className="sr-only">{t("toolbar.priority")}: </span>
             {p.name}
           </Chip>
         ))}
         {params.older && (
-          <Chip pressed onClick={() => set({ older: false })}>
+          <Chip pressed check={false} onClick={() => set({ older: false })}>
             {t("column.showRecentOnly")}
             <X className="size-3.5" aria-hidden />
           </Chip>

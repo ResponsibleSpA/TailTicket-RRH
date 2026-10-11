@@ -5,6 +5,7 @@ import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { RoleModel } from "@/lib/osticket/flags";
 import { db } from "@/server/db";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -47,7 +48,7 @@ export default async function RolesPage({ params, searchParams }: { params: Prom
         label: r.name ?? "",
         cells: {
           name: (
-            <Link href={`/admin/roles/${r.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+            <Link href={`/admin/roles/${r.id}`} className={ROW_LINK}>
               {r.name}
             </Link>
           ),

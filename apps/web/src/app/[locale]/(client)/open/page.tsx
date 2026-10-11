@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import OpenTicketForm from "@/components/portal/OpenTicketForm";
 import Alert from "@/components/ui/alert/Alert";
 import { redirect } from "@/i18n/navigation";
@@ -41,17 +42,14 @@ export default async function OpenTicketPage({ params, searchParams }: { params:
   const defaultTopic = topics.some((x) => x.id === requested) ? requested : cfg.int("default_help_topic");
   const [forms, initialTopic] = await Promise.all([baseForms(db(), cfg, "client"), defaultTopic ? topicFormsView(db(), cfg, defaultTopic, "client") : Promise.resolve({ forms: [], disabled: [] })]);
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* esito del salvataggio del profilo per chi non ha ancora ticket (/tickets?profile=1 → /open) */}
       {sp.profile && (
         <div>
           <Alert variant="success" title={ta("profileSaved")} message="" />
         </div>
       )}
-      <div>
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {allowed === true ? (
         <OpenTicketForm
           userForm={client ? null : forms.user}

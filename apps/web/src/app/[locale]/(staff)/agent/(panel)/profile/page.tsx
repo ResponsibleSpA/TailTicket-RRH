@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { sql } from "kysely";
 
+import Callout from "@/components/common/Callout";
 import ComponentCard from "@/components/common/ComponentCard";
 import { PageHeader } from "@/components/common/DataTable";
 import InfoRow from "@/components/common/InfoRow";
@@ -57,7 +58,7 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
   return (
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={agent.email} />
-      {agent.onVacation && <div className="rounded-xl border border-warning-300 bg-warning-50 p-4 text-sm text-warning-700 dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-400">{tp("welcomeBack", { name: agent.name.first })}</div>}
+      {agent.onVacation && <Callout tone="warning">{tp("welcomeBack", { name: agent.name.first })}</Callout>}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <ProfileForm
@@ -112,7 +113,7 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
               <InfoRow label={t("primaryDept")} value={`${access.primary.dept} · ${access.primary.role}`} />
               <InfoRow label={t("teams")} value={access.teams.length ? access.teams.join(", ") : t("noTeams")} />
             </dl>
-            <h4 className="mt-4 mb-2 text-theme-sm font-medium text-gray-700 dark:text-gray-300">{t("extendedAccess")}</h4>
+            <h4 className="mt-4 mb-1 text-theme-sm font-semibold text-gray-900 dark:text-white/90">{t("extendedAccess")}</h4>
             {access.extended.length ? (
               <ul className="divide-y divide-gray-100 text-theme-sm dark:divide-gray-800">
                 {access.extended.map((a) => (
@@ -131,15 +132,15 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
             )}
           </ComponentCard>
           <ComponentCard title={t("permissions")}>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <h4 className="mb-2 text-theme-sm font-medium text-gray-700 dark:text-gray-300">{t("rolePerms", { role: agent.primaryRole.name })}</h4>
-                <PermissionList perms={[...agent.primaryRole.perms.keys()]} color="success" />
+                <h4 className="mb-3 text-theme-sm font-semibold text-gray-900 dark:text-white/90">{t("rolePerms", { role: agent.primaryRole.name })}</h4>
+                <PermissionList perms={[...agent.primaryRole.perms.keys()]} />
               </div>
               {globalPerms.length > 0 && (
                 <div>
-                  <h4 className="mb-2 text-theme-sm font-medium text-gray-700 dark:text-gray-300">{t("agentPerms")}</h4>
-                  <PermissionList perms={globalPerms} color="info" />
+                  <h4 className="mb-3 text-theme-sm font-semibold text-gray-900 dark:text-white/90">{t("agentPerms")}</h4>
+                  <PermissionList perms={globalPerms} />
                 </div>
               )}
             </div>

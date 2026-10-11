@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-import Callout from "@/components/common/Callout";
+import Outcome from "./Outcome";
 
 /** Parametri d'esito passati in query string dalle server action (redirect con ?ok=…, ?created=1…). */
 const FLASH_PARAMS = ["ok", "n", "err", "created", "entry_added", "cs"];
@@ -29,8 +29,8 @@ export default function FlashNotice({ tone, children }: { tone: "success" | "err
   }, []);
   if (hidden) return null;
   return (
-    <Callout tone={tone} role={tone === "error" ? "alert" : "status"}>
+    <Outcome tone={tone} role={tone === "error" ? "alert" : "status"}>
       {children}
-    </Callout>
+    </Outcome>
   );
 }

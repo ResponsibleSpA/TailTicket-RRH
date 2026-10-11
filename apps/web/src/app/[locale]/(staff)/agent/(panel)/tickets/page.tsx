@@ -122,8 +122,8 @@ export default async function TicketsPage({ params, searchParams }: { params: Pr
         sortHref={(sort, nextDir) => baseParams({ sort, dir: nextDir, p: undefined })}
       />
 
-      <div className="flex items-center justify-between">
-        <p className="text-theme-sm text-gray-500 dark:text-gray-400">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-theme-sm text-gray-500 tabular-nums dark:text-gray-400">
           {t("pageOf", { page, pages: totalPages ?? "?" })}
         </p>
         <LinkPager

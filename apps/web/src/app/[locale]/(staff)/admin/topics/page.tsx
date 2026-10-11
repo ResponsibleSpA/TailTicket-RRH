@@ -8,6 +8,7 @@ import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
 import { deptOptions, priorityOptions } from "@/server/domain/admin/lookups";
 import { helpTopicsSnapshot, sortByName } from "@/server/domain/admin/topic";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -70,7 +71,7 @@ export default async function TopicsPage({ params, searchParams }: { params: Pro
           label: x.name,
           cells: {
             name: (
-              <Link href={`/admin/topics/${x.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+              <Link href={`/admin/topics/${x.id}`} className={ROW_LINK}>
                 {x.name}
                 {x.id === defaultId && <span className="ms-2 text-theme-xs text-gray-500">({u("default")})</span>}
               </Link>
