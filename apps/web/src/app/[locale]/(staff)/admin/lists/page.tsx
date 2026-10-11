@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { DynamicList } from "@/lib/osticket/flags";
 import { db } from "@/server/db";
 import { listLists } from "@/server/domain/adminsys/list";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -47,7 +48,7 @@ export default async function ListsPage({ params, searchParams }: { params: Prom
             cells: {
               sel: <input type="checkbox" name="ids[]" value={l.id} disabled={!!(l.masks & DynamicList.MASK_DELETE)} className="h-4 w-4 accent-brand-500" aria-label={l.name} />,
               name: (
-                <Link href={`/admin/lists/${l.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/lists/${l.id}`} className={ROW_LINK}>
                   {l.name}
                   {l.system && <span className="ms-2 text-theme-xs text-gray-500">({t("system")})</span>}
                 </Link>

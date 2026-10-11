@@ -30,15 +30,15 @@ export default function FaqList({
       {faqs.map((f) => (
         <li key={f.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 first:pt-0 last:pb-0">
           <div className="min-w-0 flex-1">
-            <Link href={`/agent/kb/faq/${f.id}`} className="text-sm font-medium break-words text-brand-600 hover:underline dark:text-brand-400">
+            <Link href={`/agent/kb/faq/${f.id}`} className="text-sm font-medium break-words text-gray-900 hover:text-brand-600 dark:text-white/90 dark:hover:text-brand-400">
               {f.question}
             </Link>
             {f.category && <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">{f.category}</p>}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {f.attachmentCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-theme-xs text-gray-500 dark:text-gray-400" title={attachmentsLabel(f.attachmentCount)}>
-                <Paperclip className="size-4" aria-hidden />
+              <span className="inline-flex items-center gap-1 text-theme-xs text-gray-500 tabular-nums dark:text-gray-400" title={attachmentsLabel(f.attachmentCount)}>
+                <Paperclip className="size-3.5" aria-hidden />
                 <span className="sr-only">{attachmentsLabel(f.attachmentCount)}</span>
                 <span aria-hidden>{f.attachmentCount}</span>
               </span>

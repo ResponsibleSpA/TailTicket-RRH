@@ -1,27 +1,28 @@
 import { useTranslations } from "next-intl";
 
+import PriorityBadge from "@/components/common/PriorityBadge";
 import type { BoardPriority } from "@/server/domain/board/types";
-import { cn } from "@/utils";
 
-/** Colore della striscia laterale della card per urgenza (i colori di osTicket sono tinte di sfondo molto chiare). */
+/**
+ * Striscia laterale della card per urgenza (i colori di osTicket sono tinte di sfondo molto chiare): un segno sottile
+ * dentro il bordo, solo per le urgenze alte; le altre card restano con il bordo neutro di 1px.
+ */
 export function priorityStripe(
   priority: Pick<BoardPriority, "urgency"> | null,
 ): string {
+  // solo le urgenze alte hanno colore (docs/brand/ui.md), come il pallino di PriorityBadge
+  const stripe = "before:absolute before:inset-y-3 before:start-0 before:w-0.75 before:rounded-e-full before:content-['']";
   switch (priority?.urgency) {
     case 1:
-      return "border-s-error-500 dark:border-s-error-500";
+      return `${stripe} before:bg-error-500`;
     case 2:
-      return "border-s-orange-500 dark:border-s-orange-500";
-    case 3:
-      return "border-s-blue-light-500 dark:border-s-blue-light-500";
-    case 4:
-      return "border-s-success-500 dark:border-s-success-500";
+      return `${stripe} before:bg-warning-500`;
     default:
-      return "border-s-gray-300 dark:border-s-gray-700";
+      return "";
   }
 }
 
-/** Pallino del colore configurato in osTicket (ticket_priority.priority_color) + nome della priorità. */
+/** Priorità della card: lo stesso badge di liste e intestazione del ticket (PriorityBadge). */
 export default function PriorityPill({
   priority,
   className,
@@ -31,20 +32,5 @@ export default function PriorityPill({
 }) {
   const t = useTranslations("board.card");
   if (!priority) return null;
-  return (
-    <span
-      title={t("priority", { name: priority.name })}
-      className={`text-theme-xs ${cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700 dark:bg-white/5 dark:text-white/80",
-        className,
-      )}`}
-    >
-      <span
-        aria-hidden
-        className="size-2 shrink-0 rounded-full bg-gray-400 ring-1 ring-black/10 dark:ring-white/20"
-        style={priority.color ? { backgroundColor: priority.color } : undefined}
-      />
-      {priority.name}
-    </span>
-  );
+  return <PriorityBadge name={priority.name} urgency={priority.urgency} title={t("priority", { name: priority.name })} className={className} />;
 }

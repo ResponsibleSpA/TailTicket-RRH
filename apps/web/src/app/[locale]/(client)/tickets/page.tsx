@@ -1,6 +1,9 @@
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
+import TicketList from "@/components/portal/TicketList";
+import { BTN_PRIMARY, BTN_SECONDARY, FIELD, FOCUS } from "@/components/portal/styles";
 import Alert from "@/components/ui/alert/Alert";
 import { Link, redirect } from "@/i18n/navigation";
 import { withBase } from "@/lib/base-path";
@@ -64,6 +67,9 @@ export default async function ClientTicketsPage({
     return `/tickets?${p.toString()}`;
   };
 
+  const canOpen = cfg.str("client_registration") !== "disabled" || !cfg.bool("clients_only");
+  const filtered = !!(sp.q || topicId || sp.sort);
+
   return (
     <div className="space-y-6">
       {/* esito del salvataggio del profilo (profileAction → ?profile=1) */}
@@ -72,108 +78,91 @@ export default async function ClientTicketsPage({
           <Alert variant="success" title={ta("profileSaved")} message="" />
         </div>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
-        <div className="flex gap-2">
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          canOpen && (
+            <Link href="/open" className={BTN_PRIMARY}>
+              <Plus aria-hidden="true" className="size-4" />
+              {t("new")}
+            </Link>
+          )
+        }
+      />
+
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        {/* aperti/chiusi: controllo segmentato, il primario solo sulla voce attiva */}
+        <nav aria-label={t("filter")} className="inline-flex shrink-0 self-start rounded-lg bg-gray-100 p-1 dark:bg-white/5">
           {(["open", "closed"] as const).map((s) => (
             <Link
               key={s}
               href={qs({ status: s, p: undefined })}
+              aria-current={status === s ? "page" : undefined}
               className={cn(
-                "rounded-lg px-4 py-2 text-theme-sm font-medium",
-                status === s ? "bg-brand-500 text-white" : "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5",
+                "inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-theme-sm font-medium transition-colors",
+                FOCUS,
+                status === s ? "bg-white text-gray-900 shadow-theme-xs dark:bg-gray-800 dark:text-white" : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white",
               )}
             >
-              {t(s)} ({s === "open" ? stats.open : stats.closed})
+              {t(s)}
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-theme-xs tabular-nums",
+                  status === s ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300" : "bg-gray-200/70 text-gray-600 dark:bg-white/5 dark:text-gray-400",
+                )}
+              >
+                {s === "open" ? stats.open : stats.closed}
+              </span>
             </Link>
           ))}
-        </div>
-      </div>
+        </nav>
 
-      <form action={withBase("/tickets")} method="get" className="flex flex-col gap-3 sm:flex-row" role="search">
-        <input type="hidden" name="status" value={status} />
-        <input
-          name="q"
-          defaultValue={sp.q ?? ""}
-          placeholder={t("search")}
-          aria-label={t("search")}
-          className="h-11 flex-1 rounded-lg border border-gray-300 bg-white px-4 text-sm shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-        />
-        <select name="topic" defaultValue={topicId ?? ""} aria-label={t("topic")} className="h-11 rounded-lg border border-gray-300 bg-white px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-          <option value="">{t("allTopics")}</option>
-          {stats.topics.map((tp) => (
-            <option key={tp.id} value={tp.id}>
-              {tp.name} ({tp.count})
-            </option>
-          ))}
-        </select>
-        <button type="submit" className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600">
-          {t("go")}
-        </button>
-        {(sp.q || topicId || sp.sort) && (
-          <Link href="/tickets" className="h-11 px-2 text-theme-sm leading-11 text-gray-500 hover:underline dark:text-gray-400">
-            {t("clear")}
-          </Link>
-        )}
-      </form>
-
-      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3">
-        <table className="min-w-full text-start text-theme-sm">
-          <thead className="border-b border-gray-200 text-theme-xs text-gray-500 uppercase dark:border-gray-800 dark:text-gray-400">
-            <tr>
-              {(["id", "date", "status", "subject", "dept"] as ClientSort[]).map((c) => (
-                <th key={c} className="px-5 py-3 text-start font-medium">
-                  <Link
-                    href={qs({
-                      sort: c,
-                      order: sort === c && order === "DESC" ? "ASC" : "DESC",
-                      p: undefined,
-                    })}
-                    className="inline-flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
-                  >
-                    {t(`col.${c}`)}
-                    {sort === c ? order === "DESC" ? <ArrowDown className="size-3.5" /> : <ArrowUp className="size-3.5" /> : null}
-                  </Link>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {list.items.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {t("empty")}
-                </td>
-              </tr>
-            )}
-            {list.items.map((r) => (
-              <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
-                <td className="px-5 py-3 whitespace-nowrap">
-                  <Link href={`/tickets/${r.id}`} className={cn("font-medium text-brand-600 hover:underline dark:text-brand-400", !r.isanswered && "font-semibold")}>
-                    #{r.number}
-                  </Link>
-                </td>
-                <td className="px-5 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{formatDbDate(r.created, tz, locale, "short")}</td>
-                <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{r.statusName}</td>
-                <td className="px-5 py-3 text-gray-800 dark:text-white/90">
-                  <Link href={`/tickets/${r.id}`} className="hover:underline">
-                    {r.subject}
-                  </Link>
-                </td>
-                <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{r.dept}</td>
-              </tr>
+        <form action={withBase("/tickets")} method="get" className="flex flex-1 flex-col gap-3 sm:flex-row" role="search">
+          <input type="hidden" name="status" value={status} />
+          <div className="relative min-w-0 flex-1">
+            <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+            <input type="search" name="q" defaultValue={sp.q ?? ""} placeholder={t("search")} aria-label={t("search")} className={cn(FIELD, "w-full ps-10")} />
+          </div>
+          <select name="topic" defaultValue={topicId ?? ""} aria-label={t("topic")} className={cn(FIELD, "sm:max-w-60")}>
+            <option value="">{t("allTopics")}</option>
+            {stats.topics.map((tp) => (
+              <option key={tp.id} value={tp.id}>
+                {tp.name} ({tp.count})
+              </option>
             ))}
-          </tbody>
-        </table>
+          </select>
+          <button type="submit" className={BTN_SECONDARY}>
+            {t("go")}
+          </button>
+        </form>
       </div>
+      {filtered && (
+        <Link href="/tickets" className={cn("-mt-3 inline-flex items-center gap-1 text-theme-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white", FOCUS)}>
+          <X aria-hidden="true" className="size-3.5" />
+          {t("clear")}
+        </Link>
+      )}
+
+      <TicketList
+        items={list.items.map((r) => ({ ...r, date: formatDbDate(r.created, tz, locale, "short") }))}
+        sort={sort}
+        order={order}
+        sortHref={(c) => qs({ sort: c, order: sort === c && order === "DESC" ? "ASC" : "DESC", p: undefined })}
+      />
 
       {pages > 1 && (
-        <nav className="flex justify-center gap-2" aria-label={t("pages")}>
+        <nav className="flex flex-wrap justify-center gap-1" aria-label={t("pages")}>
           {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
             <Link
               key={n}
               href={qs({ p: n })}
-              className={cn("rounded-lg px-3 py-1.5 text-theme-sm", n === page ? "bg-brand-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5")}
+              aria-current={n === page ? "page" : undefined}
+              className={cn(
+                "min-w-9 rounded-lg px-3 py-1.5 text-center text-theme-sm font-medium tabular-nums",
+                FOCUS,
+                n === page ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5",
+              )}
             >
               {n}
             </Link>

@@ -6,6 +6,7 @@ import Alert from "@/components/ui/alert/Alert";
 import { isHexColor, paletteFromHex, relativeLuminance, SHADES } from "@/lib/theme/palette";
 import { COLOR_PRESETS } from "@/lib/theme/schema";
 import { cn } from "@/utils";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Field } from "./controls";
@@ -21,6 +22,9 @@ interface ColorsCardProps {
   onHexDraft: (value: string) => void;
 }
 
+/** tonalità mostrate nei campioni dei preset */
+const PRESET_SHADES = ["200", "400", "500", "600", "800"] as const;
+
 /** Colore del marchio: preset, colore personalizzato e scala generata, con avviso di basso contrasto. */
 export default function ColorsCard({ color, hexDraft, onColor, onHexDraft }: ColorsCardProps) {
   const t = useTranslations("admin.theme");
@@ -29,24 +33,34 @@ export default function ColorsCard({ color, hexDraft, onColor, onHexDraft }: Col
   const invalid = !isHexColor(hexDraft);
   return (
     <ComponentCard title={t("colors")} desc={t("colorsDesc")}>
-      <div className="flex flex-wrap gap-3">
-        {COLOR_PRESETS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            aria-pressed={color === p.color}
-            onClick={() => onColor(p.color)}
-            className={cn(
-              "flex items-center gap-2 rounded-lg border px-3 py-2 text-theme-sm",
-              color === p.color
-                ? "border-brand-500 ring-3 ring-brand-500/20"
-                : "border-gray-200 dark:border-gray-800",
-            )}
-          >
-            <span className="size-5 rounded-full ring-1 ring-black/15 dark:ring-white/25" style={{ backgroundColor: p.color }} />
-            <span className="text-gray-700 dark:text-gray-300">{t(`presets.${p.id}`)}</span>
-          </button>
-        ))}
+      <div role="group" aria-label={t("colors")} className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {COLOR_PRESETS.map((p) => {
+          const ramp = paletteFromHex(p.color);
+          const active = color === p.color;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onColor(p.color)}
+              className={cn(
+                "rounded-xl border p-2 text-start transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
+                active ? "border-brand-500 ring-3 ring-brand-500/15" : "border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700",
+              )}
+            >
+              {/* scala generata dal preset: chiara, base, scura */}
+              <span className="flex h-7 overflow-hidden rounded-md ring-1 ring-black/5 ring-inset dark:ring-white/10">
+                {PRESET_SHADES.map((sh) => (
+                  <span key={sh} className="flex-1" style={{ backgroundColor: ramp[sh] }} />
+                ))}
+              </span>
+              <span className="mt-2 flex items-center justify-between gap-2 px-0.5">
+                <span className="truncate text-theme-sm font-medium text-gray-700 dark:text-gray-300">{t(`presets.${p.id}`)}</span>
+                {active && <Check aria-hidden className="size-4 shrink-0 text-brand-600 dark:text-brand-400" />}
+              </span>
+            </button>
+          );
+        })}
       </div>
       <div className="flex flex-wrap items-end gap-4">
         <Field label={t("customColor")} htmlFor="theme-color">
@@ -75,9 +89,9 @@ export default function ColorsCard({ color, hexDraft, onColor, onHexDraft }: Col
           )}
         </Field>
       </div>
-      <div className="flex overflow-hidden rounded-lg">
+      <div className="flex overflow-hidden rounded-xl ring-1 ring-black/5 ring-inset dark:ring-white/10">
         {SHADES.map((s) => (
-          <div key={s} className="flex-1 py-3 text-center text-[10px] font-medium" style={{ backgroundColor: palette[s], color: Number(s) >= 500 ? "#fff" : "#101828" }}>
+          <div key={s} className="flex-1 py-3 text-center text-[10px] font-medium tabular-nums" style={{ backgroundColor: palette[s], color: Number(s) >= 500 ? "#fff" : "#101828" }}>
             {s}
           </div>
         ))}

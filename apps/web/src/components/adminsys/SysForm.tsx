@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useRef, type ReactNode } from "react";
 
 import UndoChange from "@/components/admin/UndoChange";
-import Callout from "@/components/common/Callout";
+import FormActions from "@/components/admin/FormActions";
+import Outcome from "@/components/admin/Outcome";
 import { ReadOnlyNote, useReadOnlyHint } from "@/components/common/WriteGate";
 import Button from "@/components/ui/button/Button";
 import { useUndoReload } from "@/components/admin/useUndoReload";
@@ -71,33 +72,31 @@ export default function SysForm({
     <div className="space-y-6">
       <div ref={banner} tabIndex={-1} className="scroll-mt-24 outline-none empty:hidden">
         {state.status === "saved" && (
-          <Callout tone="success" role="status">
-            {undo.isUndone(state.nonce) ? undoneTxt : (state.message ?? savedMessage ?? t("saved"))}
+          <Outcome tone="success" role="status" title={undo.isUndone(state.nonce) ? undoneTxt : (state.message ?? savedMessage ?? t("saved"))}>
             {state.change && !undo.isUndone(state.nonce) && <UndoChange key={state.nonce} change={state.change} inline onUndone={() => undo.reload(state.nonce)} />}
-          </Callout>
+          </Outcome>
         )}
         {state.status === "error" && (
-          <Callout tone="error" role="alert">
-            <p>{state.message ?? t("fixErrors")}</p>
+          <Outcome tone="error" role="alert" title={state.message ?? t("fixErrors")}>
             {errors.length > 0 && (
-              <ul className="mt-2 list-disc ps-5">
+              <ul className="list-disc ps-4">
                 {errors.map(([k, v]) => (
                   <li key={k}>{labels[k] ? `${labels[k]}: ${v}` : v}</li>
                 ))}
               </ul>
             )}
-          </Callout>
+          </Outcome>
         )}
       </div>
       <form onSubmit={submit} className="space-y-6" key={`${resetOnSave ? (state.saved ?? "") : ""}-${undo.formKey}`}>
         <ReadOnlyNote scope="admin" />
         {children}
-        <div className="flex flex-wrap justify-end gap-3">
+        <FormActions>
           {extraButtons}
-          <Button type="submit" disabled={pending || !!readOnly} title={readOnly}>
+          <Button type="submit" size="sm" disabled={pending || !!readOnly} title={readOnly}>
             {pending ? t("saving") : (submitLabel ?? t("save"))}
           </Button>
-        </div>
+        </FormActions>
       </form>
     </div>
   );

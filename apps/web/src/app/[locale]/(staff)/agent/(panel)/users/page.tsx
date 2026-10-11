@@ -5,8 +5,8 @@ import LinkPager from "@/components/common/LinkPager";
 import AccountStatusBadge from "@/components/people/AccountStatusBadge";
 import PeopleCards from "@/components/people/PeopleCards";
 import PeopleDoneNotice from "@/components/people/PeopleDoneNotice";
+import { NameLink, QuietLink } from "@/components/people/PeopleLinks";
 import { ImportUsersButton, NewRecordButton, RowSelect, UserMassBar } from "@/components/people/directory/DirectoryButtons";
-import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listUsers } from "@/server/domain/directory/directory";
 import { newFormFields } from "@/server/domain/directory/ui";
@@ -22,13 +22,9 @@ export async function generateMetadata() {
 
 type UserRow = Awaited<ReturnType<typeof listUsers>>["rows"][number];
 
-const linkClass = "text-brand-600 hover:underline dark:text-brand-400";
-
 function orgLink(u: UserRow) {
   return u.org_id ? (
-    <Link href={`/agent/orgs/${u.org_id}`} className={linkClass}>
-      {u.org_name}
-    </Link>
+    <QuietLink href={`/agent/orgs/${u.org_id}`}>{u.org_name}</QuietLink>
   ) : (
     "—"
   );
@@ -36,9 +32,7 @@ function orgLink(u: UserRow) {
 
 function ticketsLink(u: UserRow) {
   return u.tickets ? (
-    <Link href={`/agent/tickets?user=${u.id}`} className={linkClass}>
-      {u.tickets}
-    </Link>
+    <QuietLink href={`/agent/tickets?user=${u.id}`}>{u.tickets}</QuietLink>
   ) : (
     0
   );
@@ -92,7 +86,7 @@ export default async function UsersPage({
     <div className="space-y-5">
       <PageHeader
         title={t("users")}
-        subtitle={t("usersCount", { n: total })}
+        subtitle={<span className="tabular-nums">{t("usersCount", { n: total })}</span>}
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {canCreate && <NewRecordButton kind="user" fields={await newFormFields("U")} />}
@@ -109,9 +103,7 @@ export default async function UsersPage({
           key: u.id,
           select: <RowSelect id={u.id} group="user" />,
           title: (
-            <Link href={`/agent/users/${u.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-              {u.name}
-            </Link>
+<NameLink href={`/agent/users/${u.id}`}>{u.name}</NameLink>
           ),
           badge: <AccountStatusBadge status={u.account_status} />,
           meta: [
@@ -139,9 +131,7 @@ export default async function UsersPage({
             cells: {
               sel: <RowSelect id={u.id} group="user" />,
               name: (
-                <Link href={`/agent/users/${u.id}`} className="font-medium text-brand-600 hover:underline dark:text-brand-400">
-                  {u.name}
-                </Link>
+<NameLink href={`/agent/users/${u.id}`}>{u.name}</NameLink>
               ),
               email: u.email,
               org: orgLink(u),

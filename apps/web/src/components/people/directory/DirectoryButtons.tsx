@@ -11,6 +11,7 @@ import Button from "@/components/ui/button/Button";
 import { checkedIds, useCheckedCount } from "@/lib/checked-ids";
 
 import { CheckField, DynamicField, FormAlert, SelectField, TextAreaField } from "../FormControls";
+import MassButton from "../MassButton";
 import PeopleDialog from "../PeopleDialog";
 import type { Choice, DynField, PeopleAction, PeopleActionState } from "../types";
 import { useActionNotice } from "../useActionNotice";
@@ -153,22 +154,20 @@ export function MassBar({ group, ops, action, hidden }: { group: string; ops: Ma
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-theme-sm text-gray-500 dark:text-gray-400">{t("selected")}</span>
+        <span className="text-theme-sm text-gray-500 tabular-nums dark:text-gray-400">{t("selected")}</span>
         {ops.map((o) => (
-          <Button
+          <MassButton
             key={o.key}
-            size="sm"
-            variant="outline"
             disabled={!selected || !!readOnly}
             title={readOnly}
-            className={o.danger ? "text-error-600 dark:text-error-400" : ""}
+            danger={o.danger}
             onClick={() => {
               setIds(checkedIds(selector));
               setOp(o);
             }}
           >
             {o.label}
-          </Button>
+          </MassButton>
         ))}
         {notice && (
           <ActionNotice closeLabel={tu("dismiss")} onClose={clear}>

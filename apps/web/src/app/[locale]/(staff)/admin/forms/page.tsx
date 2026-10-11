@@ -9,6 +9,7 @@ import { DynamicForm } from "@/lib/osticket/flags";
 import { FormType } from "@/lib/osticket/object-types";
 import { db } from "@/server/db";
 import { listForms } from "@/server/domain/adminsys/form";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -42,7 +43,7 @@ export default async function FormsPage({ params, searchParams }: { params: Prom
         cells: {
           sel: <input type="checkbox" name="ids[]" value={f.id} disabled={!(f.flags & DynamicForm.DELETABLE)} className="h-4 w-4 accent-brand-500" aria-label={f.title} />,
           title: (
-            <Link href={`/admin/forms/${f.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+            <Link href={`/admin/forms/${f.id}`} className={ROW_LINK}>
               {f.title}
             </Link>
           ),

@@ -8,6 +8,7 @@ import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listFilters } from "@/server/domain/adminsys/filter";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -57,7 +58,7 @@ export default async function FiltersPage({ params, searchParams }: { params: Pr
               cells: {
                 sel: <input type="checkbox" name="ids[]" value={f.id} className="h-4 w-4 accent-brand-500" aria-label={f.name} />,
                 name: (
-                  <Link href={banlist ? "/admin/banlist" : `/admin/filters/${f.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                  <Link href={banlist ? "/admin/banlist" : `/admin/filters/${f.id}`} className={ROW_LINK}>
                     {f.name}
                   </Link>
                 ),

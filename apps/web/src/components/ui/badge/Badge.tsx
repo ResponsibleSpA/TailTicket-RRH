@@ -21,7 +21,7 @@ const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const baseStyles =
-    "inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium";
+    "inline-flex items-center px-2 py-0.5 justify-center gap-1 rounded-md font-medium";
 
   // Define size styles
   const sizeStyles = {
@@ -32,16 +32,13 @@ const Badge: React.FC<BadgeProps> = ({
   // Define color styles for variants
   const variants = {
     light: {
-      primary:
-        "bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400",
-      success:
-        "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500",
-      error:
-        "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500",
-      warning:
-        "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400",
-      info: "bg-blue-light-50 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500",
-      light: "bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80",
+      // tenui con anello sottile (docs/brand/ui.md)
+      primary: "bg-brand-50 text-brand-700 ring-1 ring-brand-600/20 ring-inset dark:bg-brand-500/10 dark:text-brand-300 dark:ring-brand-400/25",
+      success: "bg-success-50 text-success-700 ring-1 ring-success-600/20 ring-inset dark:bg-success-500/10 dark:text-success-400 dark:ring-success-500/25",
+      error: "bg-error-50 text-error-700 ring-1 ring-error-600/20 ring-inset dark:bg-error-500/10 dark:text-error-400 dark:ring-error-500/25",
+      warning: "bg-warning-50 text-warning-700 ring-1 ring-warning-600/20 ring-inset dark:bg-warning-500/10 dark:text-warning-400 dark:ring-warning-500/25",
+      info: "bg-blue-light-50 text-blue-light-700 ring-1 ring-blue-light-600/20 ring-inset dark:bg-blue-light-500/10 dark:text-blue-light-400 dark:ring-blue-light-500/25",
+      light: "bg-gray-50 text-gray-700 ring-1 ring-gray-200 ring-inset dark:bg-white/5 dark:text-gray-300 dark:ring-white/10",
       dark: "bg-gray-500 text-white dark:bg-white/5 dark:text-white",
     },
     solid: {
@@ -61,9 +58,9 @@ const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span className={`${baseStyles} ${sizeClass} ${colorStyles}`}>
-      {startIcon && <span className="me-1">{startIcon}</span>}
+      {startIcon && <span className="flex items-center">{startIcon}</span>}
       {children}
-      {endIcon && <span className="ms-1">{endIcon}</span>}
+      {endIcon && <span className="flex items-center">{endIcon}</span>}
     </span>
   );
 };

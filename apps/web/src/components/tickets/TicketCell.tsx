@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
 
+import PriorityBadge from "@/components/common/PriorityBadge";
 import { Link } from "@/i18n/navigation";
 import { Flag, LinkIcon, Lock, Merge, MessageSquare, Paperclip } from "lucide-react";
-import { safeColor } from "@/lib/color";
 import { Ticket } from "@/lib/osticket/flags";
 import type { QueueColumnDef } from "@/server/domain/queue/columns";
 import type { TicketRow } from "@/server/domain/ticket/rows";
@@ -94,6 +94,8 @@ function conditionStyle(column: QueueColumnDef, row: TicketRow): React.CSSProper
     else if (path === "isoverdue") match = method === "nset" ? !row.isoverdue : row.isoverdue;
     if (match) Object.assign(style, cond.prop);
   }
+  // "bold" delle code di osTicket (es. non risposti) con Outfit è troppo pesante: semibold (docs/brand/ui.md)
+  if (/^bold$/i.test(style["font-weight"] ?? "")) style["font-weight"] = "600";
   return Object.fromEntries(Object.entries(style).map(([k, v]) => [k.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()), v]));
 }
 
@@ -117,22 +119,10 @@ export default function TicketCell({ column, row, tz, locale, assigneeName, staf
       </time>
     );
   }
-  if (column.primary === "cdata__priority" && row.priority) {
-    // colore della priorità dal DB solo se è un esadecimale valido, altrimenti grigio (gray-400)
-    const color = safeColor(row.priority_color) ?? "#98a2b3";
-    content = (
-      // i colori di osTicket sono tinte pastello pensate come sfondo: testo scuro in entrambi i temi
-      <span
-        className="inline-flex items-center rounded-full px-2 py-0.5 text-theme-xs font-medium text-gray-800 ring-1 ring-black/10 ring-inset"
-        style={{ backgroundColor: color }}
-      >
-        {row.priority}
-      </span>
-    );
-  }
+  if (column.primary === "cdata__priority" && row.priority) content = <PriorityBadge name={row.priority} urgency={row.priority_urgency} />;
   if (filter.startsWith("link:ticket")) {
     content = (
-      <Link href={`/agent/tickets/${row.ticket_id}`} className="text-brand-600 hover:underline dark:text-brand-400">
+      <Link href={`/agent/tickets/${row.ticket_id}`} className="text-gray-900 hover:text-brand-600 dark:text-white/90 dark:hover:text-brand-400">
         {content}
       </Link>
     );

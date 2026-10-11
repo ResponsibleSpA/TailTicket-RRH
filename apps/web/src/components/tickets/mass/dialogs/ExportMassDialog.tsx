@@ -1,17 +1,17 @@
 "use client";
 
+import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { exportAdhocAction } from "@/app/[locale]/(staff)/agent/(panel)/tickets/actions-mass";
 
 import { Field, Select } from "@/components/tickets/edit/inputs";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { withBase } from "@/lib/base-path";
 import { tryAction } from "@/lib/try-action";
-import { cn } from "@/utils";
 
+import { dialogButtonClass, dialogClass, DialogFooter, dialogScrollClass, DialogTitle, PrimaryButton, SecondaryButton } from "../../dialog-ui";
 import type { MassData } from "../types";
 
 /** Dialogo di export (templates/queue-export.tmpl.php): campi, separatore, download del CSV. */
@@ -50,15 +50,15 @@ export default function ExportMassDialog({ data, onClose }: { data: MassData; on
     });
   const toggle = (path: string, on: boolean) => setFields((l) => (on ? data.exportFields.map((x) => x.path).filter((p) => l.includes(p) || p === path) : l.filter((p) => p !== path)));
   return (
-    <Modal isOpen onClose={onClose} className="m-4 max-w-[760px] p-6 lg:p-8">
-      <div className="custom-scrollbar max-h-[80vh] space-y-5 overflow-y-auto pe-1">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">
+    <Modal isOpen onClose={onClose} className={dialogClass("lg")}>
+      <div className={dialogScrollClass}>
+        <DialogTitle>
           {t(data.adhoc ? "exportTitleList" : "exportTitle", {
             queue: data.queueName,
           })}
-        </h4>
+        </DialogTitle>
         <p className="text-theme-sm text-gray-600 dark:text-gray-400">{t("exportHelp")}</p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-2.5 rounded-lg border border-gray-200 p-4 sm:grid-cols-3 dark:border-gray-800">
           {data.exportFields.map((f) => (
             <label key={f.path} className="flex items-center gap-2 text-theme-sm text-gray-700 dark:text-gray-400">
               <input type="checkbox" checked={fields.includes(f.path)} onChange={(e) => toggle(f.path, e.target.checked)} className="size-4 accent-brand-500" />
@@ -78,30 +78,25 @@ export default function ExportMassDialog({ data, onClose }: { data: MassData; on
             ]}
           />
         </Field>
-        <div className="flex items-center justify-end gap-3">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {te("cancel")}
-          </Button>
+        <DialogFooter>
           {failed && (
-            <p role="alert" className="me-auto text-theme-xs text-error-600 dark:text-error-400">
+            <p role="alert" className="text-theme-xs text-error-600 sm:me-auto dark:text-error-400">
               {te("errors.generic")}
             </p>
           )}
+          <SecondaryButton onClick={onClose}>{te("cancel")}</SecondaryButton>
           {data.adhoc ? (
-            <Button size="sm" disabled={!fields.length || downloading} onClick={() => downloadAdhoc(data.adhoc!)}>
+            <PrimaryButton type="button" disabled={!fields.length || downloading} onClick={() => downloadAdhoc(data.adhoc!)}>
+              <Download aria-hidden className="size-4" />
               {downloading ? te("working") : t("download")}
-            </Button>
+            </PrimaryButton>
           ) : (
-            <a
-              href={fields.length ? href : undefined}
-              aria-disabled={!fields.length}
-              onClick={() => setTimeout(onClose, 300)}
-              className={cn("inline-flex rounded-lg bg-brand-500 px-4 py-3 text-sm font-medium text-white hover:bg-brand-600", !fields.length && "pointer-events-none opacity-50")}
-            >
+            <a href={fields.length ? href : undefined} aria-disabled={!fields.length} onClick={() => setTimeout(onClose, 300)} className={dialogButtonClass.primary}>
+              <Download aria-hidden className="size-4" />
               {t("download")}
             </a>
           )}
-        </div>
+        </DialogFooter>
       </div>
     </Modal>
   );

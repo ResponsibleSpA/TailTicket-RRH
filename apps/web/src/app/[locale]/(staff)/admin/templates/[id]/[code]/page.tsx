@@ -5,7 +5,8 @@ import BackLink from "@/components/adminsys/BackLink";
 import { Hidden, Section, TextAreaField, TextField } from "@/components/adminsys/fields";
 import SysForm from "@/components/adminsys/SysForm";
 import SysNotice from "@/components/adminsys/SysNotice";
-import Callout from "@/components/common/Callout";
+import { Notices } from "@/components/admin/Outcome";
+import { BTN_SECONDARY } from "@/components/admin/styles";
 import { PageHeader } from "@/components/common/DataTable";
 import { Link } from "@/i18n/navigation";
 import { idOrNotFound } from "@/lib/route-id";
@@ -46,20 +47,33 @@ export default async function TemplateMessagePage({
     <div className="space-y-6">
       <PageHeader title={t(`names.${code.replace(/\./g, "_")}`)} subtitle={`${group.name} — ${code}`} actions={<BackLink href={`/admin/templates/${tplId}`} label={t("backToSet")} />} />
       <SysNotice sp={sp} />
-      {!msg && <Callout tone="info">{t("implementNote")}</Callout>}
-      {sp.default && msg && <Callout tone="warning">{t("defaultLoaded")}</Callout>}
-      {unknown.length > 0 && (
-        <Callout tone="warning">
-          {t("invalidVars")} <code>{unknown.map((v) => `%{${v}}`).join(", ")}</code>
-        </Callout>
-      )}
+      {/* avvisi sul modello: un solo riquadro */}
+      <Notices
+        items={[
+          ...(!msg ? [{ key: "implement", tone: "info" as const, content: t("implementNote") }] : []),
+          ...(sp.default && msg ? [{ key: "default", tone: "warning" as const, content: t("defaultLoaded") }] : []),
+          ...(unknown.length > 0
+            ? [
+                {
+                  key: "vars",
+                  tone: "warning" as const,
+                  content: (
+                    <>
+                      {t("invalidVars")} <code>{unknown.map((v) => `%{${v}}`).join(", ")}</code>
+                    </>
+                  ),
+                },
+              ]
+            : []),
+        ]}
+      />
       <SysForm
         key={sp.default ? "default" : "current"}
         action={saveTemplateAction.bind(null, tplId, code, msg?.id ?? null)}
         labels={{ subject: t("subject"), body: t("body"), tpl_id: t("set"), code_name: t("message") }}
         extraButtons={
           msg && !sp.default ? (
-            <Link href={`/admin/templates/${tplId}/${code.replace(/\./g, "-")}?default=1`} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5">
+            <Link href={`/admin/templates/${tplId}/${code.replace(/\./g, "-")}?default=1`} className={`${BTN_SECONDARY} px-4`}>
               {t("loadDefault")}
             </Link>
           ) : undefined

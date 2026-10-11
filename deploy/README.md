@@ -88,7 +88,7 @@ Opzioni utili di `.env`:
 | `TAILTICKET_MODE` | vuota (`full`); `readonly` in attach | `readonly` · `operational` · `full`: si cambia con `./tailticket mode` |
 | `TAILTICKET_TIMEZONE` | `Europe/Rome` | fuso orario di osTicket (il DB resta in UTC) |
 | `TAILTICKET_AUTO_UPGRADE` | `true` | applica le patch di schema di osTicket all'avvio |
-| `TAILTICKET_IMAGE` / `TAILTICKET_LEGACY_IMAGE` | build locale | immagini pubblicate, es. `ghcr.io/paolo-trivi/tailticket:1.0.0` (o `:latest`) |
+| `TAILTICKET_IMAGE` / `TAILTICKET_LEGACY_IMAGE` | build locale | immagini pubblicate, es. `ghcr.io/paolo-trivi/tailticket:1.1.0` (o `:latest`) |
 
 > **Non cambiare `TAILTICKET_SECRET_SALT` dopo l'installazione.** Firma i Message-ID delle email (threading delle risposte) e cifra le password degli account email. Il backup lo conserva.
 

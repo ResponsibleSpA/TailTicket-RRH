@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 
+import { CircleCheck, LoaderCircle, Mail, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import RetryAlert from "@/components/common/RetryAlert";
@@ -15,10 +16,13 @@ import Alert from "@/components/ui/alert/Alert";
 import { Link } from "@/i18n/navigation";
 import type { DynamicFormView } from "@/lib/forms/dynamic-field";
 import { tryAction } from "@/lib/try-action";
+import { cn } from "@/utils";
 
 import { openTicketAction, portalTopicFormsAction, type OpenState } from "@/app/[locale]/(client)/actions";
 
 import { RICH_CLASS } from "./rich";
+import { Avatar, Panel } from "./PortalUi";
+import { BTN_PRIMARY, BTN_SECONDARY, CARD } from "./styles";
 import { useEditorLabels } from "./useEditorLabels";
 
 interface Props {
@@ -71,14 +75,17 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
 
   if (state.created) {
     return (
-      <section className="rounded-2xl border border-success-200 bg-white p-6 dark:border-success-800 dark:bg-white/3">
-        <h2 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("createdTitle", { number: state.created.number })}</h2>
+      <section className={cn(CARD, "flex flex-col items-center px-6 py-12 text-center")}>
+        <span className="flex size-12 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400">
+          <CircleCheck aria-hidden="true" className="size-6" />
+        </span>
+        <h2 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white/90">{t("createdTitle", { number: state.created.number })}</h2>
         {state.created.html ? (
-          <div className={`mt-3 ${RICH_CLASS}`} dangerouslySetInnerHTML={{ __html: state.created.html }} />
+          <div className={`mt-3 max-w-xl text-start ${RICH_CLASS}`} dangerouslySetInnerHTML={{ __html: state.created.html }} />
         ) : (
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">{t("createdText")}</p>
+          <p className="mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">{t("createdText")}</p>
         )}
-        <Link href="/" className="mt-5 inline-block text-brand-600 hover:underline dark:text-brand-400">
+        <Link href="/" className={cn(BTN_SECONDARY, "mt-6")}>
           {t("home")}
         </Link>
       </section>
@@ -98,65 +105,81 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
           </div>
         )}
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-        {client ? (
-          <dl className="grid gap-2 text-theme-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-gray-500 dark:text-gray-400">{t("client")}</dt>
-              <dd className="text-gray-800 dark:text-white/90">{client.name}</dd>
-            </div>
-            <div>
-              <dt className="text-gray-500 dark:text-gray-400">{t("email")}</dt>
-              <dd className="text-gray-800 dark:text-white/90">{client.email}</dd>
-            </div>
-          </dl>
-        ) : (
-          userForm && <DynamicForm form={userForm} values={state.values} errors={state.fieldErrors} showTitle />
-        )}
-      </section>
-
-      <section className="space-y-5 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
-        <FieldShell htmlFor="topicId" label={t("topic")} required errors={err("topicId")}>
-          <select id="topicId" name="topicId" defaultValue={state.values?.topicId?.[0] ?? (defaultTopic || "")} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
-            <option value="">{t("selectTopic")}</option>
-            {topics.map((tp) => (
-              <option key={tp.id} value={tp.id}>
-                {tp.name}
-              </option>
-            ))}
-          </select>
-        </FieldShell>
-        {ticketForm && (
-          <DynamicForm
-            form={ticketForm}
-            values={state.values}
-            errors={state.fieldErrors}
-            hidden={topic.disabled}
-            renderThread={(f) => (
-              <div className="space-y-3">
-                <FieldShell label={f.label || t("message")} hint={f.hint} required={f.required} errors={state.fieldErrors?.[f.id]?.map((c) => (tf.has(`errors.${c}`) ? tf(`errors.${c}`) : c))}>
-                  <RichTextEditor name={f.key} labels={labels} placeholder={t("messagePlaceholder")} defaultValue={state.values?.[f.key]?.[0]} />
-                </FieldShell>
-                {f.config.attachments && maxFileSize > 0 && <AttachmentInput name="files" uploadUrl="/api/portal/upload" maxSize={maxFileSize} />}
+        <Panel step={1} title={t("steps.contact")} description={client ? t("steps.contactClient") : userForm?.instructions || t("steps.contactGuest")}>
+          {client ? (
+            <dl className="grid gap-4 text-theme-sm sm:grid-cols-2">
+              <div className="flex items-center gap-3">
+                <Avatar name={client.name} />
+                <div className="min-w-0">
+                  <dt className="text-theme-xs text-gray-500 dark:text-gray-400">{t("client")}</dt>
+                  <dd className="truncate font-medium text-gray-900 dark:text-white/90">{client.name}</dd>
+                </div>
               </div>
-            )}
-          />
-        )}
-        {loading && <p className="text-theme-xs text-gray-500 dark:text-gray-400">{t("loadingTopic")}</p>}
-        {topicFailed !== null && !loading && <RetryAlert message={t("topicLoadError")} retryLabel={t("retry")} onRetry={() => changeTopic(topicFailed)} />}
-        {topic.forms.map((f) => (
-          <DynamicForm key={f.id} form={f} values={state.values} errors={state.fieldErrors} showTitle />
-        ))}
-      </section>
+              <div className="flex items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                  <Mail aria-hidden="true" className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <dt className="text-theme-xs text-gray-500 dark:text-gray-400">{t("email")}</dt>
+                  <dd className="truncate font-medium text-gray-900 dark:text-white/90">{client.email}</dd>
+                </div>
+              </div>
+            </dl>
+          ) : (
+            userForm && <DynamicForm form={userForm} values={state.values} errors={state.fieldErrors} />
+          )}
+        </Panel>
 
-        <div className="flex flex-wrap justify-end gap-3">
-          <Link
-            href="/"
-            className="h-11 rounded-lg border border-gray-300 px-5 text-sm leading-11 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-          >
+        <Panel step={2} title={t("steps.topic")} description={t("steps.topicText")}>
+          <FieldShell htmlFor="topicId" label={t("topic")} required errors={err("topicId")}>
+            <select id="topicId" name="topicId" defaultValue={state.values?.topicId?.[0] ?? (defaultTopic || "")} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
+              <option value="">{t("selectTopic")}</option>
+              {topics.map((tp) => (
+                <option key={tp.id} value={tp.id}>
+                  {tp.name}
+                </option>
+              ))}
+            </select>
+          </FieldShell>
+        </Panel>
+
+        <Panel step={3} title={t("steps.details")} description={t("steps.detailsText")}>
+          <div className="space-y-5">
+            {ticketForm && (
+              <DynamicForm
+                form={ticketForm}
+                values={state.values}
+                errors={state.fieldErrors}
+                hidden={topic.disabled}
+                renderThread={(f) => (
+                  <div className="space-y-3">
+                    <FieldShell label={f.label || t("message")} hint={f.hint} required={f.required} errors={state.fieldErrors?.[f.id]?.map((c) => (tf.has(`errors.${c}`) ? tf(`errors.${c}`) : c))}>
+                      <RichTextEditor name={f.key} labels={labels} placeholder={t("messagePlaceholder")} defaultValue={state.values?.[f.key]?.[0]} />
+                    </FieldShell>
+                    {f.config.attachments && maxFileSize > 0 && <AttachmentInput name="files" uploadUrl="/api/portal/upload" maxSize={maxFileSize} />}
+                  </div>
+                )}
+              />
+            )}
+            {loading && (
+              <p className="inline-flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400">
+                <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
+                {t("loadingTopic")}
+              </p>
+            )}
+            {topicFailed !== null && !loading && <RetryAlert message={t("topicLoadError")} retryLabel={t("retry")} onRetry={() => changeTopic(topicFailed)} />}
+            {topic.forms.map((f) => (
+              <DynamicForm key={f.id} form={f} values={state.values} errors={state.fieldErrors} showTitle />
+            ))}
+          </div>
+        </Panel>
+
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <Link href="/" className={BTN_SECONDARY}>
             {t("cancel")}
           </Link>
-          <button type="submit" disabled={pending} className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+          <button type="submit" disabled={pending} className={BTN_PRIMARY}>
+            <Send aria-hidden="true" className="size-4" />
             {pending ? t("submitting") : t("submit")}
           </button>
         </div>

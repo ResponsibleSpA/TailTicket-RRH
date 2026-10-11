@@ -45,15 +45,12 @@ export default async function PortalLayout({ children, params }: { children: Rea
           showLogin={registration !== "disabled"}
           logoutAction={portalLogoutAction}
         />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
-        <footer className="border-t border-gray-200 bg-white py-6 text-center text-theme-xs text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
-          <p>
-            {t("footer.copyright", {
-              year: new Date().getFullYear(),
-              name: theme.displayName,
-            })}
-          </p>
-          <p className="mt-1">{t("footer.powered")}</p>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+        <footer className="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-1 px-4 py-6 text-center text-theme-xs text-gray-500 sm:flex-row sm:justify-between sm:px-6 sm:text-start dark:text-gray-400">
+            <p>{t("footer.copyright", { year: new Date().getFullYear(), name: theme.displayName })}</p>
+            <p className="text-gray-400 dark:text-gray-500">{t("footer.powered")}</p>
+          </div>
         </footer>
       </div>
     </WriteModeProvider>

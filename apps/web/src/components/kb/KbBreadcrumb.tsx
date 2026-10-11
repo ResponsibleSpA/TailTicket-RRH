@@ -13,7 +13,7 @@ interface BreadcrumbItem {
 export default function KbBreadcrumb({ items, label }: { items: readonly BreadcrumbItem[]; label: string }) {
   return (
     <nav aria-label={label}>
-      <ol className="flex flex-wrap items-center gap-1.5 text-sm">
+      <ol className="flex flex-wrap items-center gap-1.5 text-theme-sm">
         {items.map((item, i) => (
           <Fragment key={`${i}-${item.label}`}>
             {i > 0 && (
@@ -23,11 +23,11 @@ export default function KbBreadcrumb({ items, label }: { items: readonly Breadcr
             )}
             <li className="min-w-0 break-words">
               {item.href ? (
-                <Link href={item.href} className="text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400">
+                <Link href={item.href} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white/90">
                   {item.label}
                 </Link>
               ) : (
-                <span aria-current="page" className="text-gray-800 dark:text-white/90">
+                <span aria-current="page" className="font-medium text-gray-700 dark:text-gray-300">
                   {item.label}
                 </span>
               )}

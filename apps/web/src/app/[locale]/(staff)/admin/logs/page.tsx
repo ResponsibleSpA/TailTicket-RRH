@@ -3,13 +3,15 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { controlClass } from "@/components/adminsys/fields";
 import SysNotice from "@/components/adminsys/SysNotice";
 import MassBar from "@/components/admin/MassBar";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import LinkPager from "@/components/common/LinkPager";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import Badge from "@/components/ui/badge/Badge";
 import { db } from "@/server/db";
 import { listLogs, LOG_TYPES } from "@/server/domain/adminsys/logs";
 import { cn } from "@/utils";
+import Summary from "@/components/admin/Summary";
+import { BTN_SECONDARY } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -42,19 +44,19 @@ export default async function LogsPage({ params, searchParams }: { params: Promi
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={res.type ? t(`types.${res.type}`) : t("all")} />
       <SysNotice sp={sp} />
-      {res.invalid && <Callout tone="warning">{t("invalidSpan")}</Callout>}
-      <form method="get" className="flex flex-wrap items-end gap-3">
-        <label className="text-sm text-gray-600 dark:text-gray-400">
+      {res.invalid && <Outcome tone="warning">{t("invalidSpan")}</Outcome>}
+      <form method="get" className="grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap">
+        <label className="flex min-w-0 flex-col gap-1 text-theme-sm font-medium text-gray-700 dark:text-gray-400">
           {t("from")}
-          <input type="date" name="startDate" defaultValue={sp.startDate ?? ""} className={cn(controlClass, "mt-1 h-10 w-44")} />
+          <input type="date" name="startDate" defaultValue={sp.startDate ?? ""} className={cn(controlClass, "h-10 w-full sm:w-44")} />
         </label>
-        <label className="text-sm text-gray-600 dark:text-gray-400">
+        <label className="flex min-w-0 flex-col gap-1 text-theme-sm font-medium text-gray-700 dark:text-gray-400">
           {t("to")}
-          <input type="date" name="endDate" defaultValue={sp.endDate ?? ""} className={cn(controlClass, "mt-1 h-10 w-44")} />
+          <input type="date" name="endDate" defaultValue={sp.endDate ?? ""} className={cn(controlClass, "h-10 w-full sm:w-44")} />
         </label>
-        <label className="text-sm text-gray-600 dark:text-gray-400">
+        <label className="flex min-w-0 flex-col gap-1 text-theme-sm font-medium text-gray-700 dark:text-gray-400">
           {t("type")}
-          <select name="type" defaultValue={sp.type ?? ""} className={cn(controlClass, "mt-1 h-10 w-44 py-0")}>
+          <select name="type" defaultValue={sp.type ?? ""} className={cn(controlClass, "h-10 w-full py-0 sm:w-44")}>
             <option value="">{t("all")}</option>
             {LOG_TYPES.map((lt) => (
               <option key={lt} value={lt}>
@@ -63,7 +65,7 @@ export default async function LogsPage({ params, searchParams }: { params: Promi
             ))}
           </select>
         </label>
-        <button type="submit" className="h-10 rounded-lg px-4 text-sm font-medium text-gray-700 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-white/5">
+        <button type="submit" className={cn(BTN_SECONDARY, "h-10 px-4")}>
           {c("search")}
         </button>
       </form>
@@ -75,7 +77,7 @@ export default async function LogsPage({ params, searchParams }: { params: Promi
             { key: "sel", label: "", className: "w-10" },
             { key: "title", label: t("logTitle"), sortHref: sortHref("title"), sorted: sorted("title") },
             { key: "type", label: t("type"), sortHref: sortHref("type"), sorted: sorted("type") },
-            { key: "date", label: t("date"), sortHref: sortHref("date"), sorted: sorted("date") },
+            { key: "date", label: t("date"), sortHref: sortHref("date"), sorted: sorted("date"), className: "whitespace-nowrap" },
             { key: "ip", label: t("ip"), sortHref: sortHref("ip"), sorted: sorted("ip") },
           ]}
           rows={res.rows.map((l) => ({
@@ -83,8 +85,8 @@ export default async function LogsPage({ params, searchParams }: { params: Promi
             cells: {
               sel: <input type="checkbox" name="ids[]" value={l.log_id} className="h-4 w-4 accent-brand-500" aria-label={l.title} />,
               title: (
-                <details>
-                  <summary className="cursor-pointer font-medium text-gray-800 dark:text-white/90">{l.title}</summary>
+                <details className="group">
+                  <Summary className="font-medium text-gray-800 dark:text-white/90">{l.title}</Summary>
                   <pre className="mt-2 max-w-3xl text-theme-xs whitespace-pre-wrap text-gray-600 dark:text-gray-400">{l.log}</pre>
                 </details>
               ),
@@ -99,12 +101,14 @@ export default async function LogsPage({ params, searchParams }: { params: Promi
           }))}
         />
       </form>
-      <LinkPager
-        page={res.page}
-        totalPages={Math.max(1, Math.ceil(res.total / res.limit))}
-        href={(p: number) => `/admin/logs?${new URLSearchParams({ ...Object.fromEntries(qs), p: String(p) })}`}
-        labels={{ prev: c("prev"), next: c("next") }}
-      />
+      {res.total > res.limit && (
+        <LinkPager
+          page={res.page}
+          totalPages={Math.max(1, Math.ceil(res.total / res.limit))}
+          href={(p: number) => `/admin/logs?${new URLSearchParams({ ...Object.fromEntries(qs), p: String(p) })}`}
+          labels={{ prev: c("prev"), next: c("next") }}
+        />
+      )}
     </div>
   );
 }

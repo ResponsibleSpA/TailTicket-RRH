@@ -6,6 +6,7 @@
 - [Scope](scope.md): cosa TailTicket è e non è, funzioni, limiti noti.
 - [Roadmap](roadmap.md): fatto e prossimi passi.
 - [Brand](brand/README.md): nome, logo, colori, regole d'uso.
+- [Linee guida dell'interfaccia](brand/ui.md): palette, componenti, grafici.
 
 ## Usarlo
 - [Deploy](../deploy/README.md): stack completo in un comando, HTTPS, email, backup, aggiornamenti, collegamento a un osTicket esistente.

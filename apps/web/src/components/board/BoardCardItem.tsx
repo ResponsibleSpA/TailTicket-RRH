@@ -9,6 +9,7 @@ import type { BoardCard } from "@/server/domain/board/types";
 import { cn } from "@/utils";
 
 import AssigneeAvatar from "./AssigneeAvatar";
+import DueBadge from "./DueBadge";
 import PriorityPill, { priorityStripe } from "./PriorityPill";
 
 interface BoardCardItemProps {
@@ -73,14 +74,15 @@ export default function BoardCardItem({
       }
       aria-busy={pending || undefined}
       className={cn(
-        "group relative rounded-xl border border-s-4 border-gray-200 bg-white p-3 shadow-theme-xs transition-shadow select-none",
-        "hover:shadow-theme-md has-[a:focus-visible]:ring-3 has-[a:focus-visible]:ring-brand-500/30",
-        "[-webkit-touch-callout:none] dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700",
+        // card neutra (docs/brand/ui.md): bordo 1px, ombra minima che cresce al passaggio del mouse
+        "group relative rounded-xl border border-gray-200 bg-white p-3 shadow-theme-xs transition-[box-shadow,border-color] select-none",
+        "hover:border-gray-300 hover:shadow-theme-sm has-[a:focus-visible]:ring-3 has-[a:focus-visible]:ring-brand-500/30",
+        "[-webkit-touch-callout:none] dark:border-gray-800 dark:bg-gray-900 dark:shadow-none dark:hover:border-gray-700",
         priorityStripe(card.priority),
         draggable && "cursor-grab touch-manipulation active:cursor-grabbing",
-        dragging && "opacity-40",
+        dragging && "border-dashed opacity-40 shadow-none",
         pending && "animate-pulse",
-        ghost && "cursor-grabbing shadow-theme-xl ring-2 ring-brand-500/40",
+        ghost && "cursor-grabbing border-gray-300 shadow-theme-xl ring-1 ring-brand-500/30 dark:border-gray-700 dark:shadow-theme-xl",
       )}
     >
       <div className="flex items-start gap-2">
@@ -91,8 +93,8 @@ export default function BoardCardItem({
           aria-label={t("open", { number: card.number })}
           className="min-w-0 flex-1 outline-hidden after:absolute after:inset-0 after:rounded-xl after:content-['']"
         >
-          <span className="flex items-center gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400">
-            <span className="font-mono">#{card.number}</span>
+          <span className="flex items-center gap-1.5 text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">
+            <span>#{card.number}</span>
             {card.lockedBy && (
               <span title={t("locked", { name: card.lockedBy })} className="text-warning-600 dark:text-warning-400">
                 <Lock className="size-3.5" aria-hidden />
@@ -100,7 +102,7 @@ export default function BoardCardItem({
               </span>
             )}
           </span>
-          <span className="mt-0.5 line-clamp-2 text-sm font-medium break-words text-gray-800 group-hover:text-brand-600 dark:text-white/90 dark:group-hover:text-brand-400">
+          <span className="mt-0.5 line-clamp-2 text-sm leading-snug font-medium break-words text-gray-900 group-hover:text-brand-600 dark:text-white/90 dark:group-hover:text-brand-400">
             {card.subject || "—"}
           </span>
         </Link>
@@ -121,31 +123,13 @@ export default function BoardCardItem({
 
       {(card.overdue || card.dueSoon) && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {card.overdue ? (
-            <span
-              className="inline-flex items-center rounded-full bg-error-50 px-2 py-0.5 text-theme-xs font-medium text-error-600 dark:bg-error-500/15 dark:text-error-400"
-              title={
-                card.dueLabel ? t("due", { date: card.dueLabel }) : undefined
-              }
-            >
-              {t("overdue")}
-            </span>
-          ) : (
-            <span
-              className="inline-flex items-center rounded-full bg-warning-50 px-2 py-0.5 text-theme-xs font-medium text-warning-700 dark:bg-warning-500/15 dark:text-warning-400"
-              title={
-                card.dueLabel ? t("due", { date: card.dueLabel }) : undefined
-              }
-            >
-              {t("dueSoon")}
-            </span>
-          )}
+          <DueBadge card={card} />
         </div>
       )}
 
       <div className="mt-3 flex items-center gap-2">
         <PriorityPill priority={card.priority} />
-        <div className="flex min-w-0 flex-1 items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400">
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">
           {card.threadCount > 0 && (
             <span className="inline-flex items-center gap-0.5" title={t("thread", { count: card.threadCount })}>
               <MessageSquare className="size-3.5" aria-hidden />

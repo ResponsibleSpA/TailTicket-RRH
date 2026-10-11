@@ -5,7 +5,7 @@ import LinkPager from "@/components/common/LinkPager";
 import { NewRecordButton, OrgMassBar, RowSelect } from "@/components/people/directory/DirectoryButtons";
 import PeopleCards from "@/components/people/PeopleCards";
 import PeopleDoneNotice from "@/components/people/PeopleDoneNotice";
-import { Link } from "@/i18n/navigation";
+import { NameLink } from "@/components/people/PeopleLinks";
 import { listOrgs } from "@/server/domain/directory/directory";
 import { newFormFields } from "@/server/domain/directory/ui";
 import { GlobalPerm } from "@/server/domain/staff/staff";
@@ -55,7 +55,7 @@ export default async function OrgsPage({
     <div className="space-y-5">
       <PageHeader
         title={t("orgs")}
-        subtitle={t("orgsCount", { n: total })}
+        subtitle={<span className="tabular-nums">{t("orgsCount", { n: total })}</span>}
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {agent.hasGlobalPerm(GlobalPerm.ORG_CREATE) && <NewRecordButton kind="org" fields={await newFormFields("O")} />}
@@ -71,9 +71,7 @@ export default async function OrgsPage({
           key: o.id,
           select: <RowSelect id={o.id} group="org" />,
           title: (
-            <Link href={`/agent/orgs/${o.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-              {o.name}
-            </Link>
+<NameLink href={`/agent/orgs/${o.id}`}>{o.name}</NameLink>
           ),
           meta: [
             { label: t("users"), value: o.users },
@@ -96,9 +94,7 @@ export default async function OrgsPage({
             cells: {
               sel: <RowSelect id={o.id} group="org" />,
               name: (
-                <Link href={`/agent/orgs/${o.id}`} className="font-medium text-brand-600 hover:underline dark:text-brand-400">
-                  {o.name}
-                </Link>
+<NameLink href={`/agent/orgs/${o.id}`}>{o.name}</NameLink>
               ),
               users: o.users,
               created: formatDbDate(o.created, tz, locale),

@@ -17,10 +17,10 @@ export default function SubcategoryList({ items, labels, countLabel }: { items: 
       {items.map((c) => (
         <li key={c.id} className="flex flex-wrap items-center gap-2">
           <Folder className="size-4 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-          <Link href={`/agent/kb/category/${c.id}`} className="min-w-0 text-sm font-medium break-words text-brand-600 hover:underline dark:text-brand-400">
+          <Link href={`/agent/kb/category/${c.id}`} className="min-w-0 text-sm font-medium break-words text-gray-800 hover:text-brand-600 dark:text-gray-200 dark:hover:text-brand-400">
             {c.name}
           </Link>
-          <span className="text-theme-xs text-gray-500 dark:text-gray-400">{countLabel(c.faqCount)}</span>
+          <span className="text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">{countLabel(c.faqCount)}</span>
           <VisibilityBadge visibility={c.visibility} labels={labels} />
         </li>
       ))}

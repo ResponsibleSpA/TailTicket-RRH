@@ -1,11 +1,12 @@
 import { getTranslations } from "next-intl/server";
 
-import ComponentCard from "@/components/common/ComponentCard";
 import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { TaskModel } from "@/lib/osticket/flags";
 import type { TaskRow } from "@/server/domain/task/tasks";
 import { formatDbDate } from "@/server/format/datetime";
+
+import SideCard from "./SideCard";
 
 interface TicketTasksCardProps {
   tasks: TaskRow[];
@@ -18,7 +19,7 @@ export default async function TicketTasksCard({ tasks, tz, locale }: TicketTasks
   const t = await getTranslations("ticket");
   const tTask = await getTranslations("tasks");
   return (
-    <ComponentCard title={t("tasks", { count: tasks.length })}>
+    <SideCard title={t("tasks", { count: tasks.length })}>
       <ul className="divide-y divide-gray-100 dark:divide-gray-800">
         {tasks.map((k) => {
           const open = (k.flags & TaskModel.ISOPEN) !== 0;
@@ -39,6 +40,6 @@ export default async function TicketTasksCard({ tasks, tz, locale }: TicketTasks
           );
         })}
       </ul>
-    </ComponentCard>
+    </SideCard>
   );
 }

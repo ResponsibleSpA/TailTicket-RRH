@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import ComponentCard from "@/components/common/ComponentCard";
-
 import InfoRow from "./InfoRow";
+import SideCard from "./SideCard";
 
 interface TicketAssignmentCardProps {
   /** nome dell'agente assegnatario ("" se non assegnato) */
@@ -16,12 +15,12 @@ interface TicketAssignmentCardProps {
 export default async function TicketAssignmentCard({ assignee, teamName, roleName }: TicketAssignmentCardProps) {
   const t = await getTranslations("ticket");
   return (
-    <ComponentCard title={t("assignment")}>
+    <SideCard title={t("assignment")}>
       <dl className="divide-y divide-gray-100 dark:divide-gray-800">
         <InfoRow label={t("assignedTo")}>{assignee}</InfoRow>
         <InfoRow label={t("team")}>{teamName}</InfoRow>
         <InfoRow label={t("yourRole")}>{roleName || t("viewOnly")}</InfoRow>
       </dl>
-    </ComponentCard>
+    </SideCard>
   );
 }

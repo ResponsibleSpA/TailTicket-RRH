@@ -1,9 +1,10 @@
+import { History } from "lucide-react";
 import { DateTime } from "luxon";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import AdminNotice from "@/components/admin/AdminNotice";
+import { Notices } from "@/components/admin/Outcome";
 import UndoChange from "@/components/admin/UndoChange";
-import Callout from "@/components/common/Callout";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import LinkPager from "@/components/common/LinkPager";
 import Badge from "@/components/ui/badge/Badge";
@@ -62,55 +63,74 @@ export default async function ChangesPage({ params, searchParams }: { params: Pr
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <AdminNotice ok={sp.ok} />
-      {!enabled && <Callout tone="info">{t("disabledNotice")}</Callout>}
-      {enabled && !canRestore && <Callout tone="info">{t("restoreOff")}</Callout>}
-      {enabled && canRestore && !canAdmin && <Callout tone="warning">{t("restoreOnly")}</Callout>}
-      <p className="text-sm text-gray-600 dark:text-gray-400">{t("hint", { max: MAX_CHANGE_ROWS })}</p>
-      <DataTable
-        empty={t("empty")}
-        columns={[
-          { key: "when", label: t("when"), className: "whitespace-nowrap" },
-          { key: "who", label: t("who") },
-          { key: "op", label: t("op") },
-          { key: "tables", label: t("tables") },
-          { key: "state", label: t("state") },
-          { key: "actions", label: "", className: "w-44" },
+      {/* avvisi sulla disponibilità dell'annullamento: un solo riquadro */}
+      <Notices
+        items={[
+          ...(!enabled ? [{ key: "off", tone: "info" as const, content: t("disabledNotice") }] : []),
+          ...(enabled && !canRestore ? [{ key: "restore", tone: "info" as const, content: t("restoreOff") }] : []),
+          ...(enabled && canRestore && !canAdmin ? [{ key: "only", tone: "warning" as const, content: t("restoreOnly") }] : []),
         ]}
-        rows={rows.map((s, i) => {
-          const { state, note } = states[i];
-          const tables = Object.keys(s.touched).length ? Object.keys(s.touched) : Object.keys(s.tables);
-          return {
-            key: s.id,
-            cells: {
-              when: <span title={s.id}>{DateTime.fromISO(s.ts).setZone(tz).setLocale(locale).toLocaleString(DateTime.DATETIME_MED)}</span>,
-              who: s.staff?.username ?? t("cli"),
-              op: <span className="break-all">{s.undoes ? t("undoOf", { id: s.undoes }) : (s.path ?? s.op ?? "—")}</span>,
-              tables: (
-                <div className="space-y-0.5 text-theme-xs">
-                  <p>{t("rows", { n: s.rows })}</p>
-                  {tables.map((tb) => {
-                    const n = s.tables[tb];
-                    return <p key={tb}>{n ? t("tableCounts", { table: plain(tb), insert: n.insert, update: n.update, delete: n.delete }) : `${plain(tb)}: ${s.touched[tb]?.join(", ")}`}</p>;
-                  })}
-                </div>
-              ),
-              state: (
-                <div className="space-y-1">
-                  <Badge size="sm" color={COLOR[state]}>
-                    {t(`states.${state}`)}
-                  </Badge>
-                  {note && <p className="text-theme-xs text-gray-500 dark:text-gray-400">{note}</p>}
-                </div>
-              ),
-              actions:
-                state === "undoable" || state === "conflict" ? (
-                  <UndoChange change={changeRef(s)} disabled={!canRestore ? t("restoreOff") : state === "conflict" ? t("errors.conflict") : undefined} />
-                ) : null,
-            },
-          };
-        })}
       />
-      <LinkPager page={page} totalPages={Math.max(1, Math.ceil(all.length / PER_PAGE))} href={(p: number) => `/admin/changes?p=${p}`} labels={{ prev: c("prev"), next: c("next") }} />
+      <p className="max-w-4xl text-sm text-gray-500 dark:text-gray-400">{t("hint", { max: MAX_CHANGE_ROWS })}</p>
+      {all.length === 0 ? (
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-14 text-center dark:border-gray-700 dark:bg-white/3">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+            <History aria-hidden className="size-5" />
+          </span>
+          <p className="mt-4 text-sm font-semibold text-gray-900 dark:text-white/90">{t("empty")}</p>
+          <p className="mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">{enabled ? t("emptyDesc") : t("disabledNotice")}</p>
+        </div>
+      ) : (
+        <DataTable
+          empty={t("empty")}
+          columns={[
+            { key: "when", label: t("when"), className: "whitespace-nowrap" },
+            { key: "who", label: t("who") },
+            { key: "op", label: t("op") },
+            { key: "tables", label: t("tables") },
+            { key: "state", label: t("state") },
+            { key: "actions", label: "", className: "w-44" },
+          ]}
+          rows={rows.map((s, i) => {
+            const { state, note } = states[i];
+            const tables = Object.keys(s.touched).length ? Object.keys(s.touched) : Object.keys(s.tables);
+            return {
+              key: s.id,
+              cells: {
+                when: <span title={s.id}>{DateTime.fromISO(s.ts).setZone(tz).setLocale(locale).toLocaleString(DateTime.DATETIME_MED)}</span>,
+                who: <span className="font-medium text-gray-900 dark:text-white/90">{s.staff?.username ?? t("cli")}</span>,
+                op: <span className="font-mono text-theme-xs break-all">{s.undoes ? t("undoOf", { id: s.undoes }) : (s.path ?? s.op ?? "—")}</span>,
+                tables: (
+                  <div className="space-y-0.5 text-theme-xs">
+                    <p>{t("rows", { n: s.rows })}</p>
+                    {tables.map((tb) => {
+                      const n = s.tables[tb];
+                      return (
+                        <p key={tb}>{n ? t("tableCounts", { table: plain(tb), insert: n.insert, update: n.update, delete: n.delete }) : `${plain(tb)}: ${s.touched[tb]?.join(", ")}`}</p>
+                      );
+                    })}
+                  </div>
+                ),
+                state: (
+                  <div className="space-y-1">
+                    <Badge size="sm" color={COLOR[state]}>
+                      {t(`states.${state}`)}
+                    </Badge>
+                    {note && <p className="text-theme-xs text-gray-500 dark:text-gray-400">{note}</p>}
+                  </div>
+                ),
+                actions:
+                  state === "undoable" || state === "conflict" ? (
+                    <UndoChange change={changeRef(s)} disabled={!canRestore ? t("restoreOff") : state === "conflict" ? t("errors.conflict") : undefined} />
+                  ) : null,
+              },
+            };
+          })}
+        />
+      )}
+      {all.length > PER_PAGE && (
+        <LinkPager page={page} totalPages={Math.max(1, Math.ceil(all.length / PER_PAGE))} href={(p: number) => `/admin/changes?p=${p}`} labels={{ prev: c("prev"), next: c("next") }} />
+      )}
     </div>
   );
 }

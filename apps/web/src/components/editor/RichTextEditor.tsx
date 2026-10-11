@@ -8,6 +8,8 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/utils";
 
+import { escapeHtml, LINK_HIGHLIGHT_STYLE, LINK_RE, markLinkTarget } from "./link-target";
+
 /**
  * Editor HTML essenziale (contentEditable) per risposte e note: grassetto, corsivo, sottolineato,
  * elenchi, link, citazione. L'HTML prodotto viene sempre sanificato lato server (Format::safe_html).
@@ -54,11 +56,6 @@ const BUTTONS: {
   { cmd: "formatBlock", arg: "blockquote", label: "quote", icon: TextQuote },
   { cmd: "createLink", label: "link", icon: LinkIcon },
 ];
-
-/** Indirizzi ammessi per i collegamenti (come prima con il prompt): web e email. */
-const LINK_RE = /^(https?:\/\/\S+|mailto:\S+)$/i;
-
-const escapeHtml = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const RichTextEditor = forwardRef<RichTextEditorHandle, Props>(function RichTextEditor({ name, placeholder, label, onActivity, minHeight = 160, labels, defaultValue }, ref) {
   const editor = useRef<HTMLDivElement>(null);
@@ -109,6 +106,7 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, Props>(function RichText
 
   useEffect(() => {
     if (linkOpen) linkInput.current?.select();
+    else markLinkTarget(null);
   }, [linkOpen]);
 
   /** Ripristina nell'editor la selezione salvata all'apertura del riquadro. */
@@ -125,6 +123,7 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, Props>(function RichText
     const sel = window.getSelection();
     const range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
     savedRange.current = range && editor.current?.contains(range.commonAncestorContainer) ? range.cloneRange() : null;
+    markLinkTarget(savedRange.current);
     setLinkUrl("https://");
     setLinkOpen(true);
   };
@@ -167,39 +166,49 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, Props>(function RichText
   // Il testo digitato senza blocco va in un paragrafo, come produce l'editor di osTicket
   const value = empty || /^\s*<(p|div|ul|ol|blockquote|h[1-6]|table|pre)\b/i.test(html) ? html : `<p>${html}</p>`;
 
+  // gruppi della barra: formato del testo | elenchi | citazione e collegamento
+  const groupEnds = new Set(["underline", "insertOrderedList"]);
+
   return (
-    <div className="relative rounded-lg border border-gray-300 focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/10 dark:border-gray-700">
-      <div className="flex flex-wrap gap-1 border-b border-gray-200 px-2 py-1.5 dark:border-gray-800">
+    <div className="relative rounded-lg border border-gray-300 shadow-theme-xs focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/10 dark:border-gray-700 dark:focus-within:border-brand-800">
+      <div className="flex flex-wrap items-center gap-0.5 rounded-t-lg border-b border-gray-200 bg-gray-50/70 px-1.5 py-1 dark:border-gray-800 dark:bg-white/2">
         {BUTTONS.map((b) => (
-          <button
-            key={b.cmd + (b.arg ?? "")}
-            ref={b.cmd === "createLink" ? linkButton : undefined}
-            type="button"
-            title={labels[b.label]}
-            aria-label={labels[b.label]}
-            {...(b.cmd === "createLink"
-              ? {
-                  "aria-haspopup": "dialog" as const,
-                  "aria-expanded": linkOpen,
-                  "aria-controls": linkId,
-                }
-              : {})}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => exec(b.cmd, b.arg)}
-            className="inline-flex size-8 items-center justify-center rounded text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
-          >
-            <b.icon className="size-4" />
-          </button>
+          <span key={b.cmd + (b.arg ?? "")} className="contents">
+            <button
+              ref={b.cmd === "createLink" ? linkButton : undefined}
+              type="button"
+              title={labels[b.label]}
+              aria-label={labels[b.label]}
+              {...(b.cmd === "createLink"
+                ? {
+                    "aria-haspopup": "dialog" as const,
+                    "aria-expanded": linkOpen,
+                    "aria-controls": linkId,
+                  }
+                : {})}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => exec(b.cmd, b.arg)}
+              className={cn(
+                "inline-flex size-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-200/60 hover:text-gray-900 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white",
+                b.cmd === "createLink" && linkOpen && "bg-gray-200/60 text-gray-900 dark:bg-white/5 dark:text-white",
+              )}
+            >
+              <b.icon className="size-4" />
+            </button>
+            {groupEnds.has(b.cmd) && <span aria-hidden className="mx-1 h-5 w-px bg-gray-200 dark:bg-gray-700" />}
+          </span>
         ))}
       </div>
+      {linkOpen && <style>{LINK_HIGHLIGHT_STYLE}</style>}
       {linkOpen && (
-        // Riquadro non modale sotto la barra: niente <form> annidato (l'editor sta già in un form),
+        // Riquadro non modale in una fascia sotto la barra, nel flusso: sposta il testo invece di coprirlo,
+        // così la parola da collegare resta visibile. Niente <form> annidato (l'editor sta già in un form),
         // Invio applica, Esc annulla; uscendo con il focus si chiude senza modifiche
         <div
           id={linkId}
           role="dialog"
           aria-label={labels.link}
-          className="absolute start-2 top-11 z-20 w-80 max-w-[calc(100%-1rem)] rounded-lg border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-700 dark:bg-gray-900"
+          className="border-b border-gray-200 bg-white px-3 py-3 dark:border-gray-800 dark:bg-gray-900"
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault();
@@ -214,48 +223,55 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, Props>(function RichText
           <label htmlFor={`${linkId}-url`} className="mb-1.5 block text-theme-xs font-medium text-gray-700 dark:text-gray-400">
             {labels.linkPrompt}
           </label>
-          <input
-            ref={linkInput}
-            id={`${linkId}-url`}
-            type="text"
-            inputMode="url"
-            autoComplete="off"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                applyLink();
-              }
-            }}
-            aria-invalid={linkInvalid}
-            aria-describedby={`${linkId}-hint`}
-            className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:text-white/90"
-          />
-          <p id={`${linkId}-hint`} className={cn("mt-1 text-theme-xs", linkInvalid ? "text-error-500" : "text-gray-500 dark:text-gray-400")}>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              ref={linkInput}
+              id={`${linkId}-url`}
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyLink();
+                }
+              }}
+              aria-invalid={linkInvalid}
+              aria-describedby={`${linkId}-hint`}
+              className={cn(
+                "h-9 min-w-0 flex-1 basis-56 rounded-lg border bg-transparent px-3 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:text-white/90",
+                linkInvalid
+                  ? "border-error-300 focus:border-error-300 focus:ring-error-500/10 dark:border-error-700"
+                  : "border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:focus:border-brand-800",
+              )}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => closeLink("editor")}
+                className="h-9 rounded-lg px-3 text-theme-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
+              >
+                {tc("cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={applyLink}
+                disabled={!urlValid}
+                className="h-9 rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden disabled:opacity-50"
+              >
+                {tl("linkApply")}
+              </button>
+            </div>
+          </div>
+          <p id={`${linkId}-hint`} className={cn("mt-1.5 text-theme-xs", linkInvalid ? "text-error-600 dark:text-error-400" : "text-gray-500 dark:text-gray-400")}>
             {tl("linkInvalid")}
           </p>
-          <div className="mt-3 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => closeLink("editor")}
-              className="h-8 rounded-lg border border-gray-300 px-3 text-theme-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-            >
-              {tc("cancel")}
-            </button>
-            <button
-              type="button"
-              onClick={applyLink}
-              disabled={!urlValid}
-              className="h-8 rounded-lg bg-brand-500 px-3 text-theme-xs font-medium text-white hover:bg-brand-600 disabled:opacity-50"
-            >
-              {tl("linkApply")}
-            </button>
-          </div>
         </div>
       )}
       <div className="relative">
-        {empty && placeholder && <div className="pointer-events-none absolute top-3 left-4 text-sm text-gray-400">{placeholder}</div>}
+        {empty && placeholder && <div className="pointer-events-none absolute start-4 top-3 text-sm text-gray-400 dark:text-gray-500">{placeholder}</div>}
         <div
           ref={editor}
           contentEditable

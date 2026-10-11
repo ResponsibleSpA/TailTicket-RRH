@@ -122,7 +122,7 @@ export const Modal: React.FC<ModalProps> = ({
             onClick={onClose}
             aria-label={t("close")}
             title={t("close")}
-            className="absolute inset-e-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 sm:inset-e-6 sm:top-6 sm:h-11 sm:w-11 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            className="absolute inset-e-3 top-3 z-999 flex size-9 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden sm:inset-e-5 sm:top-5 dark:text-gray-500 dark:hover:bg-white/5 dark:hover:text-gray-200"
           >
             <X className="size-5" />
           </button>

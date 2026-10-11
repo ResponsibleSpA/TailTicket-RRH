@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Link } from "@/i18n/navigation";
+import { FolderOpen } from "lucide-react";
 
 import VisibilityBadge, { type VisibilityLabels } from "./VisibilityBadge";
 
@@ -24,10 +25,13 @@ export default function CategoryCard({
   children?: ReactNode;
 }) {
   return (
-    <section className="flex min-w-0 flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3">
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="min-w-0 font-medium break-words text-gray-800 dark:text-white/90">
-          <Link href={`/agent/kb/category/${id}`} className="hover:text-brand-500 dark:hover:text-brand-400">
+    <section className="flex min-w-0 flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 transition-colors has-[h3_a:hover]:border-gray-300 dark:border-gray-800 dark:bg-white/3 dark:has-[h3_a:hover]:border-gray-700">
+      <div className="flex items-start gap-3">
+        <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+          <FolderOpen className="size-4" />
+        </span>
+        <h3 className="min-w-0 flex-1 self-center text-base font-semibold break-words text-gray-900 dark:text-white/90">
+          <Link href={`/agent/kb/category/${id}`} className="hover:text-brand-600 dark:hover:text-brand-400">
             {name}
           </Link>
         </h3>
@@ -37,7 +41,7 @@ export default function CategoryCard({
         <div className="thread-body line-clamp-3 text-sm break-words text-gray-500 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
       )}
       {children}
-      <p className="mt-auto text-theme-xs text-gray-400 dark:text-gray-500">{countLabel}</p>
+      <p className="mt-auto border-t border-gray-100 pt-3 text-theme-xs text-gray-500 tabular-nums dark:border-gray-800 dark:text-gray-400">{countLabel}</p>
     </section>
   );
 }

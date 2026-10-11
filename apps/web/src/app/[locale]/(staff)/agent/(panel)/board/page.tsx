@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import BoardClient from "@/components/board/BoardClient";
+import { PageHeader } from "@/components/common/DataTable";
 import { boardPriorities, boardSources, loadBoard } from "@/server/domain/board/board";
 import { parseBoardParams } from "@/server/domain/board/params";
 import type { BoardColumn, BoardData } from "@/server/domain/board/types";
@@ -51,14 +52,14 @@ export default async function BoardPage({
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("pageTitle")}</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <PageHeader
+        title={t("pageTitle")}
+        subtitle={
+          <span className="tabular-nums">
             {sourceTitle} · {t("count", { total: data.total })}
-          </p>
-        </div>
-      </header>
+          </span>
+        }
+      />
       <BoardClient
         params={bp}
         data={data.error ? null : view}

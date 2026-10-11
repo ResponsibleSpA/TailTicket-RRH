@@ -68,8 +68,8 @@ function TaskComposerForm({ taskId, isOpen, canReply, canClose, canReopen }: Com
             aria-pressed={mode === "reply"}
             onClick={() => setMode("reply")}
             className={cn(
-              "rounded-lg px-3 py-2 text-sm font-medium",
-              mode === "reply" ? "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5",
+              "rounded-lg px-3 py-2 text-sm font-medium focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden",
+              mode === "reply" ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5",
             )}
           >
             {t("update")}
@@ -80,8 +80,8 @@ function TaskComposerForm({ taskId, isOpen, canReply, canClose, canReopen }: Com
           aria-pressed={mode === "note"}
           onClick={() => setMode("note")}
           className={cn(
-            "rounded-lg px-3 py-2 text-sm font-medium",
-            mode === "note" ? "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5",
+            "rounded-lg px-3 py-2 text-sm font-medium focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden",
+            mode === "note" ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5",
           )}
         >
           {t("internalNote")}

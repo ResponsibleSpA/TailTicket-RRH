@@ -6,6 +6,7 @@ import TicketCell from "@/components/tickets/TicketCell";
 import { Link } from "@/i18n/navigation";
 
 import type { TicketListProps } from "./TicketListCards";
+import TicketListEmpty from "./TicketListEmpty";
 
 interface TicketListTableProps extends TicketListProps {
   /** colonna di ordinamento corrente (?sort) e direzione (1 = crescente) */
@@ -37,7 +38,10 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
                   className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400"
                 >
                   {c.sortable ? (
-                    <Link href={sortHref(c.id, nextDir)} className="inline-flex items-center gap-1 hover:text-gray-800 dark:hover:text-white">
+                    <Link
+                      href={sortHref(c.id, nextDir)}
+                      className={`inline-flex items-center gap-1 rounded hover:text-gray-800 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:hover:text-white ${sorted ? "text-gray-800 dark:text-white/90" : ""}`}
+                    >
                       {tq.has(c.heading) ? tq(c.heading) : c.heading}
                       {sorted ? dir === 1 ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" /> : null}
                     </Link>
@@ -54,8 +58,8 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {rows.length === 0 && (
             <tr>
-              <td colSpan={columns.length + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
-                {t("empty")}
+              <td colSpan={columns.length + 1}>
+                <TicketListEmpty title={t("empty")} hint={t("emptyHint")} />
               </td>
             </tr>
           )}
@@ -63,12 +67,12 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
             const staff = names.get(r.staff_id) ?? "";
             const assignee = staff || r.team_name || "";
             return (
-              <tr key={r.ticket_id} className="hover:bg-gray-50 dark:hover:bg-white/2">
+              <tr key={r.ticket_id} className="transition-colors hover:bg-gray-50/70 has-checked:bg-brand-50/50 dark:hover:bg-white/2 dark:has-checked:bg-brand-500/5">
                 <td className="px-4 py-3">
                   <input type="checkbox" data-mass-tid value={r.ticket_id} aria-label={`#${r.number}`} className="size-4 accent-brand-500" />
                 </td>
                 {columns.map((c) => (
-                  <td key={c.id} className="max-w-xs px-4 py-3 text-gray-700 dark:text-gray-300">
+                  <td key={c.id} className="max-w-xs px-4 py-3 text-gray-700 tabular-nums dark:text-gray-300">
                     <TicketCell column={c} row={r} tz={tz} locale={locale} assigneeName={assignee} staffName={staff} />
                   </td>
                 ))}

@@ -10,9 +10,9 @@ import {
   type EditActionState,
 } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions-edit";
 import UserPicker from "@/components/tickets/create/UserPicker";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 
+import { dialogClass, DialogFooter, dialogScrollClass, DialogTitle, PrimaryButton, SecondaryButton } from "../../dialog-ui";
 import { EditErrorBox } from "../EditDialog";
 import type { TicketExtraData } from "../types";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
@@ -56,9 +56,9 @@ export default function CollaboratorsDialog({
   });
 
   return (
-    <Modal isOpen onClose={onClose} className="m-4 max-w-[640px] p-6 lg:p-8">
-      <div className="custom-scrollbar max-h-[80vh] space-y-6 overflow-y-auto pe-1">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">{t("collabTitle", { number: data.number })}</h4>
+    <Modal isOpen onClose={onClose} className={dialogClass()}>
+      <div className={dialogScrollClass}>
+        <DialogTitle>{t("collabTitle", { number: data.number })}</DialogTitle>
         <form onSubmit={submitKeepingValues(action)} className="space-y-4">
           <input type="hidden" name="ticketId" value={data.ticketId} />
           <EditErrorBox state={state} />
@@ -77,8 +77,11 @@ export default function CollaboratorsDialog({
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {data.collaborators.map((c) => (
                     <tr key={c.id}>
-                      <td className="py-2 text-gray-800 dark:text-white/90">
-                        {c.name} <span className="text-gray-500 dark:text-gray-400">&lt;{c.email}&gt;</span>
+                      <td className="max-w-0 py-2.5 pe-3">
+                        <p className="truncate text-gray-800 dark:text-white/90">{c.name}</p>
+                        <p title={c.email} className="truncate text-theme-xs text-gray-500 dark:text-gray-400">
+                          {c.email}
+                        </p>
                       </td>
                       <td className="py-2 text-center">
                         <input type="checkbox" name="cid" value={c.id} defaultChecked={c.active} aria-label={t("collabActive", { name: c.name })} className="size-4 accent-brand-500" />
@@ -91,9 +94,7 @@ export default function CollaboratorsDialog({
                 </tbody>
               </table>
               <div className="flex justify-end">
-                <Button size="sm" type="submit" disabled={pending}>
-                  {pending ? t("working") : t("saveChanges")}
-                </Button>
+                <PrimaryButton disabled={pending}>{pending ? t("working") : t("saveChanges")}</PrimaryButton>
               </div>
             </>
           )}
@@ -114,19 +115,17 @@ export default function CollaboratorsDialog({
           />
           {picked && (
             <div className="flex items-center justify-between gap-3 text-theme-sm text-gray-800 dark:text-white/90">
-              <span>{picked.name}</span>
+              <span className="min-w-0 truncate">{picked.name}</span>
               <input type="hidden" name="userId" value={picked.id} />
-              <Button size="sm" type="submit" disabled={adding}>
+              <SecondaryButton type="submit" disabled={adding}>
                 {adding ? t("working") : t("add")}
-              </Button>
+              </SecondaryButton>
             </div>
           )}
         </form>
-        <div className="flex justify-end">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {t("close")}
-          </Button>
-        </div>
+        <DialogFooter>
+          <SecondaryButton onClick={onClose}>{t("close")}</SecondaryButton>
+        </DialogFooter>
       </div>
     </Modal>
   );

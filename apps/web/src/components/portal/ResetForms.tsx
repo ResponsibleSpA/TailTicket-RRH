@@ -10,6 +10,9 @@ import Alert from "@/components/ui/alert/Alert";
 
 import { pwresetLoginAction, pwresetRequestAction, type ResetState } from "@/app/[locale]/(client)/actions";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
+import { cn } from "@/utils";
+
+import { BTN_PRIMARY, CARD } from "./styles";
 
 /** pwreset.php: richiesta del link (pwreset.request.php) o accesso con il token (pwreset.login.php). */
 export default function ResetForms({ token }: { token?: string }) {
@@ -24,7 +27,7 @@ export default function ResetForms({ token }: { token?: string }) {
       </div>
     );
   return (
-    <form onSubmit={submit} className="max-w-md space-y-5 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3">
+    <form onSubmit={submit} className={cn(CARD, "space-y-5 p-6 sm:p-8")}>
       <p className="text-sm text-gray-500 dark:text-gray-400">{token ? t("loginText") : t("requestText")}</p>
       {state.error && (
         <div>
@@ -36,7 +39,7 @@ export default function ResetForms({ token }: { token?: string }) {
         <Label htmlFor="userid">{t("userid")}</Label>
         <Input id="userid" name="userid" autoComplete="username" required />
       </div>
-      <button type="submit" disabled={pending} className="h-11 w-full rounded-lg bg-brand-500 px-5 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+      <button type="submit" disabled={pending} className={cn(BTN_PRIMARY, "w-full")}>
         {token ? t("login") : t("send")}
       </button>
     </form>

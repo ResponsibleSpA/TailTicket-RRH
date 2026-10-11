@@ -5,12 +5,13 @@ import BackLink from "@/components/adminsys/BackLink";
 import PhpLink from "@/components/adminsys/PhpLink";
 import SysForm from "@/components/adminsys/SysForm";
 import SysNotice from "@/components/adminsys/SysNotice";
-import Callout from "@/components/common/Callout";
+import { Notices } from "@/components/admin/Outcome";
 import { PageHeader } from "@/components/common/DataTable";
 import { FormType } from "@/lib/osticket/object-types";
 import { idOrNotFound } from "@/lib/route-id";
 import { db } from "@/server/db";
 import { formDetail } from "@/server/domain/adminsys/form";
+import { CDATA_FORM_TYPES } from "@/server/domain/forms/cdata";
 
 import { requireAdmin } from "../../guard";
 import { saveFormAction } from "../actions";
@@ -33,9 +34,21 @@ export default async function EditFormPage({ params, searchParams }: { params: P
     <div className="space-y-6">
       <PageHeader title={detail.form.title} subtitle={t("edit")} actions={<BackLink href="/admin/forms" label={c("back")} />} />
       <SysNotice sp={sp} />
-      <Callout tone="info">
-        {t("configNote")} <PhpLink path={`/scp/forms.php?id=${formId}`} label={t("openPhp")} />
-      </Callout>
+      {/* note sul modulo (campi gestiti dal pannello classico, tabella cdata): un solo riquadro */}
+      <Notices
+        items={[
+          {
+            key: "config",
+            tone: "info",
+            content: (
+              <>
+                {t("configNote")} <PhpLink path={`/scp/forms.php?id=${formId}`} label={t("openPhp")} />
+              </>
+            ),
+          },
+          ...(CDATA_FORM_TYPES.includes(detail.form.type) ? [{ key: "cdata", tone: "warning" as const, content: t("ddlNote") }] : []),
+        ]}
+      />
       <SysForm action={saveFormAction.bind(null, formId)} labels={await formLabels(detail.fields.map((f) => f.id))}>
         <FormFields detail={detail} />
       </SysForm>

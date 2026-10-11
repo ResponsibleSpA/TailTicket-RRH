@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import ComponentCard from "@/components/common/ComponentCard";
+import { PageHeader } from "@/components/common/DataTable";
 import FaqList from "@/components/kb/FaqList";
 import HtmlContent from "@/components/kb/HtmlContent";
 import KbBreadcrumb from "@/components/kb/KbBreadcrumb";
@@ -36,15 +37,15 @@ export default async function KbCategoryPage({ params }: { params: Promise<{ loc
           ...category.path.map((c) => ({ label: c.name, href: c.id === category.id ? undefined : `/agent/kb/category/${c.id}` })),
         ]}
       />
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="min-w-0 text-xl font-semibold break-words text-gray-800 dark:text-white/90">{category.fullName}</h2>
-          <VisibilityBadge visibility={category.visibility} labels={vis} size="md" />
-        </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          <time dateTime={isoOf(category.updated)}>{tk("lastUpdated", { date: formatDbDate(category.updated, tz, locale) })}</time>
-        </p>
-      </div>
+      <PageHeader
+        title={
+          <span className="inline-flex flex-wrap items-center gap-3">
+            <span className="min-w-0 break-words">{category.fullName}</span>
+            <VisibilityBadge visibility={category.visibility} labels={vis} size="md" />
+          </span>
+        }
+        subtitle={<time dateTime={isoOf(category.updated)}>{tk("lastUpdated", { date: formatDbDate(category.updated, tz, locale) })}</time>}
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
@@ -60,7 +61,7 @@ export default async function KbCategoryPage({ params }: { params: Promise<{ loc
               labels={vis}
               attachmentsLabel={(n) => tk("attachmentCount", { n })}
             />
-            {category.hiddenFaqs > 0 && <p className="text-theme-xs text-gray-500 dark:text-gray-400">{tk("hiddenByTopic", { n: category.hiddenFaqs })}</p>}
+            {category.hiddenFaqs > 0 && <p className="text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">{tk("hiddenByTopic", { n: category.hiddenFaqs })}</p>}
           </ComponentCard>
         </div>
         <div className="min-w-0 space-y-6">

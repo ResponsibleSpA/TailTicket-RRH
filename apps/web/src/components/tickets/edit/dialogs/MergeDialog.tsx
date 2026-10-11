@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { mergeAction, searchTicketsAction, unlinkAction, type EditActionState } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions-edit";
 import SuggestPicker from "@/components/tickets/SuggestPicker";
+import Badge from "@/components/ui/badge/Badge";
 import { useRouter } from "@/i18n/navigation";
 import { tryAction } from "@/lib/try-action";
 import type { TicketNumberHit } from "@/server/domain/ticket/merge";
@@ -110,9 +111,13 @@ export default function MergeDialog(p: MergeDialogProps) {
         {list.map((x, i) => (
           <li key={x.number} className={row}>
             <input type="hidden" name="tids" value={x.number} />
-            <span className="font-medium text-gray-800 dark:text-white/90">#{x.number}</span>
+            <span className="font-medium text-gray-800 tabular-nums dark:text-white/90">#{x.number}</span>
             <span className="flex-1 truncate text-gray-600 dark:text-gray-400">{x.subject}</span>
-            {i === 0 && <span className="rounded bg-brand-50 px-2 py-0.5 text-theme-xs text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">{t("parent")}</span>}
+            {i === 0 && (
+              <Badge size="sm" color="primary">
+                {t("parent")}
+              </Badge>
+            )}
             <button type="button" className={small} disabled={i === 0} onClick={() => move(i, -1)} aria-label={`${t("moveUp")} #${x.number}`}>
               <ArrowUp className="size-4" />
             </button>

@@ -4,9 +4,10 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useRef, type ReactNode } from "react";
 
 import type { MassActionState } from "@/app/[locale]/(staff)/agent/(panel)/tickets/actions-mass";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { submitKeepingValues } from "@/lib/submit-keeping-values";
+
+import { dialogClass, DialogFooter, DialogNotice, dialogScrollClass, DialogTitle, PrimaryButton, SecondaryButton } from "../dialog-ui";
 
 type MassAction = (prev: MassActionState, form: FormData) => Promise<MassActionState>;
 
@@ -46,31 +47,25 @@ export default function MassDialog({
   const submit = submitKeepingValues(formAction);
   const err = state.error ? (t.has(`mass.errors.${state.error}`) ? t(`mass.errors.${state.error}`) : t.has(`errors.${state.error}`) ? t(`errors.${state.error}`) : t("errors.generic")) : "";
   return (
-    <Modal isOpen onClose={onClose} className={`m-4 ${wide ? "max-w-[760px]" : "max-w-[600px]"} p-6 lg:p-8`}>
-      <form onSubmit={submit} className="custom-scrollbar max-h-[80vh] space-y-5 overflow-y-auto pe-1">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
+    <Modal isOpen onClose={onClose} className={dialogClass(wide ? "lg" : "md")}>
+      <form onSubmit={submit} className={dialogScrollClass}>
+        <DialogTitle>{title}</DialogTitle>
         {ids.map((id) => (
           <input key={id} type="hidden" name="tids" value={id} />
         ))}
-        {warning && <div className="rounded-lg bg-warning-50 px-4 py-3 text-theme-sm text-warning-700 dark:bg-warning-500/15 dark:text-orange-400">{warning}</div>}
+        {warning && <DialogNotice tone="warning">{warning}</DialogNotice>}
         {err && (
-          <div role="alert" className="rounded-lg bg-error-50 px-4 py-3 text-theme-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">
+          <DialogNotice tone="error" role="alert">
             {err}
-          </div>
+          </DialogNotice>
         )}
         {children}
-        <div className="flex items-center justify-end gap-3">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {t("cancel")}
-          </Button>
-          <button
-            type="submit"
-            disabled={pending}
-            className={`inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white shadow-theme-xs disabled:opacity-50 ${danger ? "bg-error-500 hover:bg-error-600" : "bg-brand-500 hover:bg-brand-600"}`}
-          >
+        <DialogFooter>
+          <SecondaryButton onClick={onClose}>{t("cancel")}</SecondaryButton>
+          <PrimaryButton disabled={pending} danger={danger}>
             {pending ? t("working") : submitLabel}
-          </button>
-        </div>
+          </PrimaryButton>
+        </DialogFooter>
       </form>
     </Modal>
   );

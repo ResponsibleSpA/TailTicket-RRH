@@ -3,7 +3,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import { CheckboxField, Hidden, RadioField, Section, SelectField, TextAreaField, TextField } from "@/components/adminsys/fields";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import { withCurrentOption } from "@/lib/admin/current-value";
 import { db } from "@/server/db";
 import { deptOptions, priorityOptions, topicOptions } from "@/server/domain/admin/lookups";
@@ -91,7 +91,7 @@ export async function EmailFields({ info, isNew }: { info: Record<string, string
             <TextField name="smtp_port" label={t("port")} value={info.smtp_port === "0" ? "" : info.smtp_port} type="number" />
             <CheckboxField name="smtp_allow_spoofing" label={t("allowSpoofing")} checked={info.smtp_allow_spoofing === "1"} />
           </Section>
-          <Callout tone="info">{t("oauthNote")}</Callout>
+          <Outcome tone="info">{t("oauthNote")}</Outcome>
         </>
       )}
     </>

@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import SysNotice from "@/components/adminsys/SysNotice";
 import MassBar from "@/components/admin/MassBar";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import Badge from "@/components/ui/badge/Badge";
 import { CustomQueue } from "@/lib/osticket/flags";
@@ -41,14 +41,14 @@ export default async function QueuesPage({ params, searchParams }: { params: Pro
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <SysNotice sp={sp} />
-      <Callout tone="info">
+      <Outcome tone="info">
         {t("phpNote")}{" "}
         {phpUrl && (
           <a href={`${phpUrl.replace(/\/$/, "")}/scp/settings.php?t=tickets#queues`} className="font-medium underline" target="_blank" rel="noreferrer">
             {t("openPhp")}
           </a>
         )}
-      </Callout>
+      </Outcome>
       <form action={massQueueAction} className="space-y-4">
         <MassBar
           actions={[

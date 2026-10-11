@@ -14,9 +14,9 @@ import {
   transferAction,
   type TicketActionState,
 } from "@/app/[locale]/(staff)/agent/(panel)/tickets/[id]/actions-assign";
-import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 
+import { dialogClass, DialogFooter, DialogNotice, DialogTitle, SecondaryButton } from "../dialog-ui";
 import ActionDialog, { ErrorBox } from "./ActionDialog";
 import { FieldCheck, FieldSelect, toOptions } from "./FormFields";
 import type { ActionKind, TicketActionsData } from "./types";
@@ -125,17 +125,15 @@ export default function ActionDialogs({ kind, data, onClose, onSuccess }: Props)
 function EmptyDialog({ title, message, onClose }: { title: string; message: string; onClose: () => void }) {
   const t = useTranslations("ticketActions");
   return (
-    <Modal isOpen onClose={onClose} className="m-4 max-w-[600px] p-6 lg:p-8">
+    <Modal isOpen onClose={onClose} className={dialogClass()}>
       <div className="space-y-5">
-        <h4 className="pe-12 text-title-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
-        <p role="status" className="rounded-lg bg-warning-50 px-4 py-3 text-theme-sm text-warning-700 dark:bg-warning-500/15 dark:text-orange-400">
+        <DialogTitle>{title}</DialogTitle>
+        <DialogNotice tone="warning" role="status">
           {message}
-        </p>
-        <div className="flex justify-end">
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {t("close")}
-          </Button>
-        </div>
+        </DialogNotice>
+        <DialogFooter>
+          <SecondaryButton onClick={onClose}>{t("close")}</SecondaryButton>
+        </DialogFooter>
       </div>
     </Modal>
   );
@@ -177,9 +175,9 @@ function ReferralsManager({ data, onSuccess }: { data: TicketActionsData; onSucc
             ))}
           </ul>
           <div className="flex justify-end">
-            <Button size="sm" variant="outline" type="submit" disabled={pending}>
+            <SecondaryButton type="submit" disabled={pending}>
               {pending ? t("working") : t("removeReferrals")}
-            </Button>
+            </SecondaryButton>
           </div>
         </>
       ) : (

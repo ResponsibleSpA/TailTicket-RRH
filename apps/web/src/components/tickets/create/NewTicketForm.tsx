@@ -21,6 +21,7 @@ import {
   type OpenTicketState,
 } from "@/app/[locale]/(staff)/agent/(panel)/tickets/new/actions";
 
+import { dialogButtonClass } from "../dialog-ui";
 import ResponseSection from "./ResponseSection";
 import TicketInfoSection from "./TicketInfoSection";
 import type { NewTicketOptions } from "./types";
@@ -92,7 +93,7 @@ export default function NewTicketForm({ options, uploadUrl, defaultUser = null }
             role="alert"
             data-summary="1"
             tabIndex={-1}
-            className="scroll-mt-24 rounded-lg bg-error-50 px-4 py-3 text-theme-sm text-error-700 outline-none dark:bg-error-500/15 dark:text-error-400"
+            className="scroll-mt-24 rounded-lg bg-error-50 px-4 py-3 text-theme-sm text-error-700 ring-1 ring-error-600/15 outline-none ring-inset dark:bg-error-500/10 dark:text-error-400 dark:ring-error-500/20"
           >
             {general}
           </p>
@@ -150,14 +151,11 @@ export default function NewTicketForm({ options, uploadUrl, defaultUser = null }
 
       <ResponseSection options={options} values={state.values} uploadUrl={uploadUrl} />
 
-        <div className="flex flex-wrap justify-end gap-3">
-          <Link
-            href="/agent/tickets"
-            className="h-11 rounded-lg border border-gray-300 px-5 text-sm leading-11 font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
-          >
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+          <Link href="/agent/tickets" className={dialogButtonClass.secondary}>
             {t("reset")}
           </Link>
-          <button type="submit" disabled={pending} className="h-11 rounded-lg bg-brand-500 px-6 text-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+          <button type="submit" disabled={pending} className={`${dialogButtonClass.primary} sm:px-6`}>
             {pending ? t("submitting") : t("submit")}
           </button>
         </div>

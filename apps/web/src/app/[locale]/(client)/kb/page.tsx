@@ -1,10 +1,14 @@
 import { Folder } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
+import { FaqLinkList, KbEmpty, SubcategoryChip } from "@/components/portal/KbParts";
 import KbSidebar from "@/components/portal/KbSidebar";
+import { CARD, FOCUS } from "@/components/portal/styles";
 import { Link } from "@/i18n/navigation";
 import { publicCategories, searchFaqs, topicsWithFaqs } from "@/server/domain/client/kb";
 import { safeHtml } from "@/server/format/sanitize";
+import { cn } from "@/utils";
 
 import { requireKb } from "./guard";
 
@@ -25,68 +29,60 @@ export default async function KbPage({ params, searchParams }: { params: Promise
   const results = searching ? await searchFaqs({ q: sp.q, categoryId: Number(sp.cid) || undefined, topicId: Number(sp.topicId) || undefined }) : [];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="space-y-5 lg:col-span-2">
-        <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{searching ? t("results") : t("title")}</h1>
+    <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+      <div className="min-w-0 space-y-5 lg:col-span-2">
+        <PageHeader
+          title={searching ? t("results") : t("title")}
+          subtitle={searching ? (results.length ? t("matched", { count: results.length }) : undefined) : t("subtitle")}
+        />
         {searching ? (
           results.length ? (
-            <>
-              <p className="text-theme-sm text-gray-500 dark:text-gray-400">{t("matched", { count: results.length })}</p>
-              <ol className="list-decimal space-y-2 ps-6">
-                {results.map((f) => (
-                  <li key={f.id}>
-                    <Link href={`/kb/faq/${f.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-                      {f.question}
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            </>
+            <div className={cn(CARD, "px-5 py-2")}>
+              <FaqLinkList faqs={results} />
+            </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400">{t("noResults")}</p>
+            <KbEmpty text={t("noResults")} />
           )
         ) : cats.length ? (
-          <ul className="space-y-4">
+          <ul className="grid gap-4 md:grid-cols-2">
             {cats.map((c) => (
-              <li key={c.id} className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3">
-                <h2 className="font-medium">
-                  <Link href={`/kb/category/${c.id}`} className="text-gray-800 hover:underline dark:text-white/90">
-                    {c.name} {c.count ? `(${c.count})` : ""}
-                  </Link>
-                </h2>
+              <li key={c.id} className={cn(CARD, "flex flex-col p-5")}>
+                <div className="flex items-start gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                    <Folder aria-hidden="true" className="size-4.5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-base font-semibold">
+                      <Link href={`/kb/category/${c.id}`} className={cn("text-gray-900 hover:text-brand-600 dark:text-white/90 dark:hover:text-brand-400", FOCUS)}>
+                        {c.name}
+                      </Link>
+                    </h2>
+                    {c.count ? <p className="text-theme-xs text-gray-500 tabular-nums dark:text-gray-400">{t("faqCount", { count: c.count })}</p> : null}
+                  </div>
+                </div>
                 {c.description && (
                   <div
-                    className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400"
+                    className="mt-3 text-theme-sm text-gray-500 dark:text-gray-400"
                     dangerouslySetInnerHTML={{
                       __html: safeHtml(c.description),
                     }}
                   />
                 )}
                 {c.subcategories.length > 0 && (
-                  <ul className="mt-2 space-y-1">
+                  <ul className="mt-3 flex flex-wrap gap-2">
                     {c.subcategories.map((s) => (
                       <li key={s.id}>
-                        <Link href={`/kb/category/${s.id}`} className="inline-flex items-center gap-1.5 text-theme-sm text-brand-600 hover:underline dark:text-brand-400">
-                          <Folder className="size-4" /> {s.name} ({s.count})
-                        </Link>
+                        <SubcategoryChip id={s.id} name={s.name} count={s.count} />
                       </li>
                     ))}
                   </ul>
                 )}
-                <ul className="mt-3 space-y-1">
-                  {c.faqs.map((f) => (
-                    <li key={f.id}>
-                      <Link href={`/kb/faq/${f.id}`} className="text-theme-sm text-brand-600 hover:underline dark:text-brand-400">
-                        {f.question}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                {c.faqs.length > 0 && <FaqLinkList faqs={c.faqs} className="mt-2" />}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400">{t("none")}</p>
+          <KbEmpty text={t("none")} />
         )}
       </div>
       <KbSidebar topics={topics} categories={cats.map((c) => ({ id: c.id, name: c.name }))} q={sp.q} />

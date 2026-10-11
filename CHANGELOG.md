@@ -4,6 +4,54 @@ Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it/1.1.0/). Ver
 
 ## [Non rilasciato]
 
+## [1.1.0] — 2026-10-11
+
+L'interfaccia diventa il punto di forza: palette sobria, grafici con un tema unico, gerarchia chiara in tutte le aree. Nessun cambiamento ai dati né al comportamento: TailTicket scrive le stesse righe di prima.
+
+### Interfaccia
+- **Linee guida scritte** in `docs/brand/ui.md`: neutri prima di tutto, il colore primario solo per azioni e stati attivi, i colori di stato solo per stati reali, cifre tabulari, icone Lucide.
+- **Grafici con un tema unico** (`src/lib/charts/`): colori letti dai token del tema, quindi seguono il primario scelto in admin e la modalità scura; al massimo poche serie visibili, le altre dalla legenda.
+- **Dashboard degli agenti** rifatta:
+  - indicatori con icona, mini grafico e variazione rispetto al periodo precedente (aperti, chiusi nel periodo, scaduti, miei);
+  - attività a colonne giornaliere (creati e chiusi);
+  - nuovo grafico per reparto;
+  - filtro del periodo nell'intestazione.
+- **Priorità** con un pallino per urgenza (rosso Emergency, ambra High, grigio le altre), uguale in lista, ticket e board: i colori pastello di osTicket erano pensati come sfondo e poco leggibili come segnale.
+- **Badge e avvisi** tenui con anello sottile; avvisi con l'icona del tono, più avvisi della stessa pagina in un solo riquadro.
+- **Ticket**:
+  - oggetti in grigio scuro invece che tutti nel primario;
+  - schede delle code con contatori;
+  - azioni di massa raggruppate ("Altro", "Elimina" in rosso discreto);
+  - barra delle azioni del ticket con una gerarchia;
+  - thread più leggibile, note interne riconoscibili;
+  - finestre di dialogo coerenti (titolo, avvisi, pulsanti).
+- **Editor**: il riquadro del collegamento non copre più il testo da collegare, che resta evidenziato.
+- **Board** in stile moderno: card neutre, intestazioni discrete, segno di urgenza solo per le priorità alte, scadenze come badge, stati di trascinamento più leggeri.
+- **Utenti, organizzazioni, task, knowledge base e profilo**:
+  - link neutri invece che blu;
+  - schede di filtro a pillola;
+  - permessi del profilo raggruppati per area invece di decine di badge colorati.
+- **Area admin**:
+  - home rifatta come cruscotto, con stato del sistema (help desk, versione, schema, modalità di scrittura, controlli del doctor), indicatori e sezioni delle impostazioni con icone e descrizioni;
+  - barra "Salva" sempre raggiungibile nei form lunghi;
+  - pagina Tema con anteprima dal vivo;
+  - controlli del doctor con icone e "Cosa fare" in evidenza.
+- **Portale clienti**:
+  - home con benvenuto, ricerca nella knowledge base e scorciatoie;
+  - apertura del ticket in tre passi;
+  - "I miei ticket" con schede da telefono;
+  - vista del ticket con avatar e dettagli a lato;
+  - knowledge base a card.
+- **Pagine di accesso e 404**: accesso e reset centrati, logo anche su telefono, pagina 404 con il titolo della scheda corretto.
+- **Componenti comuni**:
+  - pulsanti che accettano colori e dimensioni personalizzati (il rosso di "Elimina" ora si vede);
+  - paginazione con frecce che si nasconde se c'è una sola pagina;
+  - chiusura delle finestre più discreta.
+
+### Corretto
+- Doctor: nello stack integrato i privilegi DDL dell'utente del database (servono a installer e aggiornamenti di osTicket) erano segnalati come blocco; ora sono un'informazione. Il blocco resta per il collegamento a un osTicket in produzione.
+- Rimosse le immagini del template non più usate (pagine di errore).
+
 ## [1.0.0] — 2026-10-10
 
 Prima release pubblica di TailTicket: nuova interfaccia per osTicket 1.17 e 1.18 sullo stesso database, senza DDL, con il pannello PHP classico che continua a funzionare accanto. Si collega anche a un osTicket già in produzione, partendo in sola lettura, e ogni modifica dell'area admin si può annullare.

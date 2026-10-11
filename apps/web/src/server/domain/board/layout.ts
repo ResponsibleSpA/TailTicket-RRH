@@ -4,7 +4,7 @@ import type { TicketRow } from "../ticket/rows";
 import { type BoardContext, type Placed, staffName } from "./cards";
 import { initials } from "@/lib/format/initials";
 
-import { orderDerived, safeColor } from "./grouping";
+import { orderDerived } from "./grouping";
 import type { BoardGroupBy, BoardLaneBy } from "./params";
 import { cellKey, type BoardCard, type BoardCell, type BoardColumn, type BoardLane } from "./types";
 
@@ -14,7 +14,7 @@ import { cellKey, type BoardCard, type BoardCell, type BoardColumn, type BoardLa
  */
 
 type StatusChoice = { id: number; name: string; state: string | null };
-type PriorityRow = { priority_id: number; priority_desc: string; priority_color: string | null };
+type PriorityRow = { priority_id: number; priority_desc: string; priority_urgency: number | null };
 
 /** Colonna/swimlane derivata da una card (raggruppamenti per priorità, assegnatario, reparto). */
 function derivedHeader(
@@ -22,14 +22,13 @@ function derivedHeader(
   key: string,
   r: TicketRow | undefined,
   ctx: BoardContext,
-): BoardColumn & { urgency?: number } {
+): BoardColumn {
   switch (by) {
     case "priority":
       if (key === "0" || !r) return { key, title: "", special: "noPriority", urgency: 99 };
       return {
         key,
         title: r.priority ?? key,
-        color: safeColor(r.priority_color),
         urgency: Number(r.priority_urgency ?? 99),
       };
     case "dept":
@@ -90,9 +89,9 @@ export function buildColumns(
     }
   } else if (group === "priority") {
     for (const p of priorities) {
-      columns.push({ key: String(p.priority_id), title: p.priority_desc, color: safeColor(p.priority_color) });
+      columns.push({ key: String(p.priority_id), title: p.priority_desc, urgency: Number(p.priority_urgency ?? 99) });
     }
-    if (firstCol.has("0")) columns.push({ key: "0", title: "", special: "noPriority" });
+    if (firstCol.has("0")) columns.push({ key: "0", title: "", special: "noPriority", urgency: 99 });
   } else {
     columns.push(
       ...orderDerived(

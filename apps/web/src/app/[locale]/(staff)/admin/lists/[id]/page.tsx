@@ -6,7 +6,7 @@ import PhpLink from "@/components/adminsys/PhpLink";
 import SysForm from "@/components/adminsys/SysForm";
 import SysNotice from "@/components/adminsys/SysNotice";
 import MassBar from "@/components/admin/MassBar";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
@@ -15,6 +15,7 @@ import { idOrNotFound } from "@/lib/route-id";
 import { db } from "@/server/db";
 import { htmlDecode } from "@/server/format/html";
 import { listDetail } from "@/server/domain/adminsys/list";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { requireAdmin } from "../../guard";
 import { massListItemAction, saveListAction, saveListItemAction } from "../actions";
@@ -41,22 +42,22 @@ export default async function ListPage({ params, searchParams }: { params: Promi
       <PageHeader title={htmlDecode(detail.list.name)} subtitle={t("edit")} actions={<BackLink href="/admin/lists" label={c("back")} />} />
       <SysNotice sp={sp} />
       {detail.system ? (
-        <Callout tone="info">
+        <Outcome tone="info">
           {t("systemNote")} <PhpLink path={`/scp/lists.php?id=${listId}`} label={t("openPhp")} />
-        </Callout>
+        </Outcome>
       ) : (
         <>
           <SysForm action={saveListAction.bind(null, listId)} labels={{ name: t("name") }}>
             <ListFields detail={detail} />
           </SysForm>
-          {unsupported && <Callout tone="warning">{t("unsupportedProps")}</Callout>}
+          {unsupported && <Outcome tone="warning">{t("unsupportedProps")}</Outcome>}
           <SysForm action={saveListItemAction.bind(null, listId, null)} submitLabel={t("addItem")} savedMessage={t("itemAdded")} labels={{ value: t("value"), extra: t("abbrev"), ...propertyLabels(detail.properties) }} resetOnSave>
             <ItemFields item={null} properties={detail.properties} />
           </SysForm>
           {detail.list.sort_mode === "SortCol" && (
-            <Callout tone="info">
+            <Outcome tone="info">
               {t("sortNote")} <PhpLink path={`/scp/lists.php?id=${listId}`} label={t("openPhp")} />
-            </Callout>
+            </Outcome>
           )}
           <form action={massListItemAction.bind(null, listId)} className="space-y-4">
             <MassBar
@@ -80,7 +81,7 @@ export default async function ListPage({ params, searchParams }: { params: Promi
                 cells: {
                   sel: <input type="checkbox" name="ids[]" value={i.id} disabled={!!(i.status & DynamicListItem.INTERNAL)} className="h-4 w-4 accent-brand-500" aria-label={i.value} />,
                   value: (
-                    <Link href={`/admin/lists/${listId}/items/${i.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                    <Link href={`/admin/lists/${listId}/items/${i.id}`} className={ROW_LINK}>
                       {i.value}
                     </Link>
                   ),

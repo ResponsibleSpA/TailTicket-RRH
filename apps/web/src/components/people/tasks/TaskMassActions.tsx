@@ -6,10 +6,10 @@ import { useCallback, useState, type ReactNode } from "react";
 import { taskMassAction } from "@/app/[locale]/(staff)/agent/(panel)/tasks/actions";
 import ActionNotice from "@/components/common/ActionNotice";
 import { useReadOnlyHint } from "@/components/common/WriteGate";
-import Button from "@/components/ui/button/Button";
 import { checkedIds, useCheckedCount } from "@/lib/checked-ids";
 
 import { SelectField } from "../FormControls";
+import MassButton from "../MassButton";
 import PeopleDialog from "../PeopleDialog";
 import type { Choice, PeopleAction, PeopleActionState } from "../types";
 import { useActionNotice } from "../useActionNotice";
@@ -56,18 +56,17 @@ export default function TaskMassActions({ can, agents, teams, depts }: { can: Re
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-theme-sm text-gray-500 dark:text-gray-400">{t("selected")}</span>
         {ops.map((k) => (
-          <Button
+          <MassButton
             key={k}
-            size="sm"
-            variant="outline"
             disabled={!selected || !!readOnly}
             title={readOnly}
+            danger={k === "delete"}
             onClick={() => {
               setIds(checkedIds(TASK_SELECTOR));
               setOp(k);
             }}>
             {t(`actions.${k === "assign" ? "assign" : k}`)}
-          </Button>
+          </MassButton>
         ))}
         {notice && (
           <ActionNotice closeLabel={tu("dismiss")} onClose={clear}>

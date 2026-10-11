@@ -1,9 +1,11 @@
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, ExternalLink, ListChecks, Lock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { ghostButtonClass } from "@/components/common/menu-classes";
 import { WriteGate } from "@/components/common/WriteGate";
 import TicketActionsMenu from "@/components/tickets/TicketActionsMenu";
 import TicketExtraActions from "@/components/tickets/TicketExtraActions";
+import PriorityBadge from "@/components/common/PriorityBadge";
 import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import type { Agent } from "@/server/domain/staff/staff";
@@ -23,49 +25,60 @@ interface TicketHeaderProps {
   created?: boolean;
 }
 
-/** Intestazione della vista ticket: ritorno alla lista, oggetto, stato e badge, barre delle azioni. */
+/** Intestazione della vista ticket: ritorno alla lista, oggetto, stato e badge, barra delle azioni. */
 export default async function TicketHeader({ ticket, agent, locale, taskCount, legacyUrl, created }: TicketHeaderProps) {
   const t = await getTranslations("ticket");
-  const legacyCls = "rounded-lg border border-gray-200 px-3 py-2 text-theme-sm text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5";
-  // Titolo a sinistra, azioni a destra su una sola fascia (da lg): link al classico ultimo della fascia,
-  // gli esiti delle azioni (ActionNotice, order-last) vanno a capo sotto, a tutta larghezza
+  // Barra delle azioni sotto il titolo, su una riga: a sinistra il gruppo delle azioni di tutti i giorni
+  // (assegna, trasferisci, stato) e "Altro"; a destra modifica, "Gestisci", task e pannello classico.
+  // Gli esiti delle azioni (ActionNotice, order-last) vanno a capo sotto, a tutta larghezza.
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-      <div className="min-w-0 lg:flex-1">
-        <Link href="/agent/tickets" className="inline-flex items-center gap-1.5 text-theme-sm text-gray-500 hover:text-brand-500 dark:text-gray-400">
+    <div className="space-y-4">
+      <div className="min-w-0">
+        <Link
+          href="/agent/tickets"
+          className="inline-flex items-center gap-1.5 rounded-md text-theme-sm text-gray-500 hover:text-gray-900 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:text-gray-400 dark:hover:text-white"
+        >
           <ArrowLeft className="size-4 rtl:rotate-180" /> {t("backToList")}
         </Link>
-        <h1 className="mt-1 text-title-sm font-semibold break-words text-gray-800 dark:text-white/90">
-          #{ticket.number} · {stripTags(ticket.subject)}
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight break-words text-gray-900 dark:text-white/90">
+          <span className="font-medium text-gray-400 tabular-nums dark:text-gray-500">#{ticket.number}</span> {stripTags(ticket.subject)}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge color={ticket.status_state === "open" ? "success" : "light"}>{ticket.status_name}</Badge>
-          {ticket.priority && (
-            <span className="inline-flex items-center gap-1.5 text-theme-sm text-gray-600 dark:text-gray-400">
-              <span className="size-2.5 rounded-full ring-1 ring-black/15 dark:ring-white/25" style={{ backgroundColor: ticket.priority_color ?? "#ccc" }} />
-              {ticket.priority}
-            </span>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Badge size="sm" color={ticket.status_state === "open" ? "success" : "light"}>
+            {ticket.status_name}
+          </Badge>
+          {ticket.priority && <PriorityBadge name={ticket.priority} urgency={ticket.priority_urgency} />}
+          {ticket.isoverdue && (
+            <Badge size="sm" color="error">
+              {t("overdue")}
+            </Badge>
           )}
-          {ticket.isoverdue && <Badge color="error">{t("overdue")}</Badge>}
-          {ticket.isanswered && <Badge color="info">{t("answered")}</Badge>}
+          {ticket.isanswered && (
+            <Badge size="sm" color="info">
+              {t("answered")}
+            </Badge>
+          )}
           {ticket.locked_by_other && (
-            <Badge color="warning" startIcon={<Lock className="size-3" />}>
+            <Badge size="sm" color="warning" startIcon={<Lock className="size-3" />}>
               {t("locked")}
             </Badge>
           )}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 lg:max-w-[60%] lg:shrink-0 lg:justify-end">
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-2 border-y border-gray-200 py-3 sm:gap-x-2 dark:border-gray-800">
         {/* in sola lettura le barre delle azioni non compaiono (il banner del guscio spiega perché) */}
         <WriteGate>
           <TicketActionsMenu ticket={ticket} agent={agent} locale={locale} />
+          <span aria-hidden className="hidden flex-1 lg:block" />
           <TicketExtraActions ticket={ticket} agent={agent} locale={locale} />
         </WriteGate>
-        <Link href={`/agent/tasks?ticket=${ticket.ticket_id}`} className={legacyCls}>
+        <Link href={`/agent/tasks?ticket=${ticket.ticket_id}`} className={ghostButtonClass}>
+          <ListChecks aria-hidden className="hidden size-4 sm:block" />
           {t("tasks", { count: taskCount })}
         </Link>
         {legacyUrl && (
-          <a href={`${legacyUrl}/scp/tickets.php?id=${ticket.ticket_id}`} className={`${legacyCls} whitespace-nowrap`}>
+          <a href={`${legacyUrl}/scp/tickets.php?id=${ticket.ticket_id}`} className={`${ghostButtonClass} whitespace-nowrap`}>
+            <ExternalLink aria-hidden className="size-4" />
             {t("openLegacy")}
           </a>
         )}

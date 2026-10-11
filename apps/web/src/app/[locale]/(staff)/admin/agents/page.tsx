@@ -10,6 +10,8 @@ import { deptOptions, roleOptions } from "@/server/domain/admin/lookups";
 import { AGENT_PERMISSIONS } from "@/server/domain/admin/staff-admin";
 import { agentTimeZone, formatDbDate } from "@/server/format/datetime";
 import { PersonsName } from "@/server/format/persons-name";
+import { ROW_LINK } from "@/components/admin/styles";
+import Summary from "@/components/admin/Summary";
 
 import { requireAdmin } from "../guard";
 import { permLabel } from "../roles/perm-label";
@@ -75,7 +77,7 @@ export default async function AgentsPage({ params, searchParams }: { params: Pro
           label: name,
           cells: {
             name: (
-              <Link href={`/admin/agents/${r.staff_id}`} className="font-medium text-brand-500 hover:text-brand-600">
+              <Link href={`/admin/agents/${r.staff_id}`} className={ROW_LINK}>
                 {name}
               </Link>
             ),
@@ -104,8 +106,8 @@ export default async function AgentsPage({ params, searchParams }: { params: Pro
       })}
       extra={
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <details className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3">
-            <summary className="cursor-pointer text-sm font-medium text-gray-800 dark:text-white/90">{t("massPerms")}</summary>
+          <details className="group rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3">
+            <Summary className="text-sm font-medium text-gray-800 dark:text-white/90">{t("massPerms")}</Summary>
             <div className="mt-3 grid grid-cols-1 gap-2">
               {AGENT_PERMISSIONS.map((p) => (
                 <label key={p.key} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -120,8 +122,8 @@ export default async function AgentsPage({ params, searchParams }: { params: Pro
               </div>
             </div>
           </details>
-          <details className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3">
-            <summary className="cursor-pointer text-sm font-medium text-gray-800 dark:text-white/90">{t("massDept")}</summary>
+          <details className="group rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3">
+            <Summary className="text-sm font-medium text-gray-800 dark:text-white/90">{t("massDept")}</Summary>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <select name="dept_id" className={control} aria-label={t("primaryDept")} defaultValue="">
                 <option value="">{t("chooseDept")}</option>

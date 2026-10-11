@@ -24,14 +24,14 @@ export default function BoardColumnHeader({
   return (
     <div
       className={cn(
-        "flex snap-start items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 transition-opacity dark:border-gray-800 dark:bg-white/3",
-        column.state === "closed" && "bg-gray-50 dark:bg-white/2",
+        // intestazione piatta (stile Linear): indicatore, titolo e contatore discreto sopra la colonna
+        "flex min-h-9 snap-start items-center gap-2 px-1.5 transition-opacity",
         dimmed && "opacity-40",
       )}
     >
       <ColumnMark column={column} />
       <h2
-        className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-800 dark:text-white/90"
+        className="min-w-0 truncate text-sm font-semibold text-gray-900 dark:text-white/90"
         title={column.title}
       >
         {column.title}
@@ -42,7 +42,7 @@ export default function BoardColumnHeader({
         )}
       </h2>
       <span
-        className="rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-600 tabular-nums dark:bg-white/5 dark:text-gray-300"
+        className="me-auto text-theme-sm text-gray-400 tabular-nums dark:text-gray-500"
         aria-label={t("count", { count })}
       >
         {count}

@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageHeader } from "@/components/common/DataTable";
 import EditTicketForm from "@/components/portal/EditTicketForm";
 import { redirect } from "@/i18n/navigation";
 import { fieldKey, type DynamicFormView } from "@/lib/forms/dynamic-field";
@@ -43,10 +44,8 @@ export default async function EditClientTicketPage({ params }: { params: Promise
     }
   }
   return (
-    <div className="space-y-6">
-      <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">
-        {t("edit")} #{view!.number}
-      </h1>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader title={`${t("edit")} #${view!.number}`} subtitle={view!.subject} />
       <EditTicketForm ticketId={ticketId} forms={forms} values={values} />
     </div>
   );

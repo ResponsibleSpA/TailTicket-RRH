@@ -4,12 +4,13 @@ import { RadioField, Section, TextAreaField, TextField } from "@/components/admi
 import SysForm from "@/components/adminsys/SysForm";
 import SysNotice from "@/components/adminsys/SysNotice";
 import MassBar from "@/components/admin/MassBar";
-import Callout from "@/components/common/Callout";
+import Outcome from "@/components/admin/Outcome";
 import DataTable, { PageHeader } from "@/components/common/DataTable";
 import Badge from "@/components/ui/badge/Badge";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/server/db";
 import { listBanRules } from "@/server/domain/adminsys/banlist";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -32,8 +33,8 @@ export default async function BanlistPage({ params, searchParams }: { params: Pr
     <div className="space-y-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <SysNotice sp={sp} />
-      {!filterId && <Callout tone="warning">{t("noFilter")}</Callout>}
-      {filterId && !isactive && <Callout tone="warning">{t("disabledFilter")}</Callout>}
+      {!filterId && <Outcome tone="warning">{t("noFilter")}</Outcome>}
+      {filterId && !isactive && <Outcome tone="warning">{t("disabledFilter")}</Outcome>}
       <SysForm action={addBanAction} submitLabel={t("add")} savedMessage={t("added")} labels={{ val: t("email") }} resetOnSave>
         <Section title={t("addTitle")}>
           <TextField name="val" label={t("email")} type="email" required />
@@ -78,7 +79,7 @@ export default async function BanlistPage({ params, searchParams }: { params: Pr
             cells: {
               sel: <input type="checkbox" name="ids[]" value={r.id} className="h-4 w-4 accent-brand-500" aria-label={r.val} />,
               val: (
-                <Link href={`/admin/banlist/${r.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+                <Link href={`/admin/banlist/${r.id}`} className={ROW_LINK}>
                   {r.val}
                 </Link>
               ),

@@ -53,6 +53,12 @@ export default function TicketMassActions({ data }: { data: MassData }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {/* quante righe sono selezionate: il contesto delle azioni accanto */}
+      {checked > 0 && (
+        <span role="status" className="inline-flex h-9 items-center rounded-lg bg-brand-50 px-3 text-theme-sm font-medium text-brand-700 tabular-nums dark:bg-brand-500/15 dark:text-brand-300">
+          {t("selected", { count: checked })}
+        </span>
+      )}
       <MassActionMenu data={data} onOpen={open} />
       {notice && !(notice.select && checked > 0) && (
         <ActionNotice tone={notice.ok ? "success" : "warning"} closeLabel={t("close")} onClose={() => setNotice(null)}>

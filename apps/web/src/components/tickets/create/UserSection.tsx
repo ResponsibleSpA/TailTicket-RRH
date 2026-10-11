@@ -10,6 +10,7 @@ import DynamicForm from "@/components/forms/dynamic/DynamicForm";
 import FieldShell from "@/components/forms/dynamic/FieldShell";
 import { selectCls } from "@/components/forms/dynamic/styles";
 import type { DynamicFormView } from "@/lib/forms/dynamic-field";
+import { initials } from "@/lib/format/initials";
 import { cn } from "@/utils";
 
 import { first, type SubmittedValues } from "./types";
@@ -48,13 +49,17 @@ export default function UserSection({ userForm, search, values, fieldErrors, err
     setFixedFor(values);
   };
 
+  // controllo segmentato: la scelta attiva è una "card" bianca sul fondo grigio, senza colore pieno
   const tab = (m: "existing" | "new", label: string) => (
     <button
       type="button"
+      aria-pressed={mode === m}
       onClick={() => setMode(m)}
       className={cn(
-        "rounded-lg px-3 py-1.5 text-sm font-medium",
-        mode === m ? "bg-brand-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5",
+        "h-8 flex-1 rounded-md px-3 text-theme-sm font-medium whitespace-nowrap focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden sm:flex-none",
+        mode === m
+          ? "bg-white text-gray-900 shadow-theme-xs ring-1 ring-gray-200 dark:bg-gray-800 dark:text-white dark:ring-gray-700"
+          : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
       )}
     >
       {label}
@@ -65,7 +70,7 @@ export default function UserSection({ userForm, search, values, fieldErrors, err
     <ComponentCard title={t("sections.user")}>
       <input type="hidden" name="userMode" value={mode} />
       {userForm && (
-        <div className="flex gap-2">
+        <div className="flex w-full gap-1 rounded-lg bg-gray-100 p-1 sm:inline-flex sm:w-auto dark:bg-white/5">
           {tab("existing", t("user.existingUser"))}
           {tab("new", t("user.newUser"))}
         </div>
@@ -73,11 +78,22 @@ export default function UserSection({ userForm, search, values, fieldErrors, err
       {mode === "existing" ? (
         <FieldShell htmlFor="user-search" label={user ? t("user.selected") : t("user.search")} required errors={userErrors}>
           {user ? (
-            <div className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-2.5 text-sm dark:border-gray-800">
+            <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50/60 px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-white/2">
               <input type="hidden" name="uid" value={user.id} />
-              <span className="text-gray-800 dark:text-white/90">{user.name}</span>
-              <span className="text-gray-500 dark:text-gray-400">&lt;{user.email}&gt;</span>
-              <button type="button" onClick={() => setUser(null)} className="ms-auto text-theme-xs text-brand-600 hover:underline dark:text-brand-400">
+              <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-theme-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                {initials(user.name)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium text-gray-900 dark:text-white/90">{user.name}</span>
+                <span title={user.email} className="block truncate text-theme-xs text-gray-500 dark:text-gray-400">
+                  {user.email}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setUser(null)}
+                className="shrink-0 rounded-md px-2 py-1 text-theme-sm font-medium text-brand-600 hover:bg-brand-50 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:text-brand-400 dark:hover:bg-brand-500/10"
+              >
                 {t("user.change")}
               </button>
             </div>
@@ -103,10 +119,15 @@ export default function UserSection({ userForm, search, values, fieldErrors, err
         {ccs.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {ccs.map((c) => (
-              <li key={c.id} className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-theme-xs text-gray-700 dark:bg-white/5 dark:text-gray-300">
+              <li
+                key={c.id}
+                className="flex max-w-full items-center gap-1.5 rounded-md bg-gray-50 py-1 ps-2.5 pe-1.5 text-theme-xs text-gray-700 ring-1 ring-gray-200 ring-inset dark:bg-white/5 dark:text-gray-300 dark:ring-white/10"
+              >
                 <input type="hidden" name="ccs" value={c.id} />
-                {c.name} &lt;{c.email}&gt;
-                <button type="button" aria-label={t("user.remove")} onClick={() => setCcs((p) => p.filter((x) => x.id !== c.id))} className="text-gray-400 hover:text-error-500">
+                <span className="truncate">
+                  {c.name} <span className="text-gray-500 dark:text-gray-400">{c.email}</span>
+                </span>
+                <button type="button" aria-label={t("user.remove")} onClick={() => setCcs((p) => p.filter((x) => x.id !== c.id))} className="shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-brand-500/30 focus-visible:outline-hidden dark:hover:bg-white/10 dark:hover:text-white">
                   <X className="size-3.5" />
                 </button>
               </li>

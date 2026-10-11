@@ -46,9 +46,9 @@ export default function DataTable({ columns, rows, empty }: { columns: DataColum
             </tr>
           )}
           {rows.map((r) => (
-            <tr key={r.key} className="hover:bg-gray-50 dark:hover:bg-white/2">
+            <tr key={r.key} className="hover:bg-gray-50/70 dark:hover:bg-white/2">
               {columns.map((c) => (
-                <td key={c.key} className={cn("px-4 py-3 text-gray-700 dark:text-gray-300", c.className)}>
+                <td key={c.key} className={cn("px-4 py-3 text-gray-700 tabular-nums dark:text-gray-300", c.className)}>
                   {r.cells[c.key]}
                 </td>
               ))}
@@ -65,7 +65,7 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
         {/* titolo principale della pagina: h1 (stesso aspetto) */}
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white/90">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
       </div>
       {actions}

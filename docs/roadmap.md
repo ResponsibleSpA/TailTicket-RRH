@@ -21,6 +21,10 @@ Lo stato dettagliato per milestone è in [apps/web/RESTART.md](../apps/web/RESTA
 - [x] **osTicket 1.17** supportato in lettura e scrittura (harness differenziale completo su 1.17.8); versioni precedenti riconosciute dal doctor, in sola lettura.
 - [x] **Correzioni dal collaudo visivo** su installazione pulita e icone da un solo kit (Lucide).
 
+## Fatto (v1.1)
+
+- [x] **Interfaccia rifinita** con linee guida scritte ([brand/ui.md](brand/ui.md)): palette sobria, grafici con un tema unico, dashboard degli agenti e home admin rifatte, board in stile moderno, portale con home, passi di apertura e schede da telefono, finestre di dialogo e avvisi coerenti.
+
 ## Prossimi passi
 
 ### Completezza
@@ -35,7 +39,7 @@ Lo stato dettagliato per milestone è in [apps/web/RESTART.md](../apps/web/RESTA
 - [ ] Stato condiviso (codici 2FA, tentativi falliti) fuori dalla memoria, per più istanze, sempre senza DDL: righe `config` `nextui.*` o uno store esterno opzionale.
 - [x] Endpoint di health (`/api/health`) e doctor del collegamento a osTicket.
 - [ ] Metriche.
-- [x] Rilasci versionati su GHCR (`v1.0.0`).
+- [x] Rilasci versionati su GHCR (`v1.0.0`, `v1.1.0`).
 - [ ] Immagini firmate.
 
 ### Ecosistema osTicket

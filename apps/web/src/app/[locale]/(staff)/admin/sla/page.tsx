@@ -7,6 +7,7 @@ import { SLA } from "@/lib/osticket/flags";
 import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
 import { htmlDecode } from "@/server/format/html";
+import { ROW_LINK } from "@/components/admin/styles";
 
 import { dateFormatter } from "../_sys/server";
 import { requireAdmin } from "../guard";
@@ -51,7 +52,7 @@ export default async function SlaPage({ params, searchParams }: { params: Promis
         label: htmlDecode(r.name),
         cells: {
           name: (
-            <Link href={`/admin/sla/${r.id}`} className="font-medium text-brand-500 hover:text-brand-600">
+            <Link href={`/admin/sla/${r.id}`} className={ROW_LINK}>
               {htmlDecode(r.name)}
               {r.id === defaultId && <span className="ms-2 text-theme-xs text-gray-500">({u("default")})</span>}
             </Link>

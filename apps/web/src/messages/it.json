@@ -114,7 +114,13 @@
       "open": "Ticket aperti",
       "overdue": "Scaduti",
       "mine": "I miei ticket",
-      "closedToday": "Chiusi oggi"
+      "closedToday": "Chiusi oggi",
+      "created": "Nuovi nel periodo",
+      "closed": "Chiusi nel periodo",
+      "mineFoot": "assegnati a te",
+      "overdueFoot": "oltre la scadenza",
+      "overdueNone": "nessuno in ritardo",
+      "openFoot": "{n} nuovi nel periodo"
     },
     "activity": "Attività dei ticket",
     "activityDesc": "Eventi per giorno nel periodo selezionato",
@@ -166,7 +172,17 @@
       "logout": "Uscite",
       "message": "Messaggi",
       "note": "Note"
-    }
+    },
+    "subtitle": "Panoramica dei ticket dei tuoi reparti",
+    "delta": {
+      "up": "+{pct}%",
+      "down": "−{pct}%",
+      "same": "invariato",
+      "new": "nuovo",
+      "vsPrevious": "rispetto ai {days, plural, one {# giorno} other {# giorni}} precedenti"
+    },
+    "byDept": "Per reparto",
+    "byDeptDesc": "Ticket aperti e chiusi nel periodo"
   },
   "notFound": {
     "error": "ERRORE",
@@ -273,6 +289,8 @@
       "generic": "Operazione sul ticket completata."
     },
     "empty": "Nessun ticket in questa coda",
+    "emptyHint": "Quando arriveranno nuovi ticket li troverai qui. Prova un'altra coda o la ricerca.",
+    "queuesNav": "Code dei ticket",
     "pageOf": "Pagina {page} di {pages}",
     "prev": "Precedente",
     "next": "Successiva",
@@ -325,14 +343,13 @@
     "answered": "Con risposta",
     "locked": "In modifica da un altro agente",
     "openLegacy": "Apri nel pannello classico",
-    "created": "Ticket creato.",
+    "created": "Creato",
     "closeNotice": "Chiudi",
     "details": "Dettagli",
     "department": "Reparto",
     "helpTopic": "Argomento",
     "sla": "Piano SLA",
     "source": "Origine",
-    "created": "Creato",
     "dueDate": "Scadenza",
     "lastMessage": "Ultimo messaggio",
     "lastResponse": "Ultima risposta",
@@ -554,6 +571,9 @@
     "replyPlaceholder": "Scrivi la risposta all'utente…",
     "notePlaceholder": "Scrivi una nota visibile solo agli agenti…",
     "posted": "Inviato correttamente.",
+    "noteHint": "Visibile solo agli agenti, non viene inviata all'utente.",
+    "sendReply": "Invia risposta",
+    "sendNote": "Aggiungi nota",
     "lockedBy": "Il ticket è in modifica da {name}: risposta e note sono bloccate finché non scade il lock.",
     "errors": {
       "read_only": "Operazione non disponibile: TailTicket è in sola lettura.",
