@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { UserAccountStatus } from "@/lib/osticket/flags";
+
 import { clientIp, writeSession } from "@/server/auth/session";
 import { startClientSession } from "@/server/auth/client-auth";
 import { bridgeSecret, oauth2Provider, redeemSsoProof, SSO_PENDING_COOKIE, takeSsoTransaction, type SsoRealm } from "@/server/auth/oauth2-bridge";
@@ -64,7 +66,7 @@ export async function GET(request: NextRequest) {
       pwv: passwordVersion(client.account.passwd),
       guest: null,
     });
-    const changePassword = (client.account.status & 4) !== 0 && (await canWrite("operational"));
+    const changePassword = (client.account.status & UserAccountStatus.REQUIRE_PASSWD_RESET) !== 0 && (await canWrite("operational"));
     return redirectClean(request, changePassword ? "/profile?pwchange=1" : tx.next);
   } catch {
     // Do not leak DB state, PHP identity or provider response to the browser.
