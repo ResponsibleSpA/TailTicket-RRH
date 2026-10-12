@@ -40,6 +40,8 @@
       "password": "Password",
       "signIn": "Accedi",
       "signingIn": "Accesso in corso…",
+      "ssoSignIn": "Accedi con {provider}",
+      "ssoFailed": "Accesso esterno non riuscito. Riprova o contatta l\u0027amministratore.",
       "forgot": "Password dimenticata?",
       "notRegistered": "Non sei ancora registrato?",
       "createAccount": "Crea un account",
