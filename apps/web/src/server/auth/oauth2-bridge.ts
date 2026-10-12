@@ -50,7 +50,9 @@ export async function oauth2Provider(realm: SsoRealm): Promise<string | null> {
     const result = await fetch(url, {
       cache: "no-store",
       signal: AbortSignal.timeout(3000),
-      headers: { "X-TailTicket-SSO-Key": secret },
+      // The internal Docker hop is HTTP; the public PHP installation may enforce HTTPS.
+      // Apache maps this trusted internal header to HTTPS=on (see deploy/osticket/apache.conf).
+      headers: { "X-TailTicket-SSO-Key": secret, "X-Forwarded-Proto": "https" },
     });
     if (!result.ok) return null;
     const payload: unknown = await result.json();
