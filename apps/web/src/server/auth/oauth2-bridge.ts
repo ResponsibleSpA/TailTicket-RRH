@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 import { isAgentPath, isPortalPath, safeRedirectPath } from "../actions/redirect-path";
 import { sharedStore } from "./bounded-store";
@@ -17,6 +17,13 @@ export const SSO_PENDING_SECONDS = 300;
 interface PendingLogin {
   realm: SsoRealm;
   next: string;
+  browserHash: string;
+}
+
+interface ConsumedLogin {
+  realm: SsoRealm;
+  next: string;
+  nonce: string;
 }
 interface BridgeProof {
   v: 1;
@@ -68,20 +75,31 @@ export async function oauth2Provider(realm: SsoRealm): Promise<string | null> {
   }
 }
 
-/** Create a one-time browser-bound login transaction; never trust next from PHP. */
-export function startSsoTransaction(realm: SsoRealm, next: unknown): string {
+/**
+ * The nonce is sent to PHP, but the independent browser verifier exists only
+ * in the HttpOnly cookie. A leaked callback URL alone cannot redeem a login.
+ */
+export function startSsoTransaction(realm: SsoRealm, next: unknown): { nonce: string; cookie: string } {
   const nonce = randomBytes(24).toString("base64url");
+  const browserVerifier = randomBytes(24).toString("base64url");
   const fallback = realm === "staff" ? "/agent" : "/tickets";
   const path = safeRedirectPath(next, fallback, realm === "staff" ? isAgentPath : isPortalPath);
-  pending.set(nonce, { realm, next: path }, Math.floor(Date.now() / 1000) + SSO_PENDING_SECONDS);
-  return nonce;
+  const browserHash = createHash("sha256").update(browserVerifier, "ascii").digest("hex");
+  pending.set(nonce, { realm, next: path, browserHash }, Math.floor(Date.now() / 1000) + SSO_PENDING_SECONDS);
+  return { nonce, cookie: nonce + "." + browserVerifier };
 }
 
-/** Consume even on a failed callback, so no transaction can be retried. */
-export function takeSsoTransaction(nonce: string): PendingLogin | null {
+/** Validate the browser-only verifier before consuming the transaction. */
+export function takeSsoTransaction(cookie: string): ConsumedLogin | null {
+  if (!/^[A-Za-z0-9_-]{32}\.[A-Za-z0-9_-]{32}$/.test(cookie)) return null;
+  const [nonce, verifier] = cookie.split(".");
   const tx = pending.get(nonce);
+  if (!tx) return null;
+  const presented = createHash("sha256").update(verifier, "ascii").digest();
+  const expected = Buffer.from(tx.browserHash, "hex");
+  if (!timingSafeEqual(presented, expected)) return null;
   pending.delete(nonce);
-  return tx ?? null;
+  return { realm: tx.realm, next: tx.next, nonce };
 }
 
 /** Constant-time authentication, strict typed claims, expiry and replay check. */
