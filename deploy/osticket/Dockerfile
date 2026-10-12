@@ -32,6 +32,8 @@ COPY deploy/osticket/apache.conf /etc/apache2/conf-enabled/zz-tailticket.conf
 
 # Codice osTicket in /classic; setup/ resta fuori dalla docroot e viene copiato solo per l'installazione
 COPY --chown=root:www-data legacy/ /var/www/html/classic/
+# Bridge SSO RRH fuori da legacy/: il codice core di osTicket rimane sincronizzabile con upstream.
+COPY --chown=root:www-data deploy/osticket/tailticket-sso.php /var/www/html/classic/api/tailticket-sso.php
 RUN mv /var/www/html/classic/setup /usr/local/share/osticket-setup \
  && rm -f /var/www/html/classic/include/ost-config.php \
  && mkdir -p /var/lib/osticket /var/www/html/classic/include/plugins \

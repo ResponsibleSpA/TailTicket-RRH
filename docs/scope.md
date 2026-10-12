@@ -28,7 +28,7 @@ TailTicket è **una nuova interfaccia completa per osTicket 1.18** (compatibile 
 
 Funzioni presenti in osTicket ma non ancora in TailTicket. Si usano dal pannello classico, che resta sempre disponibile.
 
-- OAuth2 degli account email e backend di autenticazione esterni (LDAP, OAuth).
+- OAuth2 degli account email e backend di autenticazione esterni diversi dal login OAuth2 Client supportato dal bridge RRH **nello stack integrato, se attivato e collaudato**. Il plugin continua a essere eseguito dal PHP (vedi [bridge OAuth2 RRH](oauth2-sso-rrh.md)); in modalità attach serve installazione manuale del bridge.
 - Caricamento di loghi e sfondi del pannello classico.
 - Modifiche ai form che richiedono DDL sulle tabelle `*__cdata`. TailTicket le rifiuta in modo esplicito.
 - Creazione e modifica delle code (criteri, colonne), configurazione dei singoli campi dei form, import CSV delle liste.

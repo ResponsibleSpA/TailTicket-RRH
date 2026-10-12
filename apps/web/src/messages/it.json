@@ -84,6 +84,8 @@
     "password": "Password",
     "signIn": "Accedi",
     "signingIn": "Accesso in corso…",
+    "ssoSignIn": "Accedi con {provider}",
+    "ssoFailed": "Accesso esterno non riuscito. Riprova o contatta l\u0027amministratore.",
     "sideTitle": "TailTicket",
     "sideText": "L'helpdesk moderno, compatibile con osTicket: nuova interfaccia, stessi dati del pannello classico.",
     "errors": {
