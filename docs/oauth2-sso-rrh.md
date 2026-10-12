@@ -28,17 +28,17 @@ Questo bridge abilita il **login agenti e clienti** di TailTicket attraverso il 
 ## Flusso (senza duplicare OAuth2)
 
 1. La pagina Next richiede al PHP interno l'elenco dei backend **registrati e attivi** (`?action=providers`; header autenticato) e mostra il pulsante nel realm corretto.
-2. `/api/auth/osticket/start?realm=staff|client` genera un nonce casuale, lo memorizza in uno store temporaneo in memoria e nel cookie `HttpOnly/SameSite=Lax`; filtra `next` con le stesse regole del login normale.
+2. `/api/auth/osticket/start?realm=staff|client` genera un nonce casuale, lo memorizza in uno store temporaneo in memoria, genera un **verificatore casuale indipendente** conservato solo nel cookie `HttpOnly/SameSite=Lax` (mai passato al PHP); filtra `next` con le stesse regole del login normale.
 3. Reindirizza al PHP `/classic/api/tailticket-sso.php?action=start&realm=...&nonce=...`, che salva la transazione nella sessione PHP e invoca `oauth2.agent` o `oauth2.user` tramite il backend registrato.
 4. Il plugin completa la sua **normale** autenticazione presso l'Identity Provider e la callback `/classic/api/auth/oauth2`: il PHP conserva il controllo di `state`, token, mapping, account e autorizzazioni native.
 5. Il PHP ritorna al bridge `?action=finish`; il bridge usa **`StaffAuthenticationBackend::getUser()` / `UserAuthenticationBackend::getUser()`** e controlla la validità, l'identificatore di backend e i vincoli dell'account. Per un agente con 2FA PHP pendente, reindirizza al login classico per completare la sfida prima di proseguire. Se è obbligatoria la configurazione del 2FA, rifiuta l'handoff.
 6. Solo dopo l'autenticazione completa, il PHP firma un payload minimo `{v, realm, uid, backend, nonce, iat, exp, jti}` con HMAC-SHA256, durata **60 secondi**, poi elimina la transazione PHP e torna alla callback Next.
-7. Next confronta la prova con il nonce del browser, verifica firma e scadenza, impedisce il riuso dello `jti`, controlla ancora lo stato del provider e dell'account nel database e crea **`ostn_staff`** oppure **`ostn_client`** con la logica di sessione esistente. Destinazione `next` solo interna; gli obblighi di cambio password restano attivi.
+7. Next confronta la prova con il nonce del browser **e con il verificatore privato nel cookie**, verifica firma e scadenza, impedisce il riuso dello `jti`, controlla ancora lo stato del provider e dell'account nel database e crea **`ostn_staff`** oppure **`ostn_client`** con la logica di sessione esistente. Destinazione `next` solo interna; gli obblighi di cambio password restano attivi.
 
 ### Garanzie e limiti
 
 - Segreto separato per il bridge; niente access token, refresh token o client secret dell'IdP in Next o nel payload; nessuna scrittura diretta delle sessioni PHP.
-- Il payload **non è una sessione persistente**: si consuma una sola volta e richiede la transazione generata nel browser da Next. Non permette di scegliere `uid` o il realm da parametri del callback.
+- Il payload **non è una sessione persistente**: si consuma una sola volta e richiede la transazione generata nel browser da Next e il relativo **verificatore privato del cookie**, non presente nell'URL. Non permette di scegliere `uid` o il realm da parametri del callback.
 - Gli store temporanei (nonce/replay) sono in memoria del **singolo processo Next**, analogamente ai contatori e alla 2FA attuali. **Non** usare più istanze Next senza prima sostituire questi store con un backend condiviso e atomico.
 - La prova firmata viaggia in una query string di ritorno. Ha TTL corto, viene consumata e non contiene dati IdP, ma la URL può apparire nei log del proxy/browser: non registrare query complete di `/api/auth/osticket/callback`. Ogni risposta del bridge imposta `no-store` e `no-referrer`.
 - Il logout da TailTicket revoca la sessione Next; **non effettua single logout** dell'Identity Provider o della sessione PHP. Un nuovo login può riuscire senza nuove credenziali se esiste ancora la sessione IdP.
