@@ -40,6 +40,8 @@
       "password": "Password",
       "signIn": "Sign in",
       "signingIn": "Signing in…",
+      "ssoSignIn": "Sign in with {provider}",
+      "ssoFailed": "External sign-in could not be completed. Try again or contact support.",
       "forgot": "Forgot my password",
       "notRegistered": "Not yet registered?",
       "createAccount": "Create an account",
