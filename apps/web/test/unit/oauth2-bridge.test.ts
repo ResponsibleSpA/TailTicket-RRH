@@ -37,13 +37,16 @@ describe("OAuth2 PHP/Next bridge", () => {
   });
 
   it("binds a pending transaction to the realm and a safe internal destination, then consumes it", () => {
-    const nonce = startSsoTransaction("staff", "/agent/tickets/123?tab=notes");
-    expect(takeSsoTransaction(nonce)).toEqual({ realm: "staff", next: "/agent/tickets/123?tab=notes" });
-    expect(takeSsoTransaction(nonce)).toBeNull();
+    const { nonce, cookie } = startSsoTransaction("staff", "/agent/tickets/123?tab=notes");
+    expect(takeSsoTransaction(nonce)).toBeNull(); // URL nonce is not enough
+    const forgedVerifier = nonce + "." + randomBytes(24).toString("base64url");
+    expect(takeSsoTransaction(forgedVerifier)).toBeNull();
+    expect(takeSsoTransaction(cookie)).toEqual({ realm: "staff", next: "/agent/tickets/123?tab=notes", nonce });
+    expect(takeSsoTransaction(cookie)).toBeNull();
     const rejected = startSsoTransaction("client", "//evil.test/steal");
-    expect(takeSsoTransaction(rejected)).toEqual({ realm: "client", next: "/tickets" });
+    expect(takeSsoTransaction(rejected.cookie)).toEqual({ realm: "client", next: "/tickets", nonce: rejected.nonce });
     const crossRealm = startSsoTransaction("client", "/agent/admin");
-    expect(takeSsoTransaction(crossRealm)).toEqual({ realm: "client", next: "/tickets" });
+    expect(takeSsoTransaction(crossRealm.cookie)).toEqual({ realm: "client", next: "/tickets", nonce: crossRealm.nonce });
   });
 
   it("accepts a valid assertion once only", () => {
