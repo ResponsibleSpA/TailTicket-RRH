@@ -12,7 +12,7 @@ import ForgotPasswordLink from "@/components/people/auth/ForgotPasswordLink";
 
 import { agentLoginAction, type LoginState } from "../actions";
 
-export default function LoginForm({ next, expired }: { next?: string; expired?: boolean }) {
+export default function LoginForm({ next, expired, ssoFailed, oauthProvider }: { next?: string; expired?: boolean; ssoFailed?: boolean; oauthProvider?: string | null }) {
   const t = useTranslations("auth");
   const [state, action, pending] = useActionState<LoginState, FormData>(agentLoginAction, {});
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +30,11 @@ export default function LoginForm({ next, expired }: { next?: string; expired?: 
         {state.error && (
           <div className="mb-5">
             <Alert variant="error" title={t(`errors.${state.error}`)} message="" />
+          </div>
+        )}
+        {!state.error && ssoFailed && (
+          <div className="mb-5">
+            <Alert variant="error" title={t("ssoFailed")} message="" />
           </div>
         )}
         {!state.error && expired && (
@@ -83,6 +88,14 @@ export default function LoginForm({ next, expired }: { next?: string; expired?: 
             <ForgotPasswordLink />
           </div>
         </form>
+        {oauthProvider && (
+          <a
+            href={`/api/auth/osticket/start?realm=staff&next=${encodeURIComponent(next ?? "")}`}
+            className="mt-4 flex w-full items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-white/5"
+          >
+            {t("ssoSignIn", { provider: oauthProvider })}
+          </a>
+        )}
       </div>
     </div>
   );
