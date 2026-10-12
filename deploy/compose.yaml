@@ -50,6 +50,8 @@ services:
     environment:
       <<: *ost-env
       TAILTICKET_URL: ${TAILTICKET_URL:-http://localhost}
+      # vuoto = OAuth2 bridge disabilitato; segreto dedicato condiviso soltanto con Next
+      TAILTICKET_SSO_SECRET: ${TAILTICKET_SSO_SECRET:-}
       TAILTICKET_INSTALL: ${TAILTICKET_INSTALL:-auto}
       TAILTICKET_AUTO_UPGRADE: ${TAILTICKET_AUTO_UPGRADE:-true}
       TAILTICKET_SYNC_URL: ${TAILTICKET_SYNC_URL:-true}
@@ -84,6 +86,8 @@ services:
       # il DB del container gira in UTC; il fuso di visualizzazione è quello impostato in osTicket
       OST_DB_TIMEZONE: UTC
       APP_SESSION_SECRET: ${TAILTICKET_SESSION_SECRET:?impostare TAILTICKET_SESSION_SECRET (./tailticket init)}
+      TAILTICKET_SSO_SECRET: ${TAILTICKET_SSO_SECRET:-}
+      TAILTICKET_SSO_PHP_INTERNAL_URL: http://osticket/classic/api/tailticket-sso.php
       OST_PHP_URL: /classic
       OST_SMTP_URL: ${TAILTICKET_SMTP_URL:-}
       # un solo proxy fidato (Caddy): l'IP del client arriva in X-Real-IP
