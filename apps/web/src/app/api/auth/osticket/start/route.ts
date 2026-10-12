@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
   if (!["http:", "https:"].includes(php.protocol) || php.username || php.password) {
     return new Response(null, { status: 503 });
   }
-  const nonce = startSsoTransaction(realm, request.nextUrl.searchParams.get("next"));
+  const { nonce, cookie } = startSsoTransaction(realm, request.nextUrl.searchParams.get("next"));
   php.searchParams.set("action", "start");
   php.searchParams.set("realm", realm);
   php.searchParams.set("nonce", nonce);
 
   const response = NextResponse.redirect(php);
-  response.cookies.set(SSO_PENDING_COOKIE, nonce, {
+  response.cookies.set(SSO_PENDING_COOKIE, cookie, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
