@@ -26,8 +26,9 @@ function redirectClean(request: NextRequest, path: string): NextResponse {
  * browser transaction and re-checks the local account before issuing a JWT.
  */
 export async function GET(request: NextRequest) {
-  const nonce = request.cookies.get(SSO_PENDING_COOKIE)?.value ?? "";
-  const tx = nonce ? takeSsoTransaction(nonce) : null;
+  const cookie = request.cookies.get(SSO_PENDING_COOKIE)?.value ?? "";
+  const tx = cookie ? takeSsoTransaction(cookie) : null;
+  const nonce = tx?.nonce ?? "";
   const realm: SsoRealm = tx?.realm ?? "client";
   const failure = () => redirectClean(request, (realm === "staff" ? "/agent/login" : "/login") + "?sso_error=1");
   const secret = bridgeSecret();
