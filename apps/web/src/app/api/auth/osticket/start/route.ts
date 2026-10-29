@@ -8,6 +8,7 @@ import {
   startSsoTransaction,
   type SsoRealm,
 } from "@/server/auth/oauth2-bridge";
+import { localRedirect } from "@/server/http/redirect";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,10 @@ export async function GET(request: NextRequest) {
   php.searchParams.set("realm", realm);
   php.searchParams.set("nonce", nonce);
 
-  const response = NextResponse.redirect(php);
+  // A relative PHP base belongs to the public origin, not the container hostname.
+  const response = phpBase.startsWith("/") && !phpBase.startsWith("//")
+    ? localRedirect(php.pathname + php.search)
+    : NextResponse.redirect(php);
   response.cookies.set(SSO_PENDING_COOKIE, cookie, {
     httpOnly: true,
     sameSite: "lax",

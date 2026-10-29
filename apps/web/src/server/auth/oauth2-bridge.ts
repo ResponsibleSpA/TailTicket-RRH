@@ -44,8 +44,15 @@ export function bridgeSecret(): string | null {
   return Buffer.byteLength(value, "utf8") >= 32 ? value : null;
 }
 
+/** ServiceRegistry::getBkId appends the plugin instance (e.g. oauth2.agent.p3i2). */
+function isOauth2Backend(value: unknown, realm: SsoRealm): value is string {
+  const base = realm === "staff" ? "oauth2.agent" : "oauth2.user";
+  return typeof value === "string" && (value === base ||
+    (value.startsWith(base + ".") && /^p[1-9]\d*i[1-9]\d*$/.test(value.slice(base.length + 1))));
+}
+
 /** Only an actually registered, enabled PHP OAuth backend is offered. */
-export async function oauth2Provider(realm: SsoRealm): Promise<string | null> {
+export async function oauth2Provider(realm: SsoRealm, expectedBackend?: string): Promise<string | null> {
   const secret = bridgeSecret();
   const endpoint = process.env.TAILTICKET_SSO_PHP_INTERNAL_URL;
   if (!secret || !endpoint) return null;
@@ -56,6 +63,9 @@ export async function oauth2Provider(realm: SsoRealm): Promise<string | null> {
     url.searchParams.set("action", "providers");
     const result = await fetch(url, {
       cache: "no-store",
+      // Existing PHP/proxies can redirect to another host or a login page.
+      // Never forward the shared signing secret beyond the configured endpoint.
+      redirect: "error",
       signal: AbortSignal.timeout(3000),
       // The internal Docker hop is HTTP; the public PHP installation may enforce HTTPS.
       // Apache maps this trusted internal header to HTTPS=on (see deploy/osticket/apache.conf).
@@ -67,7 +77,7 @@ export async function oauth2Provider(realm: SsoRealm): Promise<string | null> {
     const option = (payload as Record<string, unknown>)[realm];
     if (!option || typeof option !== "object") return null;
     const { id, label } = option as Record<string, unknown>;
-    if (id !== (realm === "staff" ? "oauth2.agent" : "oauth2.user")) return null;
+    if (!isOauth2Backend(id, realm) || (expectedBackend !== undefined && id !== expectedBackend)) return null;
     return typeof label === "string" && label.trim() ? label.trim().slice(0, 100) : "OAuth2";
   } catch {
     // PHP/plugin unavailable: hide the button, leave local authentication intact.
@@ -118,7 +128,7 @@ export function redeemSsoProof(proof: string, secret: string, nonce: string, rea
   }
   if (!value || typeof value !== "object") return null;
   const p = value as Record<string, unknown>;
-  if (p.v !== 1 || p.realm !== realm || p.nonce !== nonce || p.backend !== (realm === "staff" ? "oauth2.agent" : "oauth2.user")) return null;
+  if (p.v !== 1 || p.realm !== realm || p.nonce !== nonce || !isOauth2Backend(p.backend, realm)) return null;
   if (!Number.isSafeInteger(p.uid) || (p.uid as number) <= 0) return null;
   if (!Number.isSafeInteger(p.iat) || !Number.isSafeInteger(p.exp)) return null;
   const iat = p.iat as number;

@@ -144,6 +144,8 @@ Per chi ha già osTicket 1.17 o 1.18 in produzione e vuole aggiungere TailTicket
 
 Il PHP continua a fare tutto quello che TailTicket non duplica: **cron** (`api/cron.php`: fetch delle email, SLA e scadenze, pulizie), **email in entrata** (caselle IMAP/POP e pipe), **API REST**, **plugin** (autenticazione LDAP/OAuth, storage, segnali), installer e upgrader. Il cron dell'osTicket esistente deve restare attivo: il doctor lo controlla.
 
+Il **login OAuth2 Client (Google e provider configurati nel plugin PHP)** può essere usato anche in attach aggiungendo il solo endpoint `api/tailticket-sso.php` al PHP originale. `compose.attach.yaml` passa a Next `TAILTICKET_SSO_SECRET` e `TAILTICKET_SSO_PHP_INTERNAL_URL`; restano vuote fino all'attivazione esplicita. URL pubblici/interni, configurazione Apache/FPM, cookie e collaudo: [bridge OAuth2 in attach](../docs/oauth2-sso-rrh.md#attivazione-in-modalità-attach).
+
 ### Le tre modalità
 
 | Modalità | Cosa scrive TailTicket |

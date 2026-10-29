@@ -42,17 +42,25 @@ function tt_sso_secret(): string {
 
 /** A backend is eligible only if the PHP plugin actually registered it. */
 function tt_sso_backend(string $realm) {
-    if ($realm === 'staff') {
-        $backend = StaffAuthenticationBackend::getBackend('oauth2.agent');
-        return $backend instanceof ExternalStaffAuthenticationBackend
-            && $backend->getBkId() === 'oauth2.agent' ? $backend : null;
+    if (!in_array($realm, ['staff', 'client'], true)) {
+        return null;
     }
-    if ($realm === 'client') {
-        $backend = UserAuthenticationBackend::getBackend('oauth2.user');
-        return $backend instanceof ExternalUserAuthenticationBackend
-            && $backend->getBkId() === 'oauth2.user' ? $backend : null;
+    $staff = $realm === 'staff';
+    $base = $staff ? 'oauth2.agent' : 'oauth2.user';
+    $registered = $staff ? StaffAuthenticationBackend::allRegistered()
+        : UserAuthenticationBackend::allRegistered();
+    $eligible = [];
+    foreach ($registered as $backend) {
+        $external = $staff ? $backend instanceof ExternalStaffAuthenticationBackend
+            : $backend instanceof ExternalUserAuthenticationBackend;
+        if ($external && $backend->getId() === $base
+            && preg_match('/^' . preg_quote($base, '/') . '(?:\.p[1-9][0-9]*i[1-9][0-9]*)?$/D', $backend->getBkId())) {
+            $eligible[$backend->getBkId()] = $backend;
+        }
     }
-    return null;
+    // The current UI offers one provider per realm. Never silently choose a
+    // different identity provider when more than one authentication instance is enabled.
+    return count($eligible) === 1 ? reset($eligible) : null;
 }
 
 /** Only the configured public TailTicket URL may receive the assertion. */
@@ -113,9 +121,12 @@ if ($action === 'start') {
     $_SESSION[TT_SSO_SESSION] = [
         'realm' => $realm,
         'nonce' => $nonce,
+        'backend' => $backend->getBkId(),
         'started' => time(),
     ];
-    $dest = ROOT_PATH . 'api/tailticket-sso.php?action=finish';
+    // Preserve the PHP origin/port even when Google's existing callback is
+    // proxied from TailTicket's origin (e.g. callback on 443, PHP on 8443).
+    $dest = osTicket::get_base_url() . 'api/tailticket-sso.php?action=finish';
     if ($realm === 'staff') {
         $_SESSION['_staff']['auth']['dest'] = $dest;
     } else {
@@ -130,7 +141,7 @@ if ($action === 'start') {
 if ($action === 'finish') {
     $transaction = $_SESSION[TT_SSO_SESSION] ?? null;
     if (!is_array($transaction)
-        || !isset($transaction['realm'], $transaction['nonce'], $transaction['started'])
+        || !isset($transaction['realm'], $transaction['nonce'], $transaction['backend'], $transaction['started'])
         || !in_array($transaction['realm'], ['staff', 'client'], true)
         || !is_int($transaction['started'])
         || time() - $transaction['started'] > TT_SSO_MAX_AGE
@@ -142,7 +153,7 @@ if ($action === 'finish') {
     }
     $realm = $transaction['realm'];
     $backend = tt_sso_backend($realm);
-    if (!$backend) {
+    if (!$backend || $transaction['backend'] !== $backend->getBkId()) {
         unset($_SESSION[TT_SSO_SESSION]);
         tt_sso_fail();
     }
@@ -158,14 +169,14 @@ if ($action === 'finish') {
         if (!$user || !$user->getId() || !$user->isActive()
             || !$user->isValid() || $user->force2faConfig()
             || !StaffAuthenticationBackend::isBackendAllowed($user, $backend)
-            || !str_starts_with((string) $user->getAuthKey(), 'oauth2.agent:')) {
+            || !str_starts_with((string) $user->getAuthKey(), $backend->getBkId() . ':')) {
             unset($_SESSION[TT_SSO_SESSION]);
             tt_sso_fail();
         }
     } else {
         $user = UserAuthenticationBackend::getUser();
         if (!$user || !$user->getId() || !$user->isValid()
-            || !str_starts_with((string) $user->getAuthKey(), 'oauth2.user:')) {
+            || !str_starts_with((string) $user->getAuthKey(), $backend->getBkId() . ':')) {
             unset($_SESSION[TT_SSO_SESSION]);
             tt_sso_fail();
         }

@@ -55,6 +55,21 @@ describe("OAuth2 PHP/Next bridge", () => {
     expect(redeemSsoProof(proof, SECRET, payload.nonce, "staff")).toBeNull();
   });
 
+  it("preserves the native plugin instance in staff and client assertions", () => {
+    const staff = makeProof({ backend: "oauth2.agent.p3i2" });
+    expect(redeemSsoProof(staff.proof, SECRET, staff.payload.nonce, "staff"))
+      .toMatchObject({ backend: "oauth2.agent.p3i2" });
+    const client = makeProof({ realm: "client", backend: "oauth2.user.p3i2" });
+    expect(redeemSsoProof(client.proof, SECRET, client.payload.nonce, "client"))
+      .toMatchObject({ backend: "oauth2.user.p3i2" });
+  });
+
+  it.each(["oauth2.agent.evil", "oauth2.agent.p0i2", "oauth2.agent.p3i0", "oauth2.agent.p3i2:other", "oauth2.user.p3i2"])
+    ("rejects an invalid or cross-realm instance: %s", (backend) => {
+      const { proof, payload } = makeProof({ backend });
+      expect(redeemSsoProof(proof, SECRET, payload.nonce, "staff")).toBeNull();
+    });
+
   it("rejects tampering, an unknown secret, wrong nonce, realm or backend", () => {
     const { proof, payload } = makeProof();
     expect(redeemSsoProof(proof, "another-test-secret-with-at-least-32-bytes", payload.nonce, "staff")).toBeNull();

@@ -40,6 +40,11 @@ services:
       TAILTICKET_JOURNAL_DIR: /var/lib/tailticket/journal
       APP_SESSION_SECRET: ${TAILTICKET_SESSION_SECRET:?impostare TAILTICKET_SESSION_SECRET (./tailticket init --attach)}
       OST_PHP_URL: ${TAILTICKET_CLASSIC_URL:-}
+      # Login OAuth2 tramite il PHP esistente: installare il solo endpoint aggiuntivo
+      # api/tailticket-sso.php e condividere il segreto (docs/oauth2-sso-rrh.md).
+      # URL completo raggiungibile dal container, senza redirect; vuoto = SSO disabilitato.
+      TAILTICKET_SSO_SECRET: ${TAILTICKET_SSO_SECRET:-}
+      TAILTICKET_SSO_PHP_INTERNAL_URL: ${TAILTICKET_SSO_PHP_INTERNAL_URL:-}
       # relay solo se osTicket non ha account SMTP (usa mail() di PHP); vuoto = account SMTP di osTicket
       OST_SMTP_URL: ${TAILTICKET_SMTP_URL:-}
       # proxy fidati davanti alla app (Caddy di questo file: 1); l'IP del client arriva in X-Real-IP

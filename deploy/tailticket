@@ -324,6 +324,14 @@ TAILTICKET_SESSION_SECRET=
 # token di /api/doctor (./tailticket doctor)
 TAILTICKET_DOCTOR_TOKEN=
 
+# --- Login OAuth2 tramite il PHP esistente (facoltativo) --------------------------------------------
+# Installare il solo api/tailticket-sso.php: ../docs/oauth2-sso-rrh.md
+# Segreto dedicato condiviso con il PHP, che deve ricevere anche TAILTICKET_URL.
+# Generare con openssl rand -hex 32; vuoto = SSO disabilitato.
+TAILTICKET_SSO_SECRET=
+# URL completo del bridge raggiungibile dal container, senza redirect.
+TAILTICKET_SSO_PHP_INTERNAL_URL=
+
 # --- Modalità di scrittura --------------------------------------------------------------------------
 # readonly (default in attach) | operational (ticket, task, utenti, portale; admin in sola lettura) | full
 # Si cambia con ./tailticket mode, che prima verifica doctor e backup.
