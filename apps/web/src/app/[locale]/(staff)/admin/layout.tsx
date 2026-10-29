@@ -6,6 +6,8 @@ import AppShell from "@/components/shell/AppShell";
 import WriteModeBanner from "@/components/shell/WriteModeBanner";
 import { WriteModeProvider } from "@/context/WriteModeContext";
 import type { NavSection } from "@/layout/nav-types";
+import { TicketPerm } from "@/server/domain/staff/staff";
+import { writeAllowed } from "@/server/system/write-mode";
 import { uiWriteMode } from "@/server/system/write-mode-ui";
 
 import { agentLogoutAction } from "../agent/actions";
@@ -113,6 +115,7 @@ export default async function AdminLayout({ children, params }: { children: Reac
         sections={sections}
         homeHref="/admin"
         user={await shellUser(agent)}
+        canCreateTicket={writeAllowed(wm.effective, "operational") && agent.hasPermInAnyRole(TicketPerm.CREATE)}
         logoutAction={agentLogoutAction}
         menuLinks={[{ label: t("nav.items.agentPanel"), href: "/agent" }]}
         banner={<WriteModeBanner area="admin" legacyUrl={process.env.OST_PHP_URL} />}

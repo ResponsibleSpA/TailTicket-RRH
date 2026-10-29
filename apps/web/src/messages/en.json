@@ -75,7 +75,11 @@
     "admin": "Administrator",
     "home": "Go to dashboard",
     "menu": "More actions",
-    "toggleTheme": "Toggle light/dark theme"
+    "toggleTheme": "Toggle light/dark theme",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeAuto": "System"
   },
   "auth": {
     "agentLoginTitle": "Agent sign in",

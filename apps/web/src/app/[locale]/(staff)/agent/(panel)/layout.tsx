@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import AppShell from "@/components/shell/AppShell";
 import WriteModeBanner from "@/components/shell/WriteModeBanner";
 import { WriteModeProvider } from "@/context/WriteModeContext";
+import { TicketPerm } from "@/server/domain/staff/staff";
 import { writeAllowed } from "@/server/system/write-mode";
 import { uiWriteMode } from "@/server/system/write-mode-ui";
 
@@ -27,10 +28,11 @@ export default async function AgentPanelLayout({ children, params }: { children:
   return (
     <WriteModeProvider configured={wm.configured} effective={wm.effective} reasons={wm.reasons}>
       <AppShell
-        sections={await agentNav(agent, writeAllowed(wm.effective, "operational"))}
+        sections={await agentNav(agent)}
         homeHref="/agent"
         user={await shellUser(agent)}
         searchHref="/agent/tickets"
+        canCreateTicket={writeAllowed(wm.effective, "operational") && agent.hasPermInAnyRole(TicketPerm.CREATE)}
         logoutAction={agentLogoutAction}
         menuLinks={[
           { label: t("header.profile"), href: "/agent/profile" },

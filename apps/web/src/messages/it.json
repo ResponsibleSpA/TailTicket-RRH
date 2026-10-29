@@ -75,7 +75,11 @@
     "admin": "Amministratore",
     "home": "Vai alla dashboard",
     "menu": "Altre azioni",
-    "toggleTheme": "Cambia tema chiaro/scuro"
+    "toggleTheme": "Cambia tema chiaro/scuro",
+    "theme": "Tema",
+    "themeLight": "Chiaro",
+    "themeDark": "Scuro",
+    "themeAuto": "Sistema"
   },
   "auth": {
     "agentLoginTitle": "Accesso agenti",

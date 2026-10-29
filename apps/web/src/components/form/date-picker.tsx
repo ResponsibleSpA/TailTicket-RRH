@@ -41,7 +41,6 @@ export default function DatePicker({
     const lang = locale?.slice(0, 2);
     const flatPickr = flatpickr(`#${id}`, {
       mode: mode || "single",
-      static: true,
       monthSelectorType: "static",
       dateFormat: "Y-m-d",
       defaultDate,

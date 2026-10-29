@@ -1,8 +1,7 @@
 "use client";
 
-import { Command, Ellipsis, Menu, PanelLeft, Search, X } from "lucide-react";
+import { Command, Ellipsis, Menu, PanelLeft, Plus, Search, X } from "lucide-react";
 import BrandLogo from "@/components/brand/BrandLogo";
-import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import UserMenu from "@/components/shell/UserMenu";
 import { useSidebar } from "@/context/SidebarContext";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -16,12 +15,14 @@ interface Props {
   user: ShellUser;
   /** pagina che riceve ?q= dalla ricerca rapida; se assente la ricerca non viene mostrata */
   searchHref?: string;
+  canCreateTicket: boolean;
   logoutAction: () => Promise<void>;
   menuLinks?: { label: string; href: string; external?: boolean }[];
 }
 
-export default function AppHeader({ user, searchHref, logoutAction, menuLinks = [] }: Props) {
+export default function AppHeader({ user, searchHref, canCreateTicket, logoutAction, menuLinks = [] }: Props) {
   const t = useTranslations("header");
+  const tn = useTranslations("nav.items");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,9 +115,15 @@ export default function AppHeader({ user, searchHref, logoutAction, menuLinks = 
             mobileMenuOpen ? "flex" : "hidden",
           )}
         >
-          <div className="flex items-center gap-2 2xsm:gap-3">
-            <ThemeToggleButton />
-          </div>
+          {canCreateTicket && (
+            <Link
+              href="/agent/tickets/new"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-4 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 focus-visible:ring-3 focus-visible:ring-brand-500/30 focus-visible:outline-hidden"
+            >
+              <Plus aria-hidden="true" className="size-4" />
+              {tn("newTicket")}
+            </Link>
+          )}
           <UserMenu user={user} logoutAction={logoutAction} links={menuLinks} />
         </div>
       </div>

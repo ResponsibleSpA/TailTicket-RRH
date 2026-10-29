@@ -84,10 +84,6 @@ export default async function AgentDashboardPage({
     new URLSearchParams(Object.entries({ ...extra, ...filters }).filter(([, v]) => v !== "")).toString();
   const hours = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const fmt = (n: number | null) => (n === null ? "—" : hours.format(n));
-  // Giorni (yyyy-mm-dd, già nel fuso dell'agente) formattati senza ulteriori conversioni di fuso
-  const dayFmt = new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" });
-  const day = (iso: string) => dayFmt.format(Date.parse(`${iso}T00:00:00Z`));
-  const rangeText = ts("range", { start: day(range.startDay), stop: day(range.lastDay), tz: range.zone });
 
   return (
     <div className="space-y-6">
@@ -96,7 +92,7 @@ export default async function AgentDashboardPage({
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white/90">{t("welcome", { name: agent.name.first || agent.name.full })}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
-        <StatsFilter start={range.startDay} period={period} periods={PERIOD_CHOICES} group={group} rangeText={rangeText} />
+        <StatsFilter start={range.startDay} period={period} periods={PERIOD_CHOICES} group={group} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
