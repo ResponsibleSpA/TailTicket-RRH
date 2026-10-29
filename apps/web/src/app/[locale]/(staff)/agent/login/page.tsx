@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import AuthLayout from "@/components/shell/AuthLayout";
 import { redirect } from "@/i18n/navigation";
 import { sessionAgent } from "@/server/auth/staff-auth";
+import { oauth2Provider } from "@/server/auth/oauth2-bridge";
 import { loadTheme } from "@/server/theme/theme";
 
 import LoginForm from "./LoginForm";
@@ -18,11 +19,11 @@ export default async function AgentLoginPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ next?: string; expired?: string }>;
+  searchParams: Promise<{ next?: string; expired?: string; sso_error?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { next, expired } = await searchParams;
+  const { next, expired, sso_error } = await searchParams;
 
   if (await sessionAgent()) redirect({ href: "/agent", locale });
 
@@ -34,7 +35,7 @@ export default async function AgentLoginPage({
       sideText={theme.login_tagline || t("sideText")}
       backdropUrl={theme.backdropId ? "/api/branding/backdrop" : undefined}
     >
-      <LoginForm next={next} expired={expired === "1"} />
+      <LoginForm next={next} expired={expired === "1"} ssoFailed={sso_error === "1"} oauthProvider={await oauth2Provider("staff")} />
     </AuthLayout>
   );
 }

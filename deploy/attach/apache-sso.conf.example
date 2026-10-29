@@ -1,0 +1,10 @@
+# Include nel VirtualHost HTTPS che serve osticket-custom (Apache con mod_php).
+# Salvare la copia configurata fuori dalla document root, leggibile solo da root.
+# Sostituire il segreto con lo stesso TAILTICKET_SSO_SECRET di deploy/.env.
+# Guida e alternativa PHP-FPM: docs/oauth2-sso-rrh.md, "Attivazione in modalità attach".
+<Directory /var/www/html/osTicket/osticket-custom/api>
+    <Files "tailticket-sso.php">
+        SetEnv TAILTICKET_SSO_SECRET ""
+        SetEnv TAILTICKET_URL "https://ticket.responsible.hospital"
+    </Files>
+</Directory>

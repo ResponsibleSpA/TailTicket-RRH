@@ -16,6 +16,8 @@ import { accessLinkAction, portalLoginAction, type AccessLinkState, type PortalL
 
 interface Props {
   next?: string;
+  oauthProvider?: string | null;
+  ssoFailed?: boolean;
   /** errore arrivato dal link (view, conferma) */
   linkError?: string;
   /** login con account disponibile (client_registration != disabled) */
@@ -45,7 +47,7 @@ function CardHead({ icon: Icon, title, children, as: H }: { icon: LucideIcon; ti
 }
 
 /** login.php: accesso con account (login.inc.php) e verifica dello stato con numero del ticket (accesslink.inc.php). */
-export default function LoginPanel({ next, linkError, showLogin, canRegister, verifyEmail, canOpen, allowReset, defaults, banner }: Props) {
+export default function LoginPanel({ next, oauthProvider, ssoFailed, linkError, showLogin, canRegister, verifyEmail, canOpen, allowReset, defaults, banner }: Props) {
   const t = useTranslations("portal.login");
   const te = useTranslations("portal.errors");
   const [login, loginAction, loginPending] = useActionState<PortalLoginState, FormData>(portalLoginAction, {});
@@ -63,6 +65,9 @@ export default function LoginPanel({ next, linkError, showLogin, canRegister, ve
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
             )}
           </CardHead>
+          {ssoFailed && (
+            <div className="mt-4"><Alert variant="error" title={t("ssoFailed")} message="" /></div>
+          )}
           {login.error && (
             <div className="mt-4">
               <Alert variant="error" title={err(login.error)!} message="" />
@@ -103,6 +108,14 @@ export default function LoginPanel({ next, linkError, showLogin, canRegister, ve
               </Link>
             </p>
           </form>
+          {oauthProvider && (
+            <a
+              href={`/api/auth/osticket/start?realm=client&next=${encodeURIComponent(next ?? "")}`}
+              className={cn(BTN_SECONDARY, "mt-4 flex w-full items-center justify-center")}
+            >
+              {t("ssoSignIn", { provider: oauthProvider })}
+            </a>
+          )}
         </section>
       )}
 

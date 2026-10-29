@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import LoginPanel from "@/components/portal/LoginPanel";
 import { redirect } from "@/i18n/navigation";
 import { coreConfig } from "@/server/config/config";
+import { oauth2Provider } from "@/server/auth/oauth2-bridge";
 import { renderedContent } from "@/server/domain/client/ui";
 
 import { portalVisitor } from "../guard";
@@ -18,7 +19,7 @@ export default async function PortalLoginPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ next?: string; error?: string; e?: string; t?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; e?: string; t?: string; sso_error?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -30,6 +31,8 @@ export default async function PortalLoginPage({
   return (
     <LoginPanel
       next={sp.next}
+      ssoFailed={sp.sso_error === "1"}
+      oauthProvider={registration !== "disabled" ? await oauth2Provider("client") : null}
       linkError={sp.error}
       showLogin={registration !== "disabled"}
       canRegister={["public", "auto"].includes(registration)}
