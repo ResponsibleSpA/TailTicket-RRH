@@ -10,6 +10,7 @@ import PermissionList from "@/components/people/profile/PermissionList";
 import { PasswordCard, TwoFactorCard } from "@/components/people/profile/SecurityCards";
 import Badge from "@/components/ui/badge/Badge";
 import { CustomQueue } from "@/lib/osticket/flags";
+import { formatQueueName } from "@/lib/format/queue-name";
 import { staff2faConfig } from "@/server/auth/mfa";
 import { sessionResetToken } from "@/server/auth/staff-recovery";
 import { coreConfig } from "@/server/config/config";
@@ -40,6 +41,7 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
   const agent = await requireAgent(locale, { passwordChange: true });
   const t = await getTranslations("profile");
   const tp = await getTranslations("peopleProfile");
+  const tq = await getTranslations("queues");
   const sp = await searchParams;
   const tz = await agentTimeZone(agent);
   const cfg = await coreConfig();
@@ -90,7 +92,7 @@ export default async function ProfilePage({ params, searchParams }: { params: Pr
               editor_spacing: agent.config.str("editor_spacing") || "double",
               hideStaffName: cfg.bool("hide_staff_name"),
               systemPageSize: cfg.int("max_page_size"),
-              queues: queues.map((q) => ({ id: q.id, name: q.parent ? `${q.parent} / ${q.title}` : q.title })),
+              queues: queues.map((q) => ({ id: q.id, name: q.parent ? `${formatQueueName(q.parent, null, tq)} / ${formatQueueName(q.title, null, tq)}` : formatQueueName(q.title, null, tq) })),
               timezones: Intl.supportedValuesOf("timeZone"),
               languages: LANGUAGES,
               locales: LOCALES,

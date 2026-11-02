@@ -132,6 +132,7 @@ export function SelectField({
   defaultValue = "",
   placeholder,
   error,
+  hint,
   onChange,
   required,
 }: {
@@ -141,17 +142,18 @@ export function SelectField({
   defaultValue?: string | number;
   placeholder?: string;
   error?: string;
+  hint?: string;
   onChange?: (value: string) => void;
   required?: boolean;
 }) {
   const optionClass = "text-gray-700 dark:bg-gray-900 dark:text-gray-400";
-  const { id, a11y } = useFieldIds(undefined, error);
+  const { id, a11y } = useFieldIds(hint, error);
   // valore attuale fuori elenco (fuso, lingua, 2FA o avatar di un plugin…): resta tra le opzioni, così il
   // salvataggio non lo sostituisce in silenzio con la prima voce
   const current = String(defaultValue);
   const shown = current !== "" && !options.some((o) => String(o.id) === current) ? [...options, { id: current, name: current }] : options;
   return (
-    <Wrap id={id} label={label} error={error} required={required}>
+    <Wrap id={id} label={label} error={error} required={required} hint={hint}>
       <span className="relative block">
         <select {...a11y} name={name} defaultValue={String(defaultValue)} onChange={(e) => onChange?.(e.target.value)} className={cn(inputClass, "appearance-none pe-11")}>
           {placeholder !== undefined && (

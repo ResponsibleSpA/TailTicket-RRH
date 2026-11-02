@@ -17,7 +17,7 @@ export default async function StatsFilter({ start, period, periods, group }: Sta
   const ts = await getTranslations("stats");
   const locale = await getLocale();
   return (
-    <form action="/agent" className="flex flex-wrap items-center gap-2 text-sm">
+    <form action="/agent/dashboard" className="flex flex-wrap items-center gap-2 text-sm">
       <label className="w-full xsm:w-44">
         <span className="sr-only">{t("from")}</span>
         <DatePicker id="stats-start" name="start" defaultDate={start} locale={locale} placeholder={ts("datePlaceholder")} />

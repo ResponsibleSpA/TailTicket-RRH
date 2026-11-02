@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
+import { formatQueueName } from "@/lib/format/queue-name";
 import type { agentQueueNav } from "@/server/domain/queue/context";
 import type { TicketQueue } from "@/server/domain/queue/queues";
 import { cn } from "@/utils";
@@ -20,7 +21,7 @@ interface QueueTabsProps {
 export default async function QueueTabs({ top, subQueues, activeTopId, currentQueueId, counts }: QueueTabsProps) {
   const tq = await getTranslations("queues");
   const t = await getTranslations("tickets");
-  const queueName = (q: TicketQueue) => (tq.has(q.title) ? tq(q.title) : q.title);
+  const queueName = (q: TicketQueue) => formatQueueName(q.title, count(q), tq);
   const count = (q: TicketQueue) => {
     const c = counts.get(q.id);
     return typeof c === "number" ? c : null;

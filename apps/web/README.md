@@ -35,6 +35,10 @@ Documentazione:
 | KB e risposte predefinite | consultazione |
 | Profilo | preferenze, firma, password con policy, configurazione 2FA |
 
+All'accesso, `/agent` apre la lista ticket con la coda personale di osTicket (`default_ticket_queue_id`),
+modificabile in **Profilo → Preferenze → Coda iniziale dei ticket**. Senza una scelta personale vale
+la coda di sistema (`core.default_ticket_queue`, normalmente Aperti). La dashboard resta su `/agent/dashboard`.
+
 ### Area amministrazione (`/admin`, solo amministratori)
 - **Impostazioni**: azienda, sistema, ticket, task, agenti, utenti, KB, email; tema della nuova interfaccia (colori, font, densità, loghi di osTicket).
 - **Gestione**: reparti, help topic, SLA, orari e festività, agenti, team, ruoli e permessi.

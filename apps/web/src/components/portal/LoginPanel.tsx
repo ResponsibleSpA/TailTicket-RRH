@@ -101,12 +101,6 @@ export default function LoginPanel({ next, oauthProvider, ssoFailed, linkError, 
                 </span>
               )}
             </div>
-            <p className="border-t border-gray-100 pt-4 text-theme-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              {t("agent")}{" "}
-              <Link href="/agent/login" className={TEXT_LINK}>
-                {t("agentLink")}
-              </Link>
-            </p>
           </form>
           {oauthProvider && (
             <a
@@ -156,6 +150,13 @@ export default function LoginPanel({ next, oauthProvider, ssoFailed, linkError, 
           </p>
         )}
       </section>
+      <aside className={cn(CARD, "flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6", showLogin && "lg:col-span-2")}>
+        <p className="text-lg font-semibold text-gray-900 dark:text-white/90">{t("agent")}</p>
+        <Link href="/agent/login" className={cn(BTN_PRIMARY, "h-auto min-h-11 w-full py-3 text-center sm:w-auto")}>
+          <LogIn aria-hidden="true" className="size-5 shrink-0" />
+          {t("agentLink")}
+        </Link>
+      </aside>
     </div>
   );
 }
