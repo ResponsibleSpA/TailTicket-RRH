@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import BoardClient from "@/components/board/BoardClient";
 import { PageHeader } from "@/components/common/DataTable";
+import { formatQueueName } from "@/lib/format/queue-name";
 import { boardPriorities, boardSources, loadBoard } from "@/server/domain/board/board";
 import { parseBoardParams } from "@/server/domain/board/params";
 import type { BoardColumn, BoardData } from "@/server/domain/board/types";
@@ -42,13 +43,13 @@ export default async function BoardPage({
 
   // Titoli tradotti: colonne/swimlane speciali e nomi delle code (come la lista ticket)
   const title = (c: BoardColumn): BoardColumn => (c.special ? { ...c, title: t(`special.${c.special}`) } : c);
-  const queueName = (raw: string) => (raw && tq.has(raw) ? tq(raw) : raw);
+  const queueName = (raw: string, count: number | null = null) => formatQueueName(raw, count, tq);
   const view: BoardData = {
     ...data,
     columns: data.columns.map(title),
     lanes: data.lanes.map((l) => ({ ...l, ...title(l) })),
   };
-  const sourceTitle = bp.source === "all" ? t("toolbar.allVisible") : queueName(data.sourceTitle);
+  const sourceTitle = bp.source === "all" ? t("toolbar.allVisible") : queueName(data.sourceTitle, data.total);
 
   return (
     <div className="space-y-5">

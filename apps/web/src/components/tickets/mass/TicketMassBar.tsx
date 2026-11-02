@@ -2,6 +2,7 @@ import { sql } from "kysely";
 import { getTranslations } from "next-intl/server";
 
 import { TicketStatus } from "@/lib/osticket/flags";
+import { formatQueueName } from "@/lib/format/queue-name";
 import { coreConfig } from "@/server/config/config";
 import { db } from "@/server/db";
 import type { AdhocListParams, TicketQueue } from "@/server/domain/queue/queues";
@@ -24,6 +25,7 @@ export default async function TicketMassBar({
   title,
   sort,
   dir,
+  total = null,
 }: {
   agent: Agent;
   queue: TicketQueue | null;
@@ -33,6 +35,7 @@ export default async function TicketMassBar({
   title?: string;
   sort?: string;
   dir?: string;
+  total?: number | null;
 }) {
   const executor = db();
   const tq = await getTranslations("queues");
@@ -76,7 +79,7 @@ export default async function TicketMassBar({
     parentStatuses: choices.map((s) => ({ id: s.id, name: s.name })),
     queueId: queue?.id ?? 0,
     // stesso nome della scheda (titolo tradotto) o della ricerca
-    queueName: queue?.id ? (tq.has(queue.title) ? tq(queue.title) : queue.title) : (title ?? queue?.title ?? ""),
+    queueName: queue?.id ? formatQueueName(queue.title, total, tq) : (title ?? queue?.title ?? ""),
     adhoc: queue?.id ? undefined : adhoc,
     sort,
     dir,

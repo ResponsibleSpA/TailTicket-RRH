@@ -2,6 +2,7 @@ import { BookOpen, Building, Inbox, LayoutDashboard, ListChecks, Settings, Squar
 import { getTranslations } from "next-intl/server";
 
 import type { NavSection, ShellUser } from "@/layout/nav-types";
+import { formatQueueName } from "@/lib/format/queue-name";
 import { agentQueueNav, defaultQueueId } from "@/server/domain/queue/context";
 import type { TicketQueue } from "@/server/domain/queue/queues";
 import { GlobalPerm, type Agent } from "@/server/domain/staff/staff";
@@ -27,7 +28,7 @@ export async function agentNav(agent: Agent): Promise<NavSection[]> {
       key: "dashboard",
       label: t("items.dashboard"),
       icon: <LayoutDashboard />,
-      href: "/agent",
+      href: "/agent/dashboard",
       exact: true,
     },
     {
@@ -39,7 +40,7 @@ export async function agentNav(agent: Agent): Promise<NavSection[]> {
         const c = counts.get(q.id);
         const subs = descendants(q);
         return {
-          label: tq.has(q.title) ? tq(q.title) : q.title,
+          label: formatQueueName(q.title, typeof c === "number" ? c : null, tq),
           href: `/agent/tickets?queue=${q.id}`,
           exact: true,
           badge: typeof c === "number" ? c : undefined,

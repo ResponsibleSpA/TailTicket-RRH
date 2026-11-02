@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { menuButtonClass } from "@/components/common/menu-classes";
+import { formatQueueName } from "@/lib/format/queue-name";
 import type { queueSorts } from "@/server/domain/queue/columns";
 import type { TicketQueue } from "@/server/domain/queue/queues";
 
@@ -22,7 +23,7 @@ export default async function TicketListHeader({ queue, query, totalNum, sorts, 
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <h2 className="flex min-w-0 items-center gap-2.5 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white/90">
-        <span className="min-w-0 break-words">{query ? t("searchResults", { query }) : queue.id ? (tq.has(queue.title) ? tq(queue.title) : queue.title) : queue.title}</span>
+        <span className="min-w-0 break-words">{query ? t("searchResults", { query }) : queue.id ? formatQueueName(queue.title, totalNum, tq) : queue.title}</span>
         {totalNum !== null && (
           <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-theme-sm font-medium tracking-normal text-gray-600 tabular-nums dark:bg-white/5 dark:text-gray-400">
             {totalNum}

@@ -303,7 +303,10 @@
     "userTickets": "User tickets",
     "orgTickets": "Organization tickets"
   },
-  "queues": {},
+  "queues": {
+    "Open": "Open",
+    "openCount": "Open"
+  },
   "ticket": {
     "backToList": "Back to tickets",
     "overdue": "Overdue",

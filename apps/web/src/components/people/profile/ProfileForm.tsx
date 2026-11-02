@@ -120,7 +120,7 @@ export default function ProfileForm({ data }: { data: ProfileFormData }) {
               { id: "", name: t("systemDefault") },
             ]}
           />
-          <SelectField name="default_ticket_queue_id" label={t("defaultQueue")} defaultValue={data.default_ticket_queue_id} options={[{ id: 0, name: t("systemDefault") }, ...data.queues]} />
+          <SelectField name="default_ticket_queue_id" label={t("defaultQueue")} hint={t("defaultQueueHint")} defaultValue={data.default_ticket_queue_id} options={[{ id: 0, name: t("systemDefault") }, ...data.queues]} />
           <SelectField
             name="thread_view_order"
             label={t("threadOrder")}

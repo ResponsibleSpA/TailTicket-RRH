@@ -305,6 +305,7 @@
   },
   "queues": {
     "Open": "Aperti",
+    "openCount": "{count, plural, one {Aperto} other {Aperti}}",
     "Answered": "Con risposta",
     "Overdue": "Scaduti",
     "My Tickets": "I miei ticket",

@@ -108,7 +108,7 @@ export default async function TicketsPage({ params, searchParams }: { params: Pr
 
       {/* Area "ticketedit": azioni di massa sui ticket selezionati ed export CSV della coda */}
       {/* PHP: Export anche per le ricerche ad hoc (#tickets/export/adhoc,<chiave>) */}
-      <TicketMassBar agent={agent} queue={queue} adhoc={queue.id ? undefined : adhoc} title={query ? t("searchResults", { query }) : queue.title} sort={sp.sort} dir={sp.dir} />
+      <TicketMassBar agent={agent} queue={queue} adhoc={queue.id ? undefined : adhoc} title={query ? t("searchResults", { query }) : queue.title} sort={sp.sort} dir={sp.dir} total={totalNum} />
 
       <TicketListCards rows={rows} columns={columns} names={names} tz={tz} locale={locale} />
       <TicketListTable

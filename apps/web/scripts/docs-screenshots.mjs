@@ -179,7 +179,7 @@ if (
   await agentLogin(page);
   ticket = await pickTicket(page);
   console.log(`ticket mostrato: #${ticket.number}`);
-  await shot(page, "agent-dashboard", "/agent", { ms: 2000 });
+  await shot(page, "agent-dashboard", "/agent/dashboard", { ms: 2000 });
   await shot(page, "agent-tickets", "/agent/tickets");
   await shot(page, "agent-ticket", ticket.href);
   await shot(page, "agent-new-ticket", "/agent/tickets/new");
