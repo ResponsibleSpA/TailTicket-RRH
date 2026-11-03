@@ -82,7 +82,7 @@ export default function PortalThread({
                   </time>
                 </div>
               </header>
-              <div className={cn("px-5 py-4", RICH_CLASS)} dangerouslySetInnerHTML={{ __html: renderThreadBody(it.e, { area: "portal" }) }} />
+              <div className={cn("overflow-x-auto px-5 py-4", RICH_CLASS)} dangerouslySetInnerHTML={{ __html: renderThreadBody(it.e, { area: "portal" }) }} />
               {it.e.attachments.some((a) => !a.inline) && (
                 <footer className="flex flex-wrap gap-2 border-t border-gray-100 px-5 py-3 dark:border-gray-800">
                   {it.e.attachments

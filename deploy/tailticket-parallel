@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Manage only the parallel interface; never start Caddy, PHP, DB or cron.
+# Public URL: https://ticket.responsible.hospital/agent
+# Classic osTicket: https://ticket.responsible.hospital:8443/scp/
+set -euo pipefail
+cd "$(dirname "$(readlink -f "$0")")"
+compose=(docker compose --env-file .env -f compose.attach.yaml -f compose.parallel.yaml)
+case "${1:-status}" in
+  up) "${compose[@]}" up -d --no-build tailticket ;;
+  stop) "${compose[@]}" stop tailticket ;;
+  restart) "${compose[@]}" restart tailticket ;;
+  status) "${compose[@]}" ps tailticket ;;
+  logs) "${compose[@]}" logs --tail 100 -f tailticket ;;
+  doctor)
+    COMPOSE_FILE=compose.attach.yaml:compose.parallel.yaml ./tailticket doctor
+    ;;
+  mode|backup|readonly)
+    COMPOSE_FILE=compose.attach.yaml:compose.parallel.yaml ./tailticket "$@"
+    ;;
+  health)
+    "${compose[@]}" exec -T tailticket node -e '
+      fetch("http://127.0.0.1:3000/api/health").then(async r => {
+        console.log(JSON.stringify(await r.json()));
+        if (!r.ok) process.exit(1);
+      }).catch(e => { console.error(e.message); process.exit(1); });'
+    ;;
+  *) printf 'Usage: %s [up|stop|restart|status|logs|doctor|health|mode|backup|readonly]\n' "$0"; exit 2 ;;
+esac

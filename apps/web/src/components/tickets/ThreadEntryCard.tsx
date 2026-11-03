@@ -70,7 +70,7 @@ export default function ThreadEntryCard({
       </header>
       {entry.title && entry.type === ThreadEntryType.NOTE && <p className="px-4 pt-4 text-theme-sm font-semibold text-gray-800 sm:px-5 dark:text-white/90">{entry.title}</p>}
       <div
-        className="thread-body prose prose-sm dark:prose-invert max-w-none px-4 py-4 break-words text-gray-700 sm:px-5 dark:text-gray-300"
+        className="thread-body prose prose-sm dark:prose-invert max-w-none overflow-x-auto px-4 py-4 break-words text-gray-700 sm:px-5 dark:text-gray-300"
         dangerouslySetInnerHTML={{
           __html: renderThreadBody(entry, { area: "agent", iframeWhitelist }),
         }}

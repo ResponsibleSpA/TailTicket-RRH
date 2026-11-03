@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import PriorityBadge from "@/components/common/PriorityBadge";
+import TicketSourceBadge from "@/components/tickets/TicketSourceBadge";
 import { Link } from "@/i18n/navigation";
 import { Flag, LinkIcon, Lock, Merge, MessageSquare, Paperclip } from "lucide-react";
 import { Ticket } from "@/lib/osticket/flags";
@@ -99,12 +100,8 @@ function conditionStyle(column: QueueColumnDef, row: TicketRow): React.CSSProper
   return Object.fromEntries(Object.entries(style).map(([k, v]) => [k.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()), v]));
 }
 
-const SOURCES = ["Email", "Web", "Phone", "API", "Other"] as const;
-
 export default function TicketCell({ column, row, tz, locale, assigneeName, staffName, empty }: Props) {
-  const tSource = useTranslations("ticketEdit.sources");
   const tFlag = useTranslations("ticket");
-  const sourceLabel = (SOURCES as readonly string[]).includes(row.source) ? tSource(row.source as (typeof SOURCES)[number]) : row.source;
   const names = { assignee: assigneeName, staff: staffName };
   let value = rawValue(column.primary, row, names);
   if (!value && column.secondary) value = rawValue(column.secondary, row, names);
@@ -176,11 +173,7 @@ export default function TicketCell({ column, row, tz, locale, assigneeName, staf
           );
         break;
       case "TicketSourceDecoration":
-        target.push(
-          <span key={a.c} className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-theme-xs text-gray-600 dark:bg-white/5 dark:text-gray-400">
-            {sourceLabel}
-          </span>,
-        );
+        target.push(<TicketSourceBadge key={a.c} source={row.source} />);
         break;
       case "MergedFlagDecoration":
         if (row.flags & (Ticket.COMBINE_THREADS | Ticket.SEPARATE_THREADS))

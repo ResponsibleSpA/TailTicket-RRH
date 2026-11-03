@@ -1,0 +1,45 @@
+# Apache serves TailTicket on 80/443 and classic osTicket on HTTPS port 8443.
+# Only TailTicket is started here, with its container bound to loopback.
+# docker compose -f compose.attach.yaml -f compose.parallel.yaml up -d --no-build tailticket
+services:
+  tailticket:
+    image: tailticket:ticket-nowrap-20261103
+    # Match the PHP worker's filesystem access for existing storage-fs files.
+    user: "33:33"
+    ports:
+      - "127.0.0.1:3000:3000"
+    mem_limit: 512m
+    mem_reservation: 128m
+    environment:
+      OST_CONFIG_PATH: /opt/osticket/include/ost-config.php
+      OST_DB_HOST: host.docker.internal
+      OST_DB_PORT: "3306"
+      # Canonical identity comes from the mounted PHP configuration.
+      OST_DB_NAME: ""
+      OST_TABLE_PREFIX: ""
+      OST_SECRET_SALT: ""
+      OST_DB_TIMEZONE: UTC
+      OST_ATTACHMENTS_DIR: /opt/osticket-attachments
+      OST_PHP_URL: https://ticket.responsible.hospital:8443
+      TAILTICKET_SSO_SECRET: ${TAILTICKET_SSO_SECRET:-}
+      TAILTICKET_SSO_PHP_INTERNAL_URL: ${TAILTICKET_SSO_PHP_INTERNAL_URL:-}
+      TAILTICKET_MODE: ${TAILTICKET_MODE:-readonly}
+      TAILTICKET_ALLOW_UNVERIFIED_SCHEMA: ""
+      TAILTICKET_TRUSTED_PROXY_HOPS: "1"
+      NODE_OPTIONS: --max-old-space-size=384
+    volumes: !override
+      - type: bind
+        source: /var/www/html/osTicket/osticket-custom
+        target: /opt/osticket
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /var/www/html/osTicket/attachments
+        target: /opt/osticket-attachments
+        read_only: true
+        bind:
+          create_host_path: false
+      - journal:/var/lib/tailticket/journal
+    tmpfs:
+      - /app/.next/cache:uid=33,gid=33,mode=0750,size=64m

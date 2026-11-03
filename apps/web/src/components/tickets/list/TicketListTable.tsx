@@ -1,9 +1,12 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Fragment } from "react";
 
 import MassSelectAll from "@/components/tickets/mass/MassSelectAll";
 import TicketCell from "@/components/tickets/TicketCell";
+import TicketSourceBadge from "@/components/tickets/TicketSourceBadge";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/utils";
 
 import type { TicketListProps } from "./TicketListCards";
 import TicketListEmpty from "./TicketListEmpty";
@@ -20,6 +23,9 @@ interface TicketListTableProps extends TicketListProps {
 export default async function TicketListTable({ rows, columns, names, tz, locale, sort, dir, sortHref }: TicketListTableProps) {
   const t = await getTranslations("tickets");
   const tq = await getTranslations("queues");
+  const tTicket = await getTranslations("ticket");
+  // La colonna Origine esiste solo nella tabella TailTicket, non nella configurazione della coda.
+  const sourceColumns = columns.filter((c) => c.primary === "number").length;
   return (
     <div className="hidden overflow-x-auto rounded-2xl border border-gray-200 bg-white md:block dark:border-gray-800 dark:bg-white/3">
       <table className="min-w-full text-sm">
@@ -32,25 +38,31 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
               const sorted = sort === String(c.id);
               const nextDir = sorted && dir === 0 ? 1 : 0;
               return (
-                <th
-                  key={c.id}
-                  style={{ width: c.width }}
-                  className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400"
-                >
-                  {c.sortable ? (
-                    <Link
-                      href={sortHref(c.id, nextDir)}
-                      className={`inline-flex items-center gap-1 rounded hover:text-gray-800 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:hover:text-white ${sorted ? "text-gray-800 dark:text-white/90" : ""}`}
-                    >
-                      {tq.has(c.heading) ? tq(c.heading) : c.heading}
-                      {sorted ? dir === 1 ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" /> : null}
-                    </Link>
-                  ) : tq.has(c.heading) ? (
-                    tq(c.heading)
-                  ) : (
-                    c.heading
+                <Fragment key={c.id}>
+                  {c.primary === "number" && (
+                    <th className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400">
+                      {tTicket("source")}
+                    </th>
                   )}
-                </th>
+                  <th
+                    style={{ width: c.width }}
+                    className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400"
+                  >
+                    {c.sortable ? (
+                      <Link
+                        href={sortHref(c.id, nextDir)}
+                        className={`inline-flex items-center gap-1 rounded hover:text-gray-800 focus-visible:ring-3 focus-visible:ring-brand-500/20 focus-visible:outline-hidden dark:hover:text-white ${sorted ? "text-gray-800 dark:text-white/90" : ""}`}
+                      >
+                        {tq.has(c.heading) ? tq(c.heading) : c.heading}
+                        {sorted ? dir === 1 ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" /> : null}
+                      </Link>
+                    ) : tq.has(c.heading) ? (
+                      tq(c.heading)
+                    ) : (
+                      c.heading
+                    )}
+                  </th>
+                </Fragment>
               );
             })}
           </tr>
@@ -58,7 +70,7 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {rows.length === 0 && (
             <tr>
-              <td colSpan={columns.length + 1}>
+              <td colSpan={columns.length + sourceColumns + 1}>
                 <TicketListEmpty title={t("empty")} hint={t("emptyHint")} />
               </td>
             </tr>
@@ -72,9 +84,16 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
                   <input type="checkbox" data-mass-tid value={r.ticket_id} aria-label={`#${r.number}`} className="size-4 accent-brand-500" />
                 </td>
                 {columns.map((c) => (
-                  <td key={c.id} className="max-w-xs px-4 py-3 text-gray-700 tabular-nums dark:text-gray-300">
-                    <TicketCell column={c} row={r} tz={tz} locale={locale} assigneeName={assignee} staffName={staff} />
-                  </td>
+                  <Fragment key={c.id}>
+                    {c.primary === "number" && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <TicketSourceBadge source={r.source} />
+                      </td>
+                    )}
+                    <td className={cn("px-4 py-3 text-gray-700 tabular-nums dark:text-gray-300", c.primary === "number" ? "whitespace-nowrap" : "max-w-xs")}>
+                      <TicketCell column={c.primary === "number" ? { ...c, annotations: [] } : c} row={r} tz={tz} locale={locale} assigneeName={assignee} staffName={staff} />
+                    </td>
+                  </Fragment>
                 ))}
               </tr>
             );

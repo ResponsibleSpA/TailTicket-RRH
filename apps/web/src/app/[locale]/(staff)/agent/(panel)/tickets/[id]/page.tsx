@@ -41,7 +41,7 @@ export default async function TicketViewPage({ params, searchParams }: { params:
       <TicketHeader ticket={ticket} agent={agent} locale={locale} taskCount={view.taskCount} legacyUrl={view.legacyUrl} created={created === "1"} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
+        <div className="min-w-0 space-y-4 xl:col-span-2">
           <TicketThread timeline={view.timeline} tz={tz} locale={locale} iframeWhitelist={view.iframeWhitelist} />
           <TicketComposerSection composer={view.composer} />
         </div>

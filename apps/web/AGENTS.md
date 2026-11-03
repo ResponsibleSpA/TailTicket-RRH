@@ -5,7 +5,7 @@
 ## Regole di progetto (prevalgono su quelle del template)
 - Leggere `README.md` (regole di coesistenza) e `../../docs/reverse-engineering/` prima di toccare il dominio.
 - Il doc 17 §3 (contratti di scrittura) si genera da `docs/contract/*.md` con `npm run docs:contracts`: modificare i file di contratto, mai il doc 17 a mano (la CI lo verifica).
-- Mai DDL sul DB osTicket. Ogni scrittura deve riprodurre le righe che scrive il PHP: verificare con il codice `../../legacy/include/class.*.php` e con l'harness differenziale.
+- **Mai modificare la struttura del DB osTicket: compatibilità al 100% obbligatoria.** Vietati DDL, migrazioni e aggiunta, rimozione, rinomina o alterazione di tabelle, colonne, tipi, indici, chiavi e vincoli. Ogni funzionalità deve usare lo schema esistente, consentendo la coesistenza con il PHP sullo stesso database. Ogni scrittura deve riprodurre le righe che scrive il PHP, ferme restando le regole di sicurezza e permessi del progetto: verificare con il codice `../../legacy/include/class.*.php` e con l'harness differenziale.
 - Accesso al DB solo da `src/server/**` (file con `import "server-only"`), tramite i servizi in `src/server/domain/`.
 - Costanti di bit/flag e codici dei tipi di oggetto del PHP: solo da `src/lib/osticket/{flags,object-types}.ts` (mai numeri magici o copie locali).
 - Nomi tabella senza prefisso in Kysely (`selectFrom("ticket")`); non usare alias uguali a nomi di tabella; nelle query `sql```...``` usare `table("ticket")`.
