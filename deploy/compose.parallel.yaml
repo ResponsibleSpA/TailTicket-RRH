@@ -3,7 +3,7 @@
 # docker compose -f compose.attach.yaml -f compose.parallel.yaml up -d --no-build tailticket
 services:
   tailticket:
-    image: tailticket:ticket-nowrap-20261103
+    image: tailticket:multi-ticket-actions-20261103
     # Match the PHP worker's filesystem access for existing storage-fs files.
     user: "33:33"
     ports:

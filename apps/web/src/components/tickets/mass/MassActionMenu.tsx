@@ -12,6 +12,8 @@ import type { MassData, MassKind } from "./types";
 
 interface MassActionMenuProps {
   data: MassData;
+  /** unisci e collega richiedono almeno due ticket selezionati */
+  showMultiTicketActions: boolean;
   /** apre l'azione scelta (il contenitore verifica la selezione) */
   onOpen: (kind: MassKind) => void;
 }
@@ -24,7 +26,7 @@ const groupIcon = "hidden size-4 text-gray-400 sm:block";
  * in ordine di importanza: gruppo unito stato/assegna/trasferisci, "Altro" (unisci, collega), elimina in
  * rosso tenue senza bordo, export della coda in fondo a destra (non dipende dalla selezione).
  */
-export default function MassActionMenu({ data, onOpen }: MassActionMenuProps) {
+export default function MassActionMenu({ data, showMultiTicketActions, onOpen }: MassActionMenuProps) {
   const t = useTranslations("ticketEdit.mass");
   const writable = useWriteMode().canWrite("operational");
   const can = writable
@@ -73,7 +75,7 @@ export default function MassActionMenu({ data, onOpen }: MassActionMenuProps) {
           )}
         </div>
       )}
-      {(can.merge || can.link) && (
+      {showMultiTicketActions && (can.merge || can.link) && (
         <MenuButton label={t("more")} icon={<Ellipsis aria-hidden className="size-4" />} className={ghostButtonClass}>
           {(c) => (
             <>

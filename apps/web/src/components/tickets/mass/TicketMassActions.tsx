@@ -59,7 +59,7 @@ export default function TicketMassActions({ data }: { data: MassData }) {
           {t("selected", { count: checked })}
         </span>
       )}
-      <MassActionMenu data={data} onOpen={open} />
+      <MassActionMenu data={data} showMultiTicketActions={checked > 1} onOpen={open} />
       {notice && !(notice.select && checked > 0) && (
         <ActionNotice tone={notice.ok ? "success" : "warning"} closeLabel={t("close")} onClose={() => setNotice(null)}>
           {notice.text}
