@@ -25,6 +25,13 @@ export type FormField =
   | (Base & { kind: "radio"; value?: string; options: Opt[] })
   | (Base & { kind: "checkbox"; checked?: boolean; value?: string })
   | (Base & { kind: "checkboxes"; values: string[]; options: Opt[]; groups?: { title: string; options: Opt[] }[] })
+  | (Base & {
+      kind: "topic-forms";
+      fieldsName: string;
+      selectedForms: string[];
+      enabledFields: string[];
+      forms: { id: string; title: string; required: boolean; fields: (Opt & { clientVisible: boolean })[] }[];
+    })
   | { kind: "hidden"; name: string; value: string }
   | { kind: "info"; name: string; label: string; text: string; wide?: boolean }
   | (Base & {

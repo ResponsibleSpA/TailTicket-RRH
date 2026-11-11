@@ -15,6 +15,7 @@ import { cn } from "@/utils";
 import { useUndoReload } from "./useUndoReload";
 
 import AccessEditor from "./AccessEditor";
+import TopicFormsEditor from "./TopicFormsEditor";
 import FormActions from "./FormActions";
 import Outcome from "./Outcome";
 import UndoChange from "./UndoChange";
@@ -154,6 +155,8 @@ function FieldView({ field, error }: { field: FormField; error?: string }) {
         </div>,
       );
     }
+    case "topic-forms":
+      return group(<TopicFormsEditor field={field} />);
     case "access":
       return (
         <div className={cn(field.wide && "md:col-span-2")} role="group" aria-labelledby={`${id}-label`} {...aria}>

@@ -52,6 +52,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
   const tf = useTranslations("dynamicForms");
   const labels = useEditorLabels();
   const [state, action, pending] = useActionState<OpenState, FormData>(openTicketAction, {});
+  const [selectedTopic, setSelectedTopic] = useState(defaultTopic);
   const [topic, setTopic] = useState(initialTopic);
   const [loading, start] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
@@ -62,7 +63,8 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
   }, [state.nonce, state.created]);
   // argomento il cui caricamento dei form è fallito: messaggio e "Riprova", il resto del modulo resta com'è
   const [topicFailed, setTopicFailed] = useState<number | null>(null);
-  const changeTopic = (id: number) =>
+  const changeTopic = (id: number) => {
+    setSelectedTopic(id);
     start(async () => {
       setTopicFailed(null);
       if (!id) return setTopic({ forms: [], disabled: [] });
@@ -72,6 +74,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
       setTopic({ forms: [], disabled: [] });
       setTopicFailed(id);
     });
+  };
 
   if (state.created) {
     return (
@@ -132,7 +135,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
 
         <Panel step={2} title={t("steps.topic")} description={t("steps.topicText")}>
           <FieldShell htmlFor="topicId" label={t("topic")} required errors={err("topicId")}>
-            <select id="topicId" name="topicId" defaultValue={state.values?.topicId?.[0] ?? (defaultTopic || "")} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
+            <select id="topicId" name="topicId" required value={selectedTopic || ""} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
               <option value="">{t("selectTopic")}</option>
               {topics.map((tp) => (
                 <option key={tp.id} value={tp.id}>
@@ -143,7 +146,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
           </FieldShell>
         </Panel>
 
-        <Panel step={3} title={t("steps.details")} description={t("steps.detailsText")}>
+        <Panel step={3} title={t("steps.details")} description={t("steps.detailsText")} className={selectedTopic ? undefined : "hidden"}>
           <div className="space-y-5">
             {ticketForm && (
               <DynamicForm
@@ -178,7 +181,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
           <Link href="/" className={BTN_SECONDARY}>
             {t("cancel")}
           </Link>
-          <button type="submit" disabled={pending} className={BTN_PRIMARY}>
+          <button type="submit" disabled={pending || loading || !selectedTopic} className={BTN_PRIMARY}>
             <Send aria-hidden="true" className="size-4" />
             {pending ? t("submitting") : t("submit")}
           </button>

@@ -3,7 +3,7 @@ import "server-only";
 import { sql } from "kysely";
 import { getTranslations } from "next-intl/server";
 
-import { CustomQueue, Dept, DynamicForm, Schedule, SLA, TicketStatus } from "@/lib/osticket/flags";
+import { CustomQueue, Dept, DynamicForm, DynamicFormField, Schedule, SLA, TicketStatus } from "@/lib/osticket/flags";
 import { FormType } from "@/lib/osticket/object-types";
 
 import { db, type DbOrTx } from "../../db";
@@ -123,12 +123,17 @@ export async function queueOptions(executor: DbOrTx = db()): Promise<(Opt & { pa
 }
 
 /** Form dinamici con i campi (per i form associati agli help topic). */
-export async function formsWithFields(executor: DbOrTx = db()): Promise<{ id: number; title: string; type: string; fields: Opt[] }[]> {
+export async function formsWithFields(executor: DbOrTx = db()): Promise<{ id: number; title: string; type: string; fields: (Opt & { clientVisible: boolean })[] }[]> {
   const forms = await executor.selectFrom("form").select(["id", "title", "type"]).where("type", "in", [FormType.TICKET, FormType.GENERIC]).where(sql<boolean>`(flags & ${sql.lit(DynamicForm.DELETED)}) = 0`).orderBy("title").execute();
   const out = [];
   for (const f of forms) {
-    const fields = await executor.selectFrom("form_field").select(["id", "label"]).where("form_id", "=", f.id).orderBy("sort").execute();
-    out.push({ id: f.id, title: f.title ?? "", type: f.type ?? "", fields: fields.map((x) => ({ value: String(x.id), label: x.label })) });
+    const fields = await executor.selectFrom("form_field").select(["id", "label", "flags", "type"]).where("form_id", "=", f.id).orderBy("sort").execute();
+    out.push({ id: f.id, title: f.title ?? "", type: f.type ?? "", fields: fields.map((x) => {
+      const flags = x.flags ?? 0;
+      const clientVisible = !!(flags & DynamicFormField.ENABLED) && !!(flags & DynamicFormField.CLIENT_VIEW)
+        && (!!(flags & DynamicFormField.CLIENT_EDIT) || ["thread", "info", "break"].includes(x.type));
+      return { value: String(x.id), label: x.label, clientVisible };
+    }) });
   }
   return out;
 }
