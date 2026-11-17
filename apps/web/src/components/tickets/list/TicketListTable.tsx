@@ -40,12 +40,16 @@ export default async function TicketListTable({ rows, columns, names, tz, locale
               return (
                 <Fragment key={c.id}>
                   {c.primary === "number" && (
-                    <th className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400">
+                    // Anche Origine deve avere una larghezza: con il layout automatico
+                    // della tabella assorbirebbe tutto lo spazio libero sui monitor larghi.
+                    <th className="w-1 px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400">
                       {tTicket("source")}
                     </th>
                   )}
                   <th
-                    style={{ width: c.width }}
+                    // Lo spazio residuo va all'oggetto, mantenendo la larghezza
+                    // configurata come minimo, anziché dilatare le colonne brevi.
+                    style={c.primary === "cdata__subject" ? { minWidth: c.width } : { width: c.width }}
                     className="px-4 py-3 text-start text-theme-xs font-medium whitespace-nowrap text-gray-500 uppercase dark:text-gray-400"
                   >
                     {c.sortable ? (
