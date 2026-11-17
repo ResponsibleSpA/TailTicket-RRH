@@ -49,7 +49,8 @@ export async function listQueueTickets(
     : [...orderSql(keys), sql`T.ticket_id ${sql.raw(keys[0]?.desc ? "DESC" : "ASC")}`];
   const page = Math.max(1, opts.page ?? 1);
   const offset = (page - 1) * opts.pageSize;
-  const where = sql.join(conds, sql` AND `);
+  // Con search.all la ricerca può filtrare solo nel JOIN full-text, senza condizioni WHERE.
+  const where = conds.length ? sql.join(conds, sql` AND `) : sql`1`;
 
   const { rows } = await sql<{ ticket_id: number }>`
     SELECT T.ticket_id FROM ${table("ticket")} T ${joinsFor(joins)} ${kwJoin}
