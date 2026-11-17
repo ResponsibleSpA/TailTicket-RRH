@@ -17,6 +17,7 @@ import { Link } from "@/i18n/navigation";
 import type { DynamicFormView } from "@/lib/forms/dynamic-field";
 import { tryAction } from "@/lib/try-action";
 import { cn } from "@/utils";
+import { areaForDepartment, topicsForArea, type PortalTopicOption, type PortalArea } from "@/lib/portal-areas";
 
 import { openTicketAction, portalTopicFormsAction, type OpenState } from "@/app/[locale]/(client)/actions";
 
@@ -24,12 +25,14 @@ import { RICH_CLASS } from "./rich";
 import { Avatar, Panel } from "./PortalUi";
 import { BTN_PRIMARY, BTN_SECONDARY, CARD } from "./styles";
 import { useEditorLabels } from "./useEditorLabels";
+import ServiceAreaPicker from "./ServiceAreaPicker";
 
 interface Props {
   /** form utente per gli ospiti (null per il cliente autenticato) */
   userForm: DynamicFormView | null;
   ticketForm: DynamicFormView | null;
-  topics: { id: number; name: string }[];
+  topics: PortalTopicOption[];
+  areas: PortalArea[];
   defaultTopic: number;
   initialTopic: { forms: DynamicFormView[]; disabled: number[] };
   client: { name: string; email: string } | null;
@@ -46,16 +49,20 @@ export default function OpenTicketForm(props: Props) {
 }
 
 /** Apertura di un ticket dal portale (include/client/open.inc.php). */
-function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initialTopic, client, maxFileSize }: Props) {
+function OpenTicketFormInner({ userForm, ticketForm, topics, areas, defaultTopic, initialTopic, client, maxFileSize }: Props) {
   const t = useTranslations("portal.open");
   const te = useTranslations("portal.errors");
   const tf = useTranslations("dynamicForms");
   const labels = useEditorLabels();
   const [state, action, pending] = useActionState<OpenState, FormData>(openTicketAction, {});
   const [selectedTopic, setSelectedTopic] = useState(defaultTopic);
+  const [selectedArea, setSelectedArea] = useState(() => areaForDepartment(areas, topics.find((topic) => topic.id === defaultTopic)?.deptId ?? 0)?.id ?? "");
+  const area = areas.find((item) => item.id === selectedArea);
+  const visibleTopics = areas.length ? area ? topicsForArea(topics, area) : [] : topics;
   const [topic, setTopic] = useState(initialTopic);
   const [loading, start] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
+  const topicRequest = useRef(0);
   // dopo un errore il form si ricostruisce con i valori del server: si porta in vista il primo errore
   useEffect(() => {
     if (!state.nonce || state.created) return;
@@ -64,16 +71,25 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
   // argomento il cui caricamento dei form è fallito: messaggio e "Riprova", il resto del modulo resta com'è
   const [topicFailed, setTopicFailed] = useState<number | null>(null);
   const changeTopic = (id: number) => {
+    const request = ++topicRequest.current;
     setSelectedTopic(id);
+    setTopic({ forms: [], disabled: [] });
+    setTopicFailed(null);
     start(async () => {
-      setTopicFailed(null);
-      if (!id) return setTopic({ forms: [], disabled: [] });
+      if (!id) return;
       const res = await tryAction(() => portalTopicFormsAction(id));
+      if (request !== topicRequest.current) return;
       if (res.ok) return setTopic(res.value);
       // i form del vecchio argomento non valgono per quello scelto
       setTopic({ forms: [], disabled: [] });
       setTopicFailed(id);
     });
+  };
+  const changeArea = (id: string) => {
+    setSelectedArea(id);
+    const nextArea = areas.find((item) => item.id === id);
+    const choices = nextArea ? topicsForArea(topics, nextArea) : [];
+    changeTopic(choices.length === 1 ? choices[0].id : 0);
   };
 
   if (state.created) {
@@ -133,20 +149,27 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
           )}
         </Panel>
 
-        <Panel step={2} title={t("steps.topic")} description={t("steps.topicText")}>
-          <FieldShell htmlFor="topicId" label={t("topic")} required errors={err("topicId")}>
-            <select id="topicId" name="topicId" required value={selectedTopic || ""} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
-              <option value="">{t("selectTopic")}</option>
-              {topics.map((tp) => (
-                <option key={tp.id} value={tp.id}>
-                  {tp.name}
-                </option>
-              ))}
-            </select>
-          </FieldShell>
+        <Panel step={2} title={areas.length ? t("area") : t("steps.topic")} description={areas.length ? t("areaText") : t("steps.topicText")}>
+          <div className="space-y-5">
+            {areas.length > 0 && <ServiceAreaPicker areas={areas} value={selectedArea} onChange={changeArea} />}
+            {areas.length > 0 && visibleTopics.length === 1 ? (
+              <input type="hidden" name="topicId" value={selectedTopic || ""} />
+            ) : (!areas.length || selectedArea) && (
+              <FieldShell htmlFor="topicId" label={t("topic")} required errors={err("topicId")}>
+                <select id="topicId" name="topicId" required value={selectedTopic || ""} className={selectCls} onChange={(e) => changeTopic(Number(e.target.value))}>
+                  <option value="">{t("selectTopic")}</option>
+                  {visibleTopics.map((tp) => (
+                    <option key={tp.id} value={tp.id}>
+                      {tp.name}
+                    </option>
+                  ))}
+                </select>
+              </FieldShell>
+            )}
+          </div>
         </Panel>
 
-        <Panel step={3} title={t("steps.details")} description={t("steps.detailsText")} className={selectedTopic ? undefined : "hidden"}>
+        {selectedTopic > 0 && <Panel key={selectedTopic} step={3} title={t("steps.details")} description={t("steps.detailsText")}>
           <div className="space-y-5">
             {ticketForm && (
               <DynamicForm
@@ -175,13 +198,13 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, defaultTopic, initi
               <DynamicForm key={f.id} form={f} values={state.values} errors={state.fieldErrors} showTitle />
             ))}
           </div>
-        </Panel>
+        </Panel>}
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Link href="/" className={BTN_SECONDARY}>
             {t("cancel")}
           </Link>
-          <button type="submit" disabled={pending || loading || !selectedTopic} className={BTN_PRIMARY}>
+          <button type="submit" disabled={pending || loading || !selectedTopic || topicFailed !== null} className={BTN_PRIMARY}>
             <Send aria-hidden="true" className="size-4" />
             {pending ? t("submitting") : t("submit")}
           </button>

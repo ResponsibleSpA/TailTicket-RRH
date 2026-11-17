@@ -2,6 +2,7 @@ import "server-only";
 
 import { Topic } from "@/lib/osticket/flags";
 import { FormType } from "@/lib/osticket/object-types";
+import type { PortalTopicOption } from "@/lib/portal-areas";
 
 import type { ConfigNamespace } from "../../config/config";
 import { db, type DbOrTx } from "../../db";
@@ -18,10 +19,10 @@ import { contentPage } from "./kb";
  */
 
 /** Topic::getHelpTopics(publicOnly): pubblici e attivi (disattivazione ereditata dal padre), nome completo */
-export async function publicTopics(cfg: ConfigNamespace, executor: DbOrTx = db()): Promise<{ id: number; name: string }[]> {
-  const rows = await executor.selectFrom("help_topic").select(["topic_id", "topic_pid", "ispublic", "flags", "topic", "sort"]).orderBy("sort").execute();
+export async function publicTopics(cfg: ConfigNamespace, executor: DbOrTx = db()): Promise<PortalTopicOption[]> {
+  const rows = await executor.selectFrom("help_topic").select(["topic_id", "topic_pid", "ispublic", "flags", "topic", "sort", "dept_id"]).orderBy("sort").execute();
   const byId = new Map(rows.map((r) => [r.topic_id, r]));
-  const out: { id: number; name: string; sort: number }[] = [];
+  const out: (PortalTopicOption & { sort: number })[] = [];
   for (const t of rows) {
     let name = t.topic;
     let disabled = !((t.flags ?? 0) & Topic.ACTIVE);
@@ -37,10 +38,10 @@ export async function publicTopics(cfg: ConfigNamespace, executor: DbOrTx = db()
       cur = p;
     }
     if (!t.ispublic || disabled) continue;
-    out.push({ id: t.topic_id, name, sort: t.sort });
+    out.push({ id: t.topic_id, name, sort: t.sort, deptId: t.dept_id || cfg.int("default_dept_id") });
   }
   if (cfg.str("help_topic_sort_mode") !== "m") out.sort((a, b) => a.name.localeCompare(b.name));
-  return out.map(({ id, name }) => ({ id, name }));
+  return out.map(({ id, name, deptId }) => ({ id, name, deptId }));
 }
 
 /** Pagina di ringraziamento del ticket appena creato (HTML sanificato con le variabili sostituite) */

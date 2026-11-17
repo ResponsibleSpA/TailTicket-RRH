@@ -224,6 +224,11 @@
       "save": "Save"
     },
     "open": {
+      "otherArea": "Other services",
+      "area": "Support area",
+      "areaHint": "Your request will be sent to the technicians in the selected area.",
+      "selectArea": "— Select an area —",
+      "areaText": "Choose the service for your request, then complete the details.",
       "title": "Open a new ticket",
       "subtitle": "Please fill in the form below to open a new ticket.",
       "createdTitle": "Ticket #{number} created",

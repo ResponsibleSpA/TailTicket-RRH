@@ -32,6 +32,7 @@ services:
       OST_DB_TIMEZONE:
       # readonly | operational | full: in attach il default è la sola lettura (./tailticket mode)
       TAILTICKET_MODE: ${TAILTICKET_MODE:-readonly}
+      TAILTICKET_PORTAL_AREAS: ${TAILTICKET_PORTAL_AREAS:-}
       # /api/doctor (./tailticket doctor, dall'interno del container; il proxy non la espone)
       TAILTICKET_DOCTOR_TOKEN: ${TAILTICKET_DOCTOR_TOKEN:-}
       # allegati su disco del plugin storage-fs, montati in sola lettura (i nuovi allegati vanno nel DB)

@@ -97,6 +97,7 @@ services:
       # integrato); readonly | operational | full con ./tailticket mode. Il doctor (./tailticket doctor)
       # risponde solo con TAILTICKET_DOCTOR_TOKEN impostato.
       TAILTICKET_MODE:
+      TAILTICKET_PORTAL_AREAS: ${TAILTICKET_PORTAL_AREAS:-}
       TAILTICKET_DOCTOR_TOKEN:
       # allegati su disco montati in sola lettura (usato dalla prova generale: ./tailticket rehearse --attachments)
       OST_ATTACHMENTS_DIR:

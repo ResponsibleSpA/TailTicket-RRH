@@ -9,6 +9,8 @@ import { db } from "@/server/db";
 import { clientDisplayName } from "@/server/domain/client/identity";
 import { portalOpenAllowed } from "@/server/domain/client/open";
 import { publicTopics } from "@/server/domain/client/ui";
+import { portalAreas } from "@/server/domain/client/portal-areas";
+import { portalAreaChoices } from "@/lib/portal-areas";
 import { threadUploadRules } from "@/server/domain/file/upload";
 import { baseForms, topicFormsView } from "@/server/domain/ticket/create-ui";
 
@@ -38,8 +40,10 @@ export default async function OpenTicketPage({ params, searchParams }: { params:
   const ta = await getTranslations("portal.account");
   const allowed = portalOpenAllowed(cfg, client);
   const topics = await publicTopics(cfg);
+  const areas = portalAreaChoices(portalAreas(), topics, t("otherArea"));
   const requested = Number(sp.topicId) || 0;
-  const defaultTopic = topics.some((x) => x.id === requested) ? requested : cfg.int("default_help_topic");
+  const configuredDefault = areas.length ? 0 : cfg.int("default_help_topic");
+  const defaultTopic = topics.some((x) => x.id === requested) ? requested : topics.some((x) => x.id === configuredDefault) ? configuredDefault : 0;
   const [forms, initialTopic] = await Promise.all([baseForms(db(), cfg, "client"), defaultTopic ? topicFormsView(db(), cfg, defaultTopic, "client") : Promise.resolve({ forms: [], disabled: [] })]);
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -55,6 +59,7 @@ export default async function OpenTicketPage({ params, searchParams }: { params:
           userForm={client ? null : forms.user}
           ticketForm={forms.ticket}
           topics={topics}
+          areas={areas}
           defaultTopic={defaultTopic}
           initialTopic={initialTopic}
           client={client ? { name: clientDisplayName(client, cfg), email: client.email } : null}

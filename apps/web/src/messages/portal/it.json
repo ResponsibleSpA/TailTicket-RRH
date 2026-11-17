@@ -224,6 +224,11 @@
       "save": "Salva"
     },
     "open": {
+      "otherArea": "Altri servizi",
+      "area": "Area di assistenza",
+      "areaHint": "La richiesta verrà inviata ai tecnici dell’area scelta.",
+      "selectArea": "— Seleziona un’area —",
+      "areaText": "Scegli a quale servizio inviare la richiesta, poi completa i dettagli.",
       "title": "Apri un nuovo ticket",
       "subtitle": "Compila il modulo per aprire una nuova richiesta.",
       "createdTitle": "Ticket #{number} creato",
