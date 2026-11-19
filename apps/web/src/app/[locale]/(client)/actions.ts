@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import { randomBytes } from "node:crypto";
 
 import { getLocale } from "next-intl/server";
@@ -247,7 +248,7 @@ export async function openTicketAction(_prev: OpenState, fd: FormData): Promise<
   if (topicId) vars.topicId = topicId;
   const key = (await visitorKey()) || randomBytes(16).toString("hex");
   vars.files = verifyUploadTokens(formStrs(fd, "files"), client ? `U${client.id}` : `G${key}`);
-  const res = await openPortalTicket(cfg, client, vars, { ip: await clientIp(), sessionKey: key });
+  const res = await openPortalTicket(cfg, client, vars, { ip: await clientIp(), sessionKey: key, afterCommit: after });
   const values: Record<string, string[]> = {};
   for (const [k, v] of fd.entries()) if (typeof v === "string" && !k.startsWith("$ACTION") && k !== "files") (values[k] ??= []).push(v);
   if ("denied" in res) return { error: res.denied, values, nonce: Date.now() };

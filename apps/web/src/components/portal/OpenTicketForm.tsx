@@ -117,7 +117,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, areas, defaultTopic
   return (
     // gli allegati già caricati restano in AttachmentMemory, fuori dal form ricostruito a ogni errore
     <AttachmentMemory>
-      <form ref={formRef} action={action} key={state.nonce ?? 0} className="space-y-6">
+      <form ref={formRef} action={action} key={state.nonce ?? 0} aria-busy={pending} className="space-y-6">
         {general && (
           <div>
             <Alert variant="error" title={general} message="" />
@@ -205,7 +205,7 @@ function OpenTicketFormInner({ userForm, ticketForm, topics, areas, defaultTopic
             {t("cancel")}
           </Link>
           <button type="submit" disabled={pending || loading || !selectedTopic || topicFailed !== null} className={BTN_PRIMARY}>
-            <Send aria-hidden="true" className="size-4" />
+            {pending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : <Send aria-hidden="true" className="size-4" />}
             {pending ? t("submitting") : t("submit")}
           </button>
         </div>
