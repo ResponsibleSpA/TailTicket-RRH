@@ -2,6 +2,7 @@ import "server-only";
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
+import { hostname } from "node:os";
 
 import { convert as htmlToText } from "html-to-text";
 import nodemailer from "nodemailer";
@@ -185,6 +186,9 @@ function smtpTransportOptions(acc: SmtpAccount, creds: { user: string; pass: str
   return {
     host: conn.host,
     port: conn.port,
+    // AccountSetting::get_hostname(): PHP usa php_uname('n'), anche senza un FQDN.
+    // Il default di nodemailer sostituisce i nomi senza punto con [127.0.0.1], rifiutato dai relay.
+    name: hostname(),
     secure: ssl === "ssl",
     requireTLS: ssl === "tls",
     ignoreTLS: ssl === null,

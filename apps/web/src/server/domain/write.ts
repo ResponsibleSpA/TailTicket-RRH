@@ -5,11 +5,14 @@ import { db } from "../db";
 import { detectDbTimezone } from "../db/time";
 import { assertWritableSchema } from "../system/schema-compat";
 import { requestOpForJournal } from "../system/write-journal";
-import { canWrite, isReadOnlyError, ReadOnlyModeError, readOnlyResult, withWriteScope, type ReadOnlyResult, type WriteActor } from "../system/write-mode";
+import { canWrite, currentWriteContext, isReadOnlyError, ReadOnlyModeError, readOnlyResult, withWriteScope, type ReadOnlyResult, type WriteActor } from "../system/write-mode";
 import { bindRequestContext } from "./forms/entry";
 import type { Agent } from "./staff/staff";
 import { staffActor, type WriteContext } from "./ticket/context";
 import type { Actor } from "./ticket/events";
+
+/** Le richieste HTTP possono affidare gli effetti post-commit a Next after; script e test li attendono. */
+export type PostCommitScheduler = (job: () => Promise<void>) => void;
 
 /**
  * Esegue un'operazione di scrittura in una transazione con il contesto dell'attore; le email e gli altri
@@ -19,9 +22,9 @@ import type { Actor } from "./ticket/events";
  * l'esito è readOnlyResult() (`{ ok: false, error: "read_only", … }`), anche quando il gate rifiuta una
  * query a metà transazione (rollback).
  */
-export async function runWrite<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>, op?: string): Promise<T | ReadOnlyResult> {
+export async function runWrite<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>, op?: string, schedule?: PostCommitScheduler): Promise<T | ReadOnlyResult> {
   try {
-    return await runWriteOrThrow(who, fn, op);
+    return await runWriteOrThrow(who, fn, op, schedule);
   } catch (err) {
     if (isReadOnlyError(err)) return readOnlyResult();
     throw err;
@@ -29,9 +32,9 @@ export async function runWrite<T>(who: { agent: Agent; ip: string } | { actor: A
 }
 
 /** Come runWrite, ma una scrittura non consentita resta ReadOnlyModeError (harness, script). */
-export async function runWriteOrThrow<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>, op?: string): Promise<T> {
+export async function runWriteOrThrow<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>, op?: string, schedule?: PostCommitScheduler): Promise<T> {
   if (!(await canWrite("operational"))) throw new ReadOnlyModeError("operational");
-  return withWriteScope("operational", () => runWriteTx(who, fn), {
+  return withWriteScope("operational", () => runWriteTx(who, fn, schedule), {
     actor: journalActor(who),
     op: op ?? (await requestOpForJournal()),
   });
@@ -44,7 +47,7 @@ function journalActor(who: { agent: Agent } | { actor: Actor }): WriteActor {
   return { type: "system" };
 }
 
-async function runWriteTx<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>): Promise<T> {
+async function runWriteTx<T>(who: { agent: Agent; ip: string } | { actor: Actor }, fn: (ctx: WriteContext) => Promise<T>, schedule?: PostCommitScheduler): Promise<T> {
   const cfg = await loadConfigNamespace("core");
   assertWritableSchema(cfg);
   const dbZone = await detectDbTimezone(db());
@@ -63,12 +66,19 @@ async function runWriteTx<T>(who: { agent: Agent; ip: string } | { actor: Actor 
       bindRequestContext(ctx);
       return fn(ctx);
     });
-  for (const job of after) {
-    try {
-      await job();
-    } catch (err) {
-      console.error("[runWrite] effetto post-commit fallito", err);
+  const context = currentWriteContext();
+  const finish = () => withWriteScope("operational", async () => {
+    for (const job of after) {
+      try {
+        await job();
+      } catch (err) {
+        console.error("[runWrite] effetto post-commit fallito", err);
+      }
     }
+  }, context ?? {});
+  if (after.length) {
+    if (schedule) schedule(finish);
+    else await finish();
   }
   return result;
 }

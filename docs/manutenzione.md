@@ -49,3 +49,17 @@ sono state modificate dalla configurazione della Manutenzione.
 
 Non vengono aggiunte tabelle, colonne, indici o migrazioni. Reparto, ruolo, agente, argomento e coda
 sono stati creati con i modelli PHP originali di osTicket.
+
+## Trasferimenti fra Manutenzione e IT/Sanitari
+
+Dal 19 novembre 2026 il ruolo **Tecnico Manutenzione** include `ticket.transfer` e gli agenti di
+Manutenzione hanno `visibility.departments`: possono scegliere **Sistemi Informativi**, **Supporto
+Verticali Sanitari** e **Manutenzione** come destinazioni. Quest'ultimo permesso mostra i nomi dei
+reparti, senza dare accesso ai loro ticket. Gli agenti IT/Sanitari hanno già questi permessi.
+Gli accessi estesi preesistenti fra Sistemi Informativi e Verticali Sanitari restano configurati;
+non vengono aggiunti accessi estesi tra questi reparti e Manutenzione.
+
+Usare **Trasferisci** per cambiare il reparto responsabile. Per interrompere anche l'accesso del
+reparto di origine, liberare le assegnazioni ai suoi agenti/team e lasciare disattivato **Mantieni
+riferimento**. Assegnare un ticket a un team di un'altra area oppure mantenerne il riferimento è
+una condivisione esplicita e continua a consentirne la visione secondo le regole di osTicket.

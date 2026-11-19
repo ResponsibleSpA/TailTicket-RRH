@@ -4,7 +4,7 @@ import type { ConfigNamespace } from "../../config/config";
 import { deleteDraftsForNamespace } from "../drafts";
 import { createTicket, type CreateResult, type CreateTicketVars } from "../ticket/create";
 import type { Actor } from "../ticket/events";
-import { runWrite } from "../write";
+import { runWrite, type PostCommitScheduler } from "../write";
 import type { ClientIdentity } from "./identity";
 import { publicTopics } from "./ui";
 
@@ -52,7 +52,7 @@ export async function openPortalTicket(
   cfg: ConfigNamespace,
   client: ClientIdentity | null,
   vars: CreateTicketVars,
-  opts: { ip: string; sessionKey: string },
+  opts: { ip: string; sessionKey: string; afterCommit?: PostCommitScheduler },
 ): Promise<CreateResult | { ok: false; denied: PortalOpenError }> {
   const allowed = portalOpenAllowed(cfg, client);
   if (allowed !== true) return { ok: false, denied: allowed };
@@ -67,6 +67,6 @@ export async function openPortalTicket(
       return { ok: false as const, errors: { topicId: "Select a Help Topic", err: "Missing or invalid data — Correct any errors below and try again" } };
     }
     return createTicket(ctx, input, "web");
-  });
+  }, undefined, opts.afterCommit);
 }
 

@@ -209,6 +209,8 @@ Invio dall'email di alert (`alert_email_id`) con header `Auto-Submitted: auto-ge
   - `In-Reply-To`/`References` dall'ultimo messaggio arrivato via email;
   - immagini `cid:<chiave file>` incorporate inline con content-id `<chiave>@<dominio>`.
 - **Trasporto**:
+  - nome EHLO = hostname della macchina (`AccountSetting::get_hostname` / `php_uname('n')`), anche senza FQDN;
+    il fallback di nodemailer `[127.0.0.1]` viene evitato (`test/unit/smtp-transport.test.ts`);
   - prima l'account SMTP attivo dell'email (password decifrata con `SECRET_SALT`, compatibile `Crypto`);
   - poi il MTA predefinito (`default_smtp_id`);
   - altrimenti `sendmail_path` (`OST_SENDMAIL_PATH`) con il messaggio su stdin, come `mail()` di PHP.
@@ -999,7 +1001,7 @@ updateUserInfoForClient(tx, cfg, userId, input)  requestClientPasswordReset(user
 postMessage(ctx, {ticketId, userId, poster, message, files?, origin?, alerts?})   // Ticket::postMessage
 postClientMessage(cfg, client, ticketId, {message, files, ip})                    // tickets.php a=reply
 editClientTicket(cfg, client, ticketId, vars, ip) / editTicketAsClient(ctx, ...)     // tickets.php a=edit
-openPortalTicket(cfg, client|null, vars, {ip, sessionKey})                        // open.php → createTicket 'web'
+openPortalTicket(cfg, client|null, vars, {ip, sessionKey, afterCommit?})          // open.php → createTicket 'web'
 clientCanAccess, listClientTickets, clientTicketStats, loadClientTicketView, clientAttachment, clientEditForms
 kbEnabled, publicCategories, featuredCategories, searchFaqs, publicCategory, publicFaq, publicFaqFile, contentPage
 ```
@@ -1007,6 +1009,11 @@ kbEnabled, publicCategories, featuredCategories, searchFaqs, publicCategory, pub
 Rotte: pagine in `src/app/[locale]/(client)/**` (`/`, `/login`, `/account`, `/pwreset`, `/profile`, `/tickets`,
 `/tickets/[id]`, `/tickets/[id]/edit`, `/open`, `/kb`, `/kb/category/[id]`, `/kb/faq/[id]`); route handler
 `/view` (link `?auth=`), `/pwreset/confirm` (conferma account), `/api/portal/upload`, `/api/portal/file/[key]`.
+
+L'apertura HTTP passa `after` di Next come `afterCommit`: le notifiche partono dopo il commit e la
+risposta al cliente, conservando ordine, contenuto e scope di scrittura. Script e harness senza
+scheduler attendono gli stessi effetti prima di restituire il risultato. Nessuna notifica viene
+pianificata se la transazione fallisce (`test/unit/post-commit.test.ts`).
 
 #### Scritture
 

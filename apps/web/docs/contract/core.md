@@ -124,6 +124,8 @@ Invio dall'email di alert (`alert_email_id`) con header `Auto-Submitted: auto-ge
   - `In-Reply-To`/`References` dall'ultimo messaggio arrivato via email;
   - immagini `cid:<chiave file>` incorporate inline con content-id `<chiave>@<dominio>`.
 - **Trasporto**:
+  - nome EHLO = hostname della macchina (`AccountSetting::get_hostname` / `php_uname('n')`), anche senza FQDN;
+    il fallback di nodemailer `[127.0.0.1]` viene evitato (`test/unit/smtp-transport.test.ts`);
   - prima l'account SMTP attivo dell'email (password decifrata con `SECRET_SALT`, compatibile `Crypto`);
   - poi il MTA predefinito (`default_smtp_id`);
   - altrimenti `sendmail_path` (`OST_SENDMAIL_PATH`) con il messaggio su stdin, come `mail()` di PHP.
